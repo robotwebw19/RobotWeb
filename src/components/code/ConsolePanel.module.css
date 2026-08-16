@@ -1,0 +1,25 @@
+.console {
+  flex: 0 0 160px;
+  overflow-y: auto;
+  padding: 8px 12px;
+  border-top: 1px solid var(--border);
+  background: var(--console-bg);
+  color: var(--console-text);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.empty {
+  color: #888;
+  font-style: italic;
+}
+
+.logLine {
+  white-space: pre-wrap;
+}
+
+.errorLine {
+  white-space: pre-wrap;
+  color: #f87171;
+}

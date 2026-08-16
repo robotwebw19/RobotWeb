@@ -1,0 +1,14 @@
+.pips {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.pip {
+  display: inline-block;
+  border-radius: 50%;
+  background: var(--segment-ghost);
+}
+
+.pipLit {
+  background: var(--success);
+}

@@ -1,0 +1,126 @@
+@keyframes cardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-4px); }
+  40%, 60% { transform: translateX(4px); }
+}
+
+.page {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.card {
+  width: 100%;
+  max-width: 360px;
+  padding: 32px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--panel-bg);
+  text-align: center;
+  animation: cardEnter 350ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.title {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+.digits {
+  font-size: 32px;
+  letter-spacing: 12px;
+  text-align: center;
+  width: 100%;
+  padding: 12px 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text-h);
+  font-family: var(--mono);
+  transition: border-color 150ms ease-out;
+}
+
+.digits:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.digitsError {
+  border-color: var(--danger);
+  animation: shake 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.submit {
+  margin-top: 16px;
+  width: 100%;
+  padding: 10px;
+  border-radius: 4px;
+  border: none;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 150ms ease-out,
+    transform 120ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.submit:hover:not(:disabled) {
+  background: var(--accent-hover);
+  transform: scale(1.02);
+}
+
+.submit:active:not(:disabled) {
+  transform: scale(0.98);
+  transition-duration: 60ms;
+}
+
+.submit:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.linkButton {
+  margin-top: 16px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 150ms ease-out;
+}
+
+.linkButton:hover {
+  color: var(--accent);
+}
+
+.linkButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

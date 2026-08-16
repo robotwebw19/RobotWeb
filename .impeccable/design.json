@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-16T00:00:00.000Z",
+  "title": "Design System: The Scoreboard",
+  "extensions": {
+    "colorMeta": {
+      "accent": {
+        "role": "primary",
+        "displayName": "Signal Amber",
+        "canonical": "#ffb020",
+        "tonalRamp": ["#4d2e00", "#6b3f00", "#995900", "#cc7900", "#ffb020", "#ffc966", "#ffdb99", "#ffedcc"]
+      },
+      "accent-hover": { "role": "primary-state", "displayName": "Signal Amber, Pressed", "canonical": "#ffc966" },
+      "on-accent": { "role": "primary-ink", "displayName": "On-Amber Ink", "canonical": "#1a1204" },
+      "live": { "role": "status", "displayName": "Live Red", "canonical": "#ff3b30" },
+      "danger": { "role": "status", "displayName": "Live Red (danger)", "canonical": "#ff3b30" },
+      "success": { "role": "status", "displayName": "Pass Green", "canonical": "#34d058" },
+      "bg": { "role": "neutral", "displayName": "Bezel", "canonical": "#0d0c0a", "tonalRamp": ["#000000", "#0a0908", "#0d0c0a", "#17150f", "#322e26", "#5c5648", "#8a8577", "#d8d4c9"] },
+      "panel-bg": { "role": "neutral", "displayName": "Panel Face", "canonical": "#17150f" },
+      "panel-recessed": { "role": "neutral", "displayName": "Recessed Glass", "canonical": "#0a0908" },
+      "border": { "role": "neutral", "displayName": "Seam", "canonical": "#322e26" },
+      "text-heading": { "role": "neutral", "displayName": "Silkscreen Bright", "canonical": "#f5f2e8" },
+      "text": { "role": "neutral", "displayName": "Silkscreen", "canonical": "#d8d4c9" },
+      "text-muted": { "role": "neutral", "displayName": "Silkscreen Dim", "canonical": "#8a8577" },
+      "segment-lit": { "role": "instrument", "displayName": "Lit Segment", "canonical": "#ff9d00" },
+      "segment-ghost": { "role": "instrument", "displayName": "Ghost Segment", "canonical": "rgba(216, 212, 201, 0.07)" },
+      "console-bg": { "role": "surface-fixed", "displayName": "Console/Recessed Black", "canonical": "#0a0908" },
+      "console-text": { "role": "text-fixed", "displayName": "Console Silkscreen", "canonical": "#d8d4c9" },
+      "robot-body": { "role": "simulation", "displayName": "Robot Blue", "canonical": "#4c6ef5" },
+      "robot-heading": { "role": "simulation", "displayName": "Heading Yellow", "canonical": "#ffd43b" },
+      "sensor-ir": { "role": "simulation", "displayName": "IR Pink", "canonical": "#e64980" },
+      "sensor-ultrasonic": { "role": "simulation", "displayName": "Ultrasonic Cyan", "canonical": "#15aabf" },
+      "sensor-color": { "role": "simulation", "displayName": "Color-Sensor Orange", "canonical": "#f08c00" },
+      "track-line": { "role": "simulation", "displayName": "Track Black", "canonical": "#2b2b2b" },
+      "obstacle": { "role": "simulation", "displayName": "Obstacle Slate", "canonical": "#495057" },
+      "finish-zone": { "role": "simulation", "displayName": "Finish Green", "canonical": "#40c057" }
+    },
+    "typographyMeta": {
+      "heading": { "displayName": "Heading", "purpose": "Modal titles, page titles, section headers — plain system sans, 600 weight, 18-20px. Confirmed directly against src/index.css h1/h2/h3 rule. Not mono/uppercase; the navbar wordmark's mono/amber treatment is a standalone brand mark, not the heading default." },
+      "body": { "displayName": "Body", "purpose": "Default paragraph and control text; the root 15px font." },
+      "meta": { "displayName": "Meta", "purpose": "Subtitles, nav status, modal timestamps — 14px." },
+      "label": { "displayName": "Label", "purpose": "Difficulty placards, tab labels, captions — 11px uppercase." },
+      "mono": { "displayName": "Mono", "purpose": "Code, console, IDs, level-card names, key legends, navbar wordmark. Never decorative on prose/headings. Carries a Thai fallback ('Leelawadee UI', 'Noto Sans Thai') because some mono-styled content carries translated Thai text." },
+      "segment": { "displayName": "Segment", "purpose": "CSS-built 7-segment digits (no font) for every timed/counted value — elapsed, off-track, best time, Result Modal time, leaderboard star/levels-passed tallies." }
+    },
+    "shadows": [
+      { "name": "recessed-glass", "value": "inset 0 2px 6px rgba(0,0,0,0.6)", "purpose": "SevenSegmentDisplay's housing only — a display window set into the bezel. Confirmed as the only box-shadow declaration in the shipped src/ stylesheets; nothing else uses one." }
+    ],
+    "motionMeta": {
+      "easing": "cubic-bezier(0.16, 1, 0.3, 1)",
+      "durations": { "press": "60-100ms", "hover": "120-150ms", "entrance": "200-280ms", "focalEntrance": "350ms" },
+      "numericValues": "Instant segment swap — never eased or tweened (the Instant-Segment Rule); applies only to SevenSegmentDisplay content, not chrome.",
+      "reducedMotion": "Global @media (prefers-reduced-motion: reduce) override in src/index.css collapses all chrome animation/transition durations to ~0."
+    },
+    "breakpoints": []
+  },
+  "components": [
+    {
+      "name": "Seven-Segment Display",
+      "kind": "custom",
+      "refersTo": "segment-display",
+      "description": "The system's signature component — real LED segment digits built from CSS clip-path shapes (no webfont), recessed behind an inset-shadow housing. Ghost (unlit) cells always visible. Value changes are instant, never tweened.",
+      "html": "<span class=\"ds-segment-display\"><span class=\"ds-digit ds-digit--on\">0</span><span class=\"ds-digit ds-digit--on\">5</span><span class=\"ds-digit ds-punct\">.</span><span class=\"ds-digit ds-digit--on\">3</span></span>",
+      "css": ".ds-segment-display { display: inline-flex; align-items: center; padding: 3px 4px; background: #0a0908; border-radius: 2px; box-shadow: inset 0 2px 6px rgba(0,0,0,0.6); font-family: ui-monospace, Consolas, monospace; } .ds-digit { display: inline-block; width: 12px; height: 20px; margin: 0 1px; text-align: center; line-height: 20px; color: #3a2f1a; } .ds-digit--on { color: #ff9d00; text-shadow: 0 0 4px rgba(255,157,0,0.5); }"
+    },
+    {
+      "name": "Run Key (Primary Button)",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Solid amber fill — the one key the whole console is built around. Same treatment reused for login/onboarding submits and the Result Modal's Try Again (which additionally pops in on mount, since it resolves an attempt).",
+      "html": "<button class=\"ds-btn-primary\">Run</button>",
+      "css": ".ds-btn-primary { background: #ffb020; color: #1a1204; font: 700 12px/1.2 system-ui, 'Segoe UI', Roboto, sans-serif; text-transform: uppercase; letter-spacing: 0.04em; padding: 10px 20px; border: 1px solid #ffc966; border-radius: 4px; cursor: pointer; transition: background 150ms ease-out, transform 120ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-primary:hover { background: #ffc966; transform: scale(1.03); } .ds-btn-primary:active { transform: scale(0.96); transition-duration: 60ms; } .ds-btn-primary:focus-visible { outline: 2px solid #ffb020; outline-offset: 2px; } .ds-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }"
+    },
+    {
+      "name": "Secondary Key",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Bordered ghost key — Pause/Step/Reset, nav actions, admin actions. Uppercase mono-weight label; border-only hover keeps it distinct from the amber primary.",
+      "html": "<button class=\"ds-btn-secondary\">Pause</button>",
+      "css": ".ds-btn-secondary { background: #17150f; color: #f5f2e8; font: 600 12px/1.2 system-ui, 'Segoe UI', Roboto, sans-serif; text-transform: uppercase; letter-spacing: 0.04em; padding: 6px 14px; border: 1px solid #322e26; border-radius: 3px; cursor: pointer; transition: border-color 150ms ease-out, transform 100ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-secondary:hover:not(:disabled) { border-color: #ffb020; } .ds-btn-secondary:active:not(:disabled) { transform: scale(0.94); transition-duration: 60ms; } .ds-btn-secondary:focus-visible { outline: 2px solid #ffb020; outline-offset: 2px; } .ds-btn-secondary:disabled { opacity: 0.4; cursor: not-allowed; }"
+    },
+    {
+      "name": "Level Card (Heat Placard)",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Selectable level entry styled as a competition heat placard: a bordered difficulty tag (not plain text), star-pips, and a small segment-display best time. Incomplete levels show plain text, never a fake 00.0 reading.",
+      "html": "<button class=\"ds-card-level ds-card-level--selected\"><div class=\"ds-card-level__header\"><span class=\"ds-card-level__name\">3. Multi-Way Junction</span><span class=\"ds-card-level__difficulty\">Medium</span></div><div class=\"ds-card-level__best\"><span class=\"ds-pips\"><span class=\"ds-pip ds-pip--lit\"></span><span class=\"ds-pip ds-pip--lit\"></span><span class=\"ds-pip\"></span></span><span class=\"ds-segment-display\">05.0</span></div></button>",
+      "css": ".ds-card-level { display: flex; flex-direction: column; gap: 6px; width: 100%; padding: 10px 12px; border: 1px solid #322e26; border-radius: 4px; background: #17150f; text-align: left; cursor: pointer; font-family: system-ui, 'Segoe UI', Roboto, sans-serif; transition: border-color 150ms ease-out, background-color 150ms ease-out, transform 120ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-card-level:hover { border-color: #ffb020; } .ds-card-level:active { transform: scale(0.98); } .ds-card-level--selected { border-color: #ffb020; background: rgba(255,176,32,0.12); } .ds-card-level__header { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; } .ds-card-level__name { font-size: 13px; font-weight: 600; font-family: ui-monospace, Consolas, monospace; color: #f5f2e8; } .ds-card-level__difficulty { padding: 1px 6px; border: 1px solid #322e26; border-radius: 2px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #8a8577; } .ds-card-level__best { display: flex; align-items: center; gap: 8px; } .ds-pips { display: inline-flex; gap: 3px; } .ds-pip { width: 6px; height: 6px; border-radius: 50%; background: rgba(216,212,201,0.07); } .ds-pip--lit { background: #34d058; }"
+    },
+    {
+      "name": "Underline Tab",
+      "kind": "nav",
+      "refersTo": "tab",
+      "description": "Left-panel and admin-dashboard tab — bottom-border indicator in Signal Amber when active, no fill/pill treatment.",
+      "html": "<div class=\"ds-tabs\"><button class=\"ds-tab ds-tab--active\">Levels</button><button class=\"ds-tab\">Sensors</button><button class=\"ds-tab\">Level Editor</button></div>",
+      "css": ".ds-tabs { display: flex; border-bottom: 1px solid #322e26; font-family: system-ui, 'Segoe UI', Roboto, sans-serif; } .ds-tab { flex: 1; padding: 10px 8px; border: none; background: none; color: #8a8577; font-size: 13px; cursor: pointer; border-bottom: 2px solid transparent; transition: color 150ms ease-out, border-color 150ms ease-out; } .ds-tab:hover { color: #f5f2e8; } .ds-tab--active { color: #f5f2e8; border-bottom-color: #ffb020; }"
+    },
+    {
+      "name": "Result Modal (Scoreboard Flash)",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "Signature pass/fail overlay — plain sans heading (not mono/uppercase — see the Hierarchy note on the reverted placard treatment), flat-filled star-pips + green segment-display time (or muted fail reason), Try Again as the resolving pop-in beat.",
+      "html": "<div class=\"ds-result-overlay\"><div class=\"ds-result-modal\"><h2 class=\"ds-result-title ds-result-title--passed\">Level Complete!</h2><span class=\"ds-pips\"><span class=\"ds-pip ds-pip--lit\"></span><span class=\"ds-pip ds-pip--lit\"></span><span class=\"ds-pip\"></span></span><div class=\"ds-result-time\"><span class=\"ds-result-time__label\">Time</span><span class=\"ds-segment-display ds-segment-display--green\">05.3</span></div><button class=\"ds-btn-primary\">Try Again</button></div></div>",
+      "css": ".ds-result-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.7); } .ds-result-modal { min-width: 260px; padding: 24px; border-radius: 3px; background: #17150f; border: 1px solid #322e26; text-align: center; font-family: system-ui, 'Segoe UI', Roboto, sans-serif; } .ds-result-title { margin: 0 0 12px; font-size: 18px; font-weight: 600; } .ds-result-title--passed { color: #34d058; } .ds-result-time { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 12px 0 18px; } .ds-result-time__label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: #8a8577; } .ds-pips { display: inline-flex; gap: 10px; } .ds-pip { width: 14px; height: 14px; border-radius: 50%; background: rgba(216,212,201,0.07); } .ds-pip--lit { background: #34d058; } .ds-btn-primary { margin-top: 18px; border-radius: 4px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Scoreboard",
+    "overview": "This is a redesign - the app's second visual identity, replacing 'The Circuit Board' (a flat, purple-accented, bordered system) wholesale rather than extending it. It was chosen through a structured direction roll (concept-seed.mjs --scope direction --mode operate, seed 444573ff): the assigned grounded candidate was a literal circuit-board/silkscreen reading, but a dealt challenger - the seven-segment display family (bedside clocks, gas-station price totems, scoreboards) - won on both audience identification and product clarity and became the build.\n\nEvery number in this app is a real LED segment digit, not a themed numeral font, because the product's core feedback loop - elapsed time, off-track time, best times, star counts - genuinely is a timing instrument's job. The interface is a matte, near-black instrument bezel: silkscreen off-white labels, one amber signal for anything live or interactive, red and green reserved strictly for running/pass outcomes, exactly like a real scoreboard's lamp colors. This is a classroom tool for Thai mid/high-school robotics students, run by a teacher, so legibility and instant state-reading still come first.\n\nThe simulation canvas stays its own fixed, mode-independent palette, unrelated to the app chrome's tokens - that boundary survived the redesign unchanged.",
+    "keyCharacteristics": [
+      "Every timed/counted value renders as real 7-segment digits (SevenSegmentDisplay, CSS-built, no webfont) - ghost cells always visible, value changes are instant, never a tween.",
+      "Matte near-black bezel, always dark - no light mode, a deliberate identity commitment.",
+      "One accent: amber, for anything live/interactive/primary - including the single Run key.",
+      "Red and green are reserved for outcome states (running/live, pass) - never decoration.",
+      "Sharp, small corner radii (2-5px) - a milled panel edge, not a soft rounded card.",
+      "Flat by default, with one motivated exception: segment-display glass is recessed behind an inset shadow.",
+      "Thai gets its own system-font stack, line-height, and :lang(th) sync - unchanged from before the redesign."
+    ],
+    "rules": [
+      { "name": "The One Signal Rule", "body": "Signal Amber marks exactly one focal thing per view - the active tab, the selected card, the primary/Run action. It never doubles as decoration.", "section": "colors" },
+      { "name": "The Segment-First Rule", "body": "Any value that is a duration, a time, or a count renders through SevenSegmentDisplay, not plain text - that's what makes this a scoreboard and not a dashboard with numbers on it.", "section": "typography" },
+      { "name": "The No-Light-Mode Rule", "body": "This world commits to dark only. Do not add a prefers-color-scheme: light branch back - a scoreboard's bezel doesn't change color with the room.", "section": "colors" },
+      { "name": "The Flat-By-Default Rule", "body": "Surfaces sit flush with their background at rest - shadows are reserved for the one recessed-glass exception, nowhere else.", "section": "elevation" },
+      { "name": "The Instant-Segment Rule", "body": "Numeric readouts never animate their own value change - no easing, no count-up. Everything else may still use the shared motion vocabulary.", "section": "elevation" },
+      { "name": "The One Motion Vocabulary Rule", "body": "Tactile chrome (buttons, cards, modal, tabs) reuses one set of values: scale, cubic-bezier(0.16, 1, 0.3, 1), 60-350ms, --accent-hover for the pressed state.", "section": "elevation" },
+      { "name": "The Lang-Follows-Language Rule", "body": "document.documentElement.lang stays in sync with useLanguageStore at all times - unchanged by the redesign, independent of visual world.", "section": "typography" }
+    ],
+    "dos": [
+      "Do render every timed/counted value through SevenSegmentDisplay - never plain text for a number the product is timing.",
+      "Do keep numeric value changes instant, no easing; reserve the shared eased motion vocabulary for chrome.",
+      "Do keep Signal Amber to one focal element per screen.",
+      "Do use --on-accent for any text placed on an amber fill - never white.",
+      "Do scale radius with a surface's size on the confirmed 2/3/4/5px steps.",
+      "Do reuse the level card's selected pattern (accent border + --accent-bg wash) as the one selection idiom.",
+      "Do keep the simulation canvas's palette self-contained and independent of the app chrome's tokens.",
+      "Do keep document.documentElement.lang in sync with useLanguageStore."
+    ],
+    "donts": [
+      "Don't add a prefers-color-scheme: light branch back - this world is dark-only by identity.",
+      "Don't add box-shadow anywhere except the segment-display recessed-glass exception.",
+      "Don't introduce a second accent hue; amber is the only interactive signal.",
+      "Don't put white text on an amber fill - use --on-accent.",
+      "Don't load a custom webfont, including for the segment digits - they're CSS shapes, no network request needed.",
+      "Don't use monospace decoratively on prose or headings.",
+      "Don't let the simulation canvas's colors bleed into app-chrome UI, or vice versa.",
+      "Don't animate a SevenSegmentDisplay value with a tween/count-up - it must jump.",
+      "Don't animate on every re-render or add page-load choreography that delays interaction."
+    ]
+  }
+}

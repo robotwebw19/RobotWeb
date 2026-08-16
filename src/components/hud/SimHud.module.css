@@ -1,0 +1,72 @@
+@keyframes liveBlink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.hud {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--panel-bg);
+  font-size: 13px;
+  font-family: var(--mono);
+  color: var(--text);
+}
+
+.label {
+  color: var(--text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-right: 6px;
+}
+
+.statusRow {
+  display: flex;
+  align-items: center;
+}
+
+.liveDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--live);
+  margin-right: 8px;
+  animation: liveBlink 1.1s steps(2, jump-none) infinite;
+}
+
+.readout {
+  display: flex;
+  align-items: center;
+}
+
+.offTrackLit {
+  --segment-lit: var(--danger);
+}
+
+.motors {
+  color: var(--text-muted);
+}
+
+.warning {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.statusPassed {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.statusFailed {
+  color: var(--danger);
+  font-weight: 600;
+}

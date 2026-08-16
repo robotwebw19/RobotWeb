@@ -1,0 +1,30 @@
+.panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.canvasWrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.canvasScaled {
+  flex: none;
+  transform-origin: center center;
+}
+
+.hint {
+  margin: 0;
+  padding: 6px 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+}

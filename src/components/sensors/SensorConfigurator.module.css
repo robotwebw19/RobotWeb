@@ -1,0 +1,136 @@
+.configurator {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+.layout {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.catalog {
+  flex: 1 1 260px;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  align-items: stretch;
+  gap: 8px;
+}
+
+.side {
+  flex: 0 0 200px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.field {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.countGroup {
+  display: flex;
+  gap: 4px;
+}
+
+.countButton {
+  padding: 4px 10px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.countButtonActive {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.applyButton,
+.addButton,
+.removeButton,
+.saveButton {
+  padding: 5px 12px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.addButton:disabled,
+.applyButton:disabled,
+.saveButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.addButtonMounted {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.saveButton {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+}
+
+.mountedList {
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.mountedRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 13px;
+}
+
+.mountedRow + .mountedRow {
+  border-top: 1px solid var(--border);
+}
+
+.errors {
+  color: var(--danger);
+  font-size: 13px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.motorCard {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  min-height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 6px 10px;
+  background: var(--panel-bg);
+  cursor: default;
+}
+
+.label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

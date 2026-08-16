@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Line Tracking Robot Simulator</title>
+    <!-- Kanit — the site's one UI font (Thai + Latin), everywhere except the code editor/console,
+         which stay monospace on purpose. Falls back to system fonts below if the classroom network
+         can't reach Google Fonts, so the app never ships unreadable/blank text either way. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <!--
+      THESIS: Every number here is a real LED digit, not a themed label — this app IS a timing
+      instrument, so it should look like one, not a dashboard that happens to show numbers.
+      OWN-WORLD: matte near-black instrument bezel, silkscreen off-white labels, amber as the one
+      live accent, red/green reserved for running/pass outcomes; 7-segment cells (CSS-built, no
+      webfont) for elapsed time, best times, and star counts; ghost (unlit) cells always faintly
+      visible; numeric changes are instant segment swaps, never a smooth count-up.
+      STORY: a student reads the run timer and result at a glance, mid-lesson, the way they'd read
+      a stopwatch or a competition scoreboard, not a generic app screen.
+      FIRST VIEWPORT: the run screen — simulation canvas, code editor, and an instrument-panel HUD
+      whose elapsed/off-track readouts are real segment digits on a recessed dark glass strip.
+      FORM: "The Scoreboard" (fused challenger: signals-instruments-seven-segment-alarm-clock),
+      chosen over assigned grounded candidate 7 ("The Silkscreen") — seed key 444573ff.
+      FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review,
+      the verdict, and DESIGN.md.
+    -->
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

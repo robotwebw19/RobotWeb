@@ -1,0 +1,29 @@
+// Basic 2-sensor line follower.
+// In the Sensor Configurator, apply a 2-sensor IR row in digital mode
+// (this assigns pins A0 and A1 by default).
+
+void setup() {
+  pinMode(A0, INPUT);
+  pinMode(A1, INPUT);
+}
+
+void loop() {
+  int left = digitalRead(A0);
+  int right = digitalRead(A1);
+
+  if (left == 1 && right == 1) {
+    // Both sensors on the line: drive straight.
+    moveForward(150);
+  } else if (left == 1 && right == 0) {
+    // Only the left sensor sees the line: veer left.
+    turnLeft(100);
+  } else if (left == 0 && right == 1) {
+    // Only the right sensor sees the line: veer right.
+    turnRight(100);
+  } else {
+    // Both sensors off the line: stop and reassess.
+    stopMotors();
+  }
+
+  delay(20);
+}

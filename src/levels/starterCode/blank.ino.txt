@@ -1,0 +1,7 @@
+void setup() {
+  // Configure your sensors and pins here.
+}
+
+void loop() {
+  // Your robot's control logic runs here, over and over.
+}

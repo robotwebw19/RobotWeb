@@ -1,0 +1,106 @@
+:root {
+  /* The Scoreboard: a matte instrument bezel, always dark — real LED/segment hardware doesn't
+     have a "light mode," its housing is dark plastic under any ambient light. Silkscreen ink
+     (--text*) reads on it; amber is the one live/interactive signal; red/green are reserved for
+     running/pass outcomes, same as a real scoreboard's lamp colors. */
+  --bg: #0d0c0a;
+  --panel-bg: #17150f;
+  --panel-recessed: #0a0908;
+  --border: #322e26;
+  --text: #d8d4c9;
+  --text-h: #f5f2e8;
+  --text-muted: #8a8577;
+  --accent: #ffb020;
+  --accent-bg: rgba(255, 176, 32, 0.12);
+  --accent-hover: #ffc966;
+  /* Amber is a bright, high-luminance accent — white text on it fails contrast. Every accent-fill
+     surface (primary buttons) uses this near-black ink instead, same register as the panel bezel. */
+  --on-accent: #1a1204;
+  --live: #ff3b30;
+  --danger: #ff3b30;
+  --success: #34d058;
+  --warning: #ffb020;
+  --console-bg: #0a0908;
+  --console-text: #d8d4c9;
+  --segment-lit: #ff9d00;
+  --segment-ghost: rgba(216, 212, 201, 0.07);
+
+  /* Kanit is the one UI font, everywhere except code (see --mono) — it covers Thai and Latin in
+     the same face, loaded via Google Fonts (index.html). System stacks ride as fallback so a
+     blocked/slow classroom network degrades to a readable font, never blank/unstyled text. */
+  --sans: 'Kanit', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --sans-th: 'Kanit', 'Leelawadee UI', 'Noto Sans Thai', Tahoma, system-ui, sans-serif;
+  /* ui-monospace/Consolas have no Thai glyphs. --mono is used for the code editor/console (never
+     Kanit — code stays monospace on purpose) and also for a few short data-style UI labels (level
+     names, HUD labels, the navbar wordmark) that carry translated Thai text. Rather than track
+     down every consumer, the Thai faces ride as a fallback on the stack itself: Latin/digit
+     characters still render truly monospace, and only the glyphs those fonts lack (Thai) fall
+     through to a real Thai face instead of an undefined OS default. Standard per-character
+     font-stack fallback, not a hack. */
+  --mono: ui-monospace, Consolas, 'Leelawadee UI', 'Noto Sans Thai', monospace;
+
+  color-scheme: dark;
+  color: var(--text);
+  background: var(--bg);
+  font: 15px/1.45 var(--sans);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Thai vowels and tone marks stack above/below the consonant, so the script reads better with a
+   touch more line-height than Latin needs at the same size — matched here to the app's own body
+   line-height ratio (1.45) scaled up, not an arbitrary number. `<html lang="th">` is hardcoded in
+   index.html (the site is Thai-only, no language toggle), so this always matches. */
+:root:lang(th) {
+  --sans: var(--sans-th);
+}
+
+body:lang(th) {
+  line-height: 1.7;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--sans);
+  font-weight: 600;
+  color: var(--text-h);
+  margin: 0;
+}
+
+button {
+  font: inherit;
+}
+
+input,
+select {
+  font: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
