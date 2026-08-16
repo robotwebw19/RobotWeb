@@ -14,9 +14,9 @@ export function TestNowButton({ draft, studentId }: TestNowButtonProps) {
   const selectLevel = useLevelSelectionStore((state) => state.selectLevel)
   const { t } = useTranslation()
 
-  function handleClick() {
+  async function handleClick() {
     const level = { ...draft, id: `user-${nanoid(8)}`, createdBy: studentId }
-    levelRepository.saveUserLevel(level)
+    await levelRepository.saveUserLevel(level)
     selectLevel(level.id)
   }
 

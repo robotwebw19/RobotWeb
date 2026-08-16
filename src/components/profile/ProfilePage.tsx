@@ -1,19 +1,33 @@
+import { useEffect, useState } from 'react'
 import { useAuthStore } from '../../state/authStore'
 import { levelRepository } from '../../data'
-import { getStudentStats } from '../leaderboard/leaderboardAggregation'
+import { getStudentStats, type StudentStats } from '../leaderboard/leaderboardAggregation'
 import { Navbar } from '../layout/Navbar'
 import { useTranslation } from '../../i18n/useTranslation'
 import { SevenSegmentDisplay } from '../common/SevenSegmentDisplay'
 import { StarPips } from '../common/StarPips'
 import styles from './ProfilePage.module.css'
 
+const EMPTY_STATS: StudentStats = { totalStars: 0, levelsPassed: 0, perLevel: [] }
+
 export function ProfilePage() {
   const user = useAuthStore((state) => state.user)
   const { t, tLevelName } = useTranslation()
-  if (!user) return null
+  const [stats, setStats] = useState<StudentStats>(EMPTY_STATS)
 
-  const levels = levelRepository.getAll()
-  const stats = getStudentStats(user.studentId, levels)
+  useEffect(() => {
+    if (!user) return
+    let cancelled = false
+    levelRepository.getAll().then(async (levels) => {
+      const loaded = await getStudentStats(user.studentId, levels)
+      if (!cancelled) setStats(loaded)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [user])
+
+  if (!user) return null
 
   return (
     <div>

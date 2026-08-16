@@ -43,24 +43,28 @@ export function useLevelProgress(level: Level, studentId: string) {
 
     if (outcome.kind === 'passed') {
       setStatus('passed')
-      levelResultRepository.save({
-        studentId,
-        levelId: level.id,
-        completionTimeMs: outcome.completionTimeMs,
-        stars: outcome.stars,
-        passed: true,
-        submittedAt,
-      })
+      levelResultRepository
+        .save({
+          studentId,
+          levelId: level.id,
+          completionTimeMs: outcome.completionTimeMs,
+          stars: outcome.stars,
+          passed: true,
+          submittedAt,
+        })
+        .catch((error) => console.error('Failed to save level result', error))
     } else {
       setStatus('failed')
-      levelResultRepository.save({
-        studentId,
-        levelId: level.id,
-        completionTimeMs: simState.elapsedMs,
-        stars: 0,
-        passed: false,
-        submittedAt,
-      })
+      levelResultRepository
+        .save({
+          studentId,
+          levelId: level.id,
+          completionTimeMs: simState.elapsedMs,
+          stars: 0,
+          passed: false,
+          submittedAt,
+        })
+        .catch((error) => console.error('Failed to save level result', error))
     }
   }, [simState, level, studentId, setStatus])
 

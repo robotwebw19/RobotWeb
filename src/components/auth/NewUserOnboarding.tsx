@@ -27,8 +27,8 @@ export function NewUserOnboarding() {
     setStep('robot')
   }
 
-  function handleFinish(robotConfig: RobotConfig) {
-    completeOnboarding(displayName.trim(), robotConfig)
+  async function handleFinish(robotConfig: RobotConfig) {
+    await completeOnboarding(displayName.trim(), robotConfig)
     navigate('/')
   }
 

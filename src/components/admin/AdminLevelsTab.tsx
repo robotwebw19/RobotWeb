@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { levelRepository } from '../../data'
 import { useTranslation } from '../../i18n/useTranslation'
 import type { TranslationKey } from '../../i18n/translations'
-import type { MotorSide, RequiredEquipmentItem, SensorType } from '../../types/domain'
+import type { Level, MotorSide, RequiredEquipmentItem, SensorType } from '../../types/domain'
 import styles from './AdminLevelsTab.module.css'
 
 const SENSOR_LABEL_KEYS: Record<SensorType, TranslationKey> = {
@@ -23,14 +23,21 @@ function equipmentLabel(item: RequiredEquipmentItem, t: (key: TranslationKey) =>
 
 export function AdminLevelsTab() {
   const { t, tLevelName } = useTranslation()
-  const [levels, setLevels] = useState(() => levelRepository.getAll())
-  const [selectedId, setSelectedId] = useState(levels[0]?.id ?? '')
+  const [levels, setLevels] = useState<Level[]>([])
+  const [selectedId, setSelectedId] = useState('')
   const selected = levels.find((level) => level.id === selectedId)
 
-  function handleDelete(id: string) {
+  useEffect(() => {
+    levelRepository.getAll().then((loaded) => {
+      setLevels(loaded)
+      setSelectedId((current) => current || (loaded[0]?.id ?? ''))
+    })
+  }, [])
+
+  async function handleDelete(id: string) {
     if (!window.confirm(t('admin.confirmDeleteLevel'))) return
-    levelRepository.deleteUserLevel(id)
-    const refreshed = levelRepository.getAll()
+    await levelRepository.deleteUserLevel(id)
+    const refreshed = await levelRepository.getAll()
     setLevels(refreshed)
     setSelectedId((current) => (current === id ? (refreshed[0]?.id ?? '') : current))
   }

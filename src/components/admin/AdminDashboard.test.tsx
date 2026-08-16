@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { AdminLevelsTab } from './AdminLevelsTab'
 import { AdminStudentsTab } from './AdminStudentsTab'
 import { levelRepository, userRepository } from '../../data'
@@ -25,20 +25,20 @@ const userLevel: Level = {
 }
 
 describe('AdminLevelsTab', () => {
-  it('shows built-in levels with their solution code and lets admin delete only user-created ones', () => {
-    levelRepository.saveUserLevel(userLevel)
+  it('shows built-in levels with their solution code and lets admin delete only user-created ones', async () => {
+    await levelRepository.saveUserLevel(userLevel)
     render(<AdminLevelsTab />)
 
     // First seed level is selected by default and shows its solution code.
-    expect(screen.getByRole('heading', { name: /1\. เส้นตรง/ })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /1\. เส้นตรง/ })).toBeInTheDocument()
     expect(screen.getByText(/pinMode\(A0, INPUT\)/)).toBeInTheDocument()
 
-    fireEvent.click(screen.getByText('Community Level'))
-    expect(screen.getByRole('button', { name: 'ลบด่าน' })).toBeInTheDocument()
+    fireEvent.click(await screen.findByText('Community Level'))
+    expect(await screen.findByRole('button', { name: 'ลบด่าน' })).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'ลบด่าน' }))
-    expect(levelRepository.getById('user-abc')).toBeUndefined()
-    expect(screen.queryByText('Community Level')).not.toBeInTheDocument()
+    await waitFor(() => expect(screen.queryByText('Community Level')).not.toBeInTheDocument())
+    expect(await levelRepository.getById('user-abc')).toBeUndefined()
   })
 })
 
@@ -50,15 +50,15 @@ describe('AdminStudentsTab', () => {
     createdAt: 't',
   }
 
-  it('lists students and removes one on delete', () => {
-    userRepository.save(student)
+  it('lists students and removes one on delete', async () => {
+    await userRepository.save(student)
     render(<AdminStudentsTab />)
 
-    expect(screen.getByText('Ada')).toBeInTheDocument()
+    expect(await screen.findByText('Ada')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'ลบนักเรียน' }))
 
-    expect(userRepository.getById('22222')).toBeUndefined()
-    expect(screen.queryByText('Ada')).not.toBeInTheDocument()
+    await waitFor(() => expect(screen.queryByText('Ada')).not.toBeInTheDocument())
+    expect(await userRepository.getById('22222')).toBeUndefined()
   })
 
   it('shows an empty state with no students', () => {

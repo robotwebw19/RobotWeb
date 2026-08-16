@@ -27,7 +27,7 @@ beforeEach(() => {
 })
 
 describe('useLevelProgress', () => {
-  it('records exactly one passed result even if the finished state re-renders repeatedly', () => {
+  it('records exactly one passed result even if the finished state re-renders repeatedly', async () => {
     const { result, rerender } = renderHook(() => useLevelProgress(level, '11111'))
 
     act(() => {
@@ -41,17 +41,17 @@ describe('useLevelProgress', () => {
     rerender()
 
     expect(result.current.lastOutcome?.kind).toBe('passed')
-    expect(levelResultRepository.getForLevel(level.id)).toHaveLength(1)
+    expect(await levelResultRepository.getForLevel(level.id)).toHaveLength(1)
   })
 
-  it('resetProgress allows a subsequent run to be recorded again (Run after a finished run)', () => {
+  it('resetProgress allows a subsequent run to be recorded again (Run after a finished run)', async () => {
     const { result, rerender } = renderHook(() => useLevelProgress(level, '11111'))
 
     act(() => {
       useSimulationStore.getState().applyPatch({ status: 'running', pose: { x: 100, y: 0, headingDeg: 0 }, elapsedMs: 2000 })
     })
     rerender()
-    expect(levelResultRepository.getForLevel(level.id)).toHaveLength(1)
+    expect(await levelResultRepository.getForLevel(level.id)).toHaveLength(1)
 
     act(() => {
       result.current.resetProgress()
@@ -61,7 +61,7 @@ describe('useLevelProgress', () => {
     })
     rerender()
 
-    expect(levelResultRepository.getForLevel(level.id)).toHaveLength(2)
+    expect(await levelResultRepository.getForLevel(level.id)).toHaveLength(2)
   })
 
   it('clears the last outcome when switching to a different level', () => {

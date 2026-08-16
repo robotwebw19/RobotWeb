@@ -1,8 +1,8 @@
-import { LocalUserRepository } from './repositories/LocalUserRepository'
-import { LocalRobotRepository } from './repositories/LocalRobotRepository'
-import { LocalLevelRepository } from './repositories/LocalLevelRepository'
-import { LocalUserCodeRepository } from './repositories/LocalUserCodeRepository'
-import { LocalLevelResultRepository } from './repositories/LocalLevelResultRepository'
+import { SupabaseUserRepository } from './repositories/SupabaseUserRepository'
+import { SupabaseRobotRepository } from './repositories/SupabaseRobotRepository'
+import { SupabaseLevelRepository } from './repositories/SupabaseLevelRepository'
+import { SupabaseUserCodeRepository } from './repositories/SupabaseUserCodeRepository'
+import { SupabaseLevelResultRepository } from './repositories/SupabaseLevelResultRepository'
 import { seedLevels } from './seedLevels'
 
 export type { IUserRepository } from './repositories/IUserRepository'
@@ -12,11 +12,11 @@ export type { IUserCodeRepository } from './repositories/IUserCodeRepository'
 export type { ILevelResultRepository } from './repositories/ILevelResultRepository'
 
 // Composition root: this is the ONLY place that wires concrete repository
-// implementations. To swap localStorage for a real backend later, write
-// Api*Repository classes implementing the same I*Repository interfaces and
-// change only the instantiations below — no consumer imports change.
-export const userRepository = new LocalUserRepository()
-export const robotRepository = new LocalRobotRepository()
-export const levelRepository = new LocalLevelRepository(seedLevels)
-export const userCodeRepository = new LocalUserCodeRepository()
-export const levelResultRepository = new LocalLevelResultRepository()
+// implementations. To swap the backend again later, write new Api*Repository
+// classes implementing the same I*Repository interfaces and change only the
+// instantiations below — no consumer imports change.
+export const userRepository = new SupabaseUserRepository()
+export const robotRepository = new SupabaseRobotRepository()
+export const levelRepository = new SupabaseLevelRepository(seedLevels)
+export const userCodeRepository = new SupabaseUserCodeRepository()
+export const levelResultRepository = new SupabaseLevelResultRepository()

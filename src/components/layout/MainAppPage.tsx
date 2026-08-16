@@ -9,6 +9,7 @@ import { useLevelProgress } from '../../hooks/useLevelProgress'
 import { loadSavedCode, saveCode } from '../code/codeStorage'
 import { levelRepository } from '../../data'
 import { seedLevels } from '../../data/seedLevels'
+import type { Level } from '../../types/domain'
 import { AppShell } from './AppShell'
 import { LeftPanel } from './LeftPanel'
 import { CenterPanel } from './CenterPanel'
@@ -20,13 +21,37 @@ export function MainAppPage() {
   const sensors = user?.robotConfig.sensors ?? []
 
   const selectedLevelId = useLevelSelectionStore((state) => state.selectedLevelId)
-  const level = levelRepository.getById(selectedLevelId) ?? seedLevels[0]
+  const [level, setLevel] = useState<Level>(
+    () => seedLevels.find((candidate) => candidate.id === selectedLevelId) ?? seedLevels[0],
+  )
+
+  // The seed lookup above only covers built-in levels — resolve the full set (including
+  // user-created ones) once the backend responds, and whenever the selected level changes.
+  useEffect(() => {
+    let cancelled = false
+    levelRepository.getById(selectedLevelId).then((loaded) => {
+      if (!cancelled) setLevel(loaded ?? seedLevels[0])
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [selectedLevelId])
 
   const [sourceCode, setSourceCode] = useState(blankTemplate)
 
   // Each level has its own saved code slot — (re)load it whenever the selected level changes.
   useEffect(() => {
-    setSourceCode((studentId && loadSavedCode(studentId, level.id)) || blankTemplate)
+    if (!studentId) {
+      setSourceCode(blankTemplate)
+      return
+    }
+    let cancelled = false
+    loadSavedCode(studentId, level.id).then((saved) => {
+      if (!cancelled) setSourceCode(saved || blankTemplate)
+    })
+    return () => {
+      cancelled = true
+    }
   }, [level.id, studentId])
 
   const { consoleLines, codeError, loadProgram, clearProgram, stepInterpreterBudgeted } = useInterpreterConsole()
@@ -49,7 +74,9 @@ export function MainAppPage() {
       run()
       return
     }
-    if (studentId) saveCode(studentId, level.id, sourceCode)
+    if (studentId) {
+      saveCode(studentId, level.id, sourceCode).catch((error) => console.error('Failed to save code', error))
+    }
     resetProgress()
     reset()
     if (loadProgram(sourceCode, sensors)) run()

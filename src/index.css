@@ -4,6 +4,9 @@
      (--text*) reads on it; amber is the one live/interactive signal; red/green are reserved for
      running/pass outcomes, same as a real scoreboard's lamp colors. */
   --bg: #0d0c0a;
+  /* Bezel gray for the animated background sweep — warm-neutral, same family as --border,
+     stays dark enough that panels (--panel-bg, solid) always read as the foreground layer. */
+  --bg-alt: #2b2822;
   --panel-bg: #17150f;
   --panel-recessed: #0a0908;
   --border: #322e26;
@@ -75,6 +78,21 @@ body,
 
 body {
   margin: 0;
+  /* Bezel breathes: a slow black-to-gray sweep behind the flat panel layer, on the page background
+     only — cards/panels stay solid --panel-bg on top, unaffected, per the Flat-By-Default Rule. */
+  background: linear-gradient(160deg, var(--bg) 0%, var(--bg-alt) 50%, var(--bg) 100%);
+  background-size: 220% 220%;
+  animation: bezelSweep 20s ease-in-out infinite;
+}
+
+@keyframes bezelSweep {
+  0%,
+  100% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
 }
 
 h1,

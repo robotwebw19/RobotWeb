@@ -35,6 +35,14 @@
   animation: cardEnter 350ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+.avatar {
+  display: block;
+  width: 112px;
+  height: 112px;
+  margin: -8px auto 8px;
+  object-fit: contain;
+}
+
 .title {
   font-size: 20px;
   margin-bottom: 8px;

@@ -6,8 +6,11 @@ import type { LevelResult } from '../../types/domain'
  * produced by an actual completed simulation run, not by an arbitrary caller.
  */
 export interface ILevelResultRepository {
-  getForLevel(levelId: string): LevelResult[]
-  getForUser(studentId: string): LevelResult[]
-  getBestForUserLevel(studentId: string, levelId: string): LevelResult | undefined
-  save(result: LevelResult): void
+  getForLevel(levelId: string): Promise<LevelResult[]>
+  getForUser(studentId: string): Promise<LevelResult[]>
+  getBestForUserLevel(studentId: string, levelId: string): Promise<LevelResult | undefined>
+  save(result: LevelResult): Promise<void>
+  /** Fires `onChange` whenever any result is saved anywhere (any student, any level) — the
+   * leaderboard's live-update signal. Returns an unsubscribe function. */
+  subscribeToChanges(onChange: () => void): () => void
 }

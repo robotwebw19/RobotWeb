@@ -1,16 +1,17 @@
 import { userCodeRepository } from '../../data'
 import type { UserCode } from '../../types/domain'
 
-export function loadSavedCode(studentId: string, levelId: string): string | null {
-  return userCodeRepository.get(studentId, levelId)?.sourceCode ?? null
+export async function loadSavedCode(studentId: string, levelId: string): Promise<string | null> {
+  const userCode = await userCodeRepository.get(studentId, levelId)
+  return userCode?.sourceCode ?? null
 }
 
-export function saveCode(studentId: string, levelId: string, sourceCode: string): void {
+export async function saveCode(studentId: string, levelId: string, sourceCode: string): Promise<void> {
   const userCode: UserCode = {
     studentId,
     levelId,
     sourceCode,
     updatedAt: new Date().toISOString(),
   }
-  userCodeRepository.save(userCode)
+  await userCodeRepository.save(userCode)
 }

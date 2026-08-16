@@ -21,16 +21,3 @@ export function writeItem<T>(key: string, value: T): void {
 export function removeItem(key: string): void {
   localStorage.removeItem(namespaced(key))
 }
-
-/** Lists suffixes of stored keys matching a given prefix, with the namespace and prefix stripped. */
-export function listKeySuffixes(prefix: string): string[] {
-  const fullPrefix = namespaced(prefix)
-  const suffixes: string[] = []
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i)
-    if (key && key.startsWith(fullPrefix)) {
-      suffixes.push(key.slice(fullPrefix.length))
-    }
-  }
-  return suffixes
-}

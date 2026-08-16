@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../state/authStore'
 import { useTranslation } from '../../i18n/useTranslation'
+import loginAvatar from './login-avatar.png'
 import styles from './LoginPage.module.css'
 
 export function LoginPage() {
@@ -9,6 +10,7 @@ export function LoginPage() {
   const [studentId, setStudentId] = useState('')
   const [adminUsername, setAdminUsername] = useState('')
   const [adminError, setAdminError] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   const login = useAuthStore((state) => state.login)
   const loginAsAdmin = useAuthStore((state) => state.loginAsAdmin)
   const navigate = useNavigate()
@@ -19,11 +21,16 @@ export function LoginPage() {
     setStudentId(digitsOnly)
   }
 
-  function handleStudentSubmit(event: React.FormEvent) {
+  async function handleStudentSubmit(event: React.FormEvent) {
     event.preventDefault()
-    if (studentId.length !== 5) return
-    const result = login(studentId)
-    navigate(result === 'known' ? '/' : '/onboarding')
+    if (studentId.length !== 5 || submitting) return
+    setSubmitting(true)
+    try {
+      const result = await login(studentId)
+      navigate(result === 'known' ? '/' : '/onboarding')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   function handleAdminSubmit(event: React.FormEvent) {
@@ -39,6 +46,7 @@ export function LoginPage() {
     return (
       <div className={styles.page}>
         <form className={styles.card} onSubmit={handleAdminSubmit}>
+          <img className={styles.avatar} src={loginAvatar} alt="" aria-hidden="true" />
           <h1 className={styles.title}>{t('admin.title')}</h1>
           <input
             className={`${styles.digits} ${adminError ? styles.digitsError : ''}`}
@@ -75,6 +83,7 @@ export function LoginPage() {
   return (
     <div className={styles.page}>
       <form className={styles.card} onSubmit={handleStudentSubmit}>
+        <img className={styles.avatar} src={loginAvatar} alt="" aria-hidden="true" />
         <h1 className={styles.title}>{t('login.title')}</h1>
         <p className={styles.subtitle}>{t('login.subtitle')}</p>
         <input
@@ -89,7 +98,7 @@ export function LoginPage() {
           aria-label={t('login.idLabel')}
           placeholder="•••••"
         />
-        <button className={styles.submit} type="submit" disabled={studentId.length !== 5}>
+        <button className={styles.submit} type="submit" disabled={studentId.length !== 5 || submitting}>
           {t('login.continue')}
         </button>
         <button type="button" className={styles.linkButton} onClick={() => setMode('admin')}>

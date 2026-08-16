@@ -1,18 +1,39 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { userRepository, levelRepository } from '../../data'
-import { getStudentStats } from '../leaderboard/leaderboardAggregation'
+import { getStudentStats, type StudentStats } from '../leaderboard/leaderboardAggregation'
 import { useTranslation } from '../../i18n/useTranslation'
+import type { Level, User } from '../../types/domain'
 import styles from './AdminStudentsTab.module.css'
+
+const EMPTY_STATS: StudentStats = { totalStars: 0, levelsPassed: 0, perLevel: [] }
 
 export function AdminStudentsTab() {
   const { t } = useTranslation()
-  const [students, setStudents] = useState(() => userRepository.getAll())
-  const levels = levelRepository.getAll()
+  const [students, setStudents] = useState<User[]>([])
+  const [levels, setLevels] = useState<Level[]>([])
+  const [statsByStudentId, setStatsByStudentId] = useState<Record<string, StudentStats>>({})
 
-  function handleDelete(studentId: string) {
+  useEffect(() => {
+    userRepository.getAll().then(setStudents)
+    levelRepository.getAll().then(setLevels)
+  }, [])
+
+  useEffect(() => {
+    if (students.length === 0 || levels.length === 0) return
+    let cancelled = false
+    Promise.all(students.map((student) => getStudentStats(student.studentId, levels))).then((allStats) => {
+      if (cancelled) return
+      setStatsByStudentId(Object.fromEntries(students.map((student, index) => [student.studentId, allStats[index]])))
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [students, levels])
+
+  async function handleDelete(studentId: string) {
     if (!window.confirm(t('admin.confirmDeleteStudent'))) return
-    userRepository.delete(studentId)
-    setStudents(userRepository.getAll())
+    await userRepository.delete(studentId)
+    setStudents(await userRepository.getAll())
   }
 
   if (students.length === 0) {
@@ -33,7 +54,7 @@ export function AdminStudentsTab() {
       </thead>
       <tbody>
         {students.map((student) => {
-          const stats = getStudentStats(student.studentId, levels)
+          const stats = statsByStudentId[student.studentId] ?? EMPTY_STATS
           return (
             <tr key={student.studentId}>
               <td>{student.studentId}</td>
