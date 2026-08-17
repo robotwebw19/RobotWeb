@@ -1,6 +1,7 @@
 import type { MotorConfig, SensorConfig } from '../types/domain'
 import { getCatalogEntry } from './sensorCatalog'
 import { getMotorCatalogEntry } from './motorCatalog'
+import { sensorPins } from './sensorPins'
 
 export type RobotConfigError =
   | { key: 'validation.duplicatePin'; vars: { pin: string } }
@@ -22,11 +23,13 @@ export function validateRobotConfig(sensors: SensorConfig[], motors: MotorConfig
   const errors: RobotConfigError[] = []
   const seenPins = new Set<string>()
 
-  for (const part of [...sensors, ...motors]) {
-    if (seenPins.has(part.pin)) {
-      errors.push({ key: 'validation.duplicatePin', vars: { pin: part.pin } })
+  const pins: string[] = [...sensors.flatMap(sensorPins), ...motors.flatMap((m) => [m.in1Pin, m.in2Pin, m.enablePin])]
+
+  for (const pin of pins) {
+    if (seenPins.has(pin)) {
+      errors.push({ key: 'validation.duplicatePin', vars: { pin } })
     }
-    seenPins.add(part.pin)
+    seenPins.add(pin)
   }
 
   if (sensors.length === 0) {

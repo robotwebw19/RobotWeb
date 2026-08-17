@@ -25,32 +25,78 @@ export const level02Curve: Level = {
   solutionCode: `int baseSpeed = 150; // ความเร็วพื้นฐานของมอเตอร์ทั้งสองข้าง
 int turnBoost = 120; // ค่าลดความเร็วมอเตอร์ฝั่งที่ต้องเลี้ยว (มากกว่าด่านตรงเพราะทางโค้ง)
 int lastTurn = 0; // จำทิศเลี้ยวล่าสุด (-1 ซ้าย, 1 ขวา, 0 ตรง) ไว้ใช้ตอนหลุดเส้นทั้งคู่
+int leftSpeed = 0; // ความเร็วที่ต้องการของล้อซ้าย (ลบ = ถอยหลัง)
+int rightSpeed = 0; // ความเร็วที่ต้องการของล้อขวา
 
 void setup() {
-  pinMode(A0, INPUT); // ตั้งขา A0 (เซนเซอร์ซ้าย) เป็นอินพุต
-  pinMode(A1, INPUT); // ตั้งขา A1 (เซนเซอร์ขวา) เป็นอินพุต
+  pinMode(D2, INPUT); // ตั้งขา D2 (เซนเซอร์ซ้าย) เป็นอินพุต
+  pinMode(D3, INPUT); // ตั้งขา D3 (เซนเซอร์ขวา) เป็นอินพุต
+  pinMode(IN1, OUTPUT); // ขาเลือกทิศมอเตอร์ซ้าย (L298N)
+  pinMode(IN2, OUTPUT);
+  pinMode(ENA, OUTPUT); // ขา PWM ความเร็วมอเตอร์ซ้าย
+  pinMode(IN3, OUTPUT); // ขาเลือกทิศมอเตอร์ขวา
+  pinMode(IN4, OUTPUT);
+  pinMode(ENB, OUTPUT); // ขา PWM ความเร็วมอเตอร์ขวา
+}
+
+// สั่งขา IN1/IN2/ENA และ IN3/IN4/ENB จริงตาม leftSpeed/rightSpeed ที่ตั้งไว้
+void applyMotorSpeeds() {
+  if (leftSpeed > 0) {
+    digitalWrite(IN1, HIGH);
+    digitalWrite(IN2, LOW);
+    analogWrite(ENA, leftSpeed);
+  } else if (leftSpeed < 0) {
+    digitalWrite(IN1, LOW);
+    digitalWrite(IN2, HIGH);
+    analogWrite(ENA, -leftSpeed);
+  } else {
+    digitalWrite(IN1, LOW);
+    digitalWrite(IN2, LOW);
+    analogWrite(ENA, 0);
+  }
+
+  if (rightSpeed > 0) {
+    digitalWrite(IN3, HIGH);
+    digitalWrite(IN4, LOW);
+    analogWrite(ENB, rightSpeed);
+  } else if (rightSpeed < 0) {
+    digitalWrite(IN3, LOW);
+    digitalWrite(IN4, HIGH);
+    analogWrite(ENB, -rightSpeed);
+  } else {
+    digitalWrite(IN3, LOW);
+    digitalWrite(IN4, LOW);
+    analogWrite(ENB, 0);
+  }
 }
 
 void loop() {
-  int left = digitalRead(A0); // อ่านค่าเซนเซอร์ IR ฝั่งซ้าย
-  int right = digitalRead(A1); // อ่านค่าเซนเซอร์ IR ฝั่งขวา
+  int left = digitalRead(D2); // อ่านค่าเซนเซอร์ IR ฝั่งซ้าย
+  int right = digitalRead(D3); // อ่านค่าเซนเซอร์ IR ฝั่งขวา
 
   if (left == 1 && right == 1) { // เซนเซอร์ทั้งสองเจอเส้น = อยู่กึ่งกลางเส้นพอดี
-    setMotorSpeed(baseSpeed, baseSpeed); // วิ่งตรงด้วยความเร็วเท่ากันทั้งสองล้อ
+    leftSpeed = baseSpeed; // วิ่งตรงด้วยความเร็วเท่ากันทั้งสองล้อ
+    rightSpeed = baseSpeed;
     lastTurn = 0; // รีเซ็ตทิศเลี้ยวล่าสุดเป็นตรง
   } else if (left == 1 && right == 0) { // มีแค่เซนเซอร์ซ้ายเจอเส้น = หลุดไปทางขวา
-    setMotorSpeed(baseSpeed, baseSpeed - turnBoost); // ลดความเร็วล้อขวาเพื่อเลี้ยวกลับซ้าย
+    leftSpeed = baseSpeed; // ลดความเร็วล้อขวาเพื่อเลี้ยวกลับซ้าย
+    rightSpeed = baseSpeed - turnBoost;
     lastTurn = -1; // จำว่ากำลังเลี้ยวซ้าย
   } else if (left == 0 && right == 1) { // มีแค่เซนเซอร์ขวาเจอเส้น = หลุดไปทางซ้าย
-    setMotorSpeed(baseSpeed - turnBoost, baseSpeed); // ลดความเร็วล้อซ้ายเพื่อเลี้ยวกลับขวา
+    leftSpeed = baseSpeed - turnBoost; // ลดความเร็วล้อซ้ายเพื่อเลี้ยวกลับขวา
+    rightSpeed = baseSpeed;
     lastTurn = 1; // จำว่ากำลังเลี้ยวขวา
   } else if (lastTurn < 0) { // เซนเซอร์ทั้งคู่หลุดเส้น และครั้งก่อนเลี้ยวซ้ายอยู่
-    setMotorSpeed(baseSpeed, baseSpeed - turnBoost); // เลี้ยวซ้ายต่อเพื่อหาเส้นกลับมา (สำคัญมากตอนเข้าโค้ง)
+    leftSpeed = baseSpeed; // เลี้ยวซ้ายต่อเพื่อหาเส้นกลับมา (สำคัญมากตอนเข้าโค้ง)
+    rightSpeed = baseSpeed - turnBoost;
   } else if (lastTurn > 0) { // เซนเซอร์ทั้งคู่หลุดเส้น และครั้งก่อนเลี้ยวขวาอยู่
-    setMotorSpeed(baseSpeed - turnBoost, baseSpeed); // เลี้ยวขวาต่อเพื่อหาเส้นกลับมา (สำคัญมากตอนเข้าโค้ง)
+    leftSpeed = baseSpeed - turnBoost; // เลี้ยวขวาต่อเพื่อหาเส้นกลับมา (สำคัญมากตอนเข้าโค้ง)
+    rightSpeed = baseSpeed;
   } else { // หลุดเส้นทั้งคู่โดยไม่มีประวัติเลี้ยวมาก่อน
-    setMotorSpeed(baseSpeed, baseSpeed); // วิ่งตรงไปก่อนเผื่อกลับมาเจอเส้น
+    leftSpeed = baseSpeed; // วิ่งตรงไปก่อนเผื่อกลับมาเจอเส้น
+    rightSpeed = baseSpeed;
   }
+  applyMotorSpeeds();
 
   delay(20); // หน่วงเวลาเล็กน้อยก่อนวนลูปอ่านเซนเซอร์รอบถัดไป
 }

@@ -1,14 +1,19 @@
 import { nanoid } from 'nanoid'
-import type { IrMode, SensorConfig, SensorType } from '../types/domain'
+import type { SensorConfig, SensorType } from '../types/domain'
 import { getCatalogEntry } from './sensorCatalog'
+import { sensorPins } from './sensorPins'
 import { IR_ROW_SPACING_PX } from '../utils/constants'
+
+function usedPinsOf(sensors: SensorConfig[]): Set<string> {
+  return new Set(sensors.flatMap(sensorPins))
+}
 
 /**
  * Builds a fresh evenly-spaced row of `count` IR units, picking pins that avoid `nonIrSensors`.
  * Callers replace their existing IR sensors with this row (see SensorConfigurator's "Apply").
  */
-export function buildIrRow(count: number, mode: IrMode, nonIrSensors: SensorConfig[]): SensorConfig[] {
-  const usedPins = new Set(nonIrSensors.map((sensor) => sensor.pin))
+export function buildIrRow(count: number, nonIrSensors: SensorConfig[]): SensorConfig[] {
+  const usedPins = usedPinsOf(nonIrSensors)
   const availablePins = getCatalogEntry('ir').availablePins.filter((pin) => !usedPins.has(pin))
   const totalWidth = IR_ROW_SPACING_PX * (count - 1)
 
@@ -19,19 +24,35 @@ export function buildIrRow(count: number, mode: IrMode, nonIrSensors: SensorConf
       type: 'ir',
       pin: availablePins[i],
       position: { x: 40, y: -totalWidth / 2 + i * IR_ROW_SPACING_PX },
-      irMode: mode,
     })
   }
   return row
 }
 
-/** Adds a single ultrasonic/color sensor, capped at one of each type, using the next free pin. */
+/**
+ * Adds a single ultrasonic/color sensor, capped at one of each type, using the next free pin(s).
+ * Ultrasonic needs two — Trig (`pin`) and Echo (`echoPin`) — a real HC-SR04's two-wire interface.
+ * Color needs five — OUT (`pin`) plus a real TCS230's S0-S3 select pins.
+ */
 export function addSingleSensor(type: SensorType, sensors: SensorConfig[]): SensorConfig[] {
   if (sensors.some((sensor) => sensor.type === type)) return sensors
 
-  const usedPins = new Set(sensors.map((sensor) => sensor.pin))
-  const pin = getCatalogEntry(type).availablePins.find((candidate) => !usedPins.has(candidate))
-  if (!pin) return sensors
+  const usedPins = usedPinsOf(sensors)
+  const candidates = getCatalogEntry(type).availablePins.filter((pin) => !usedPins.has(pin))
 
+  if (type === 'ultrasonic') {
+    if (candidates.length < 2) return sensors
+    const [pin, echoPin] = candidates
+    return [...sensors, { id: nanoid(), type, pin, echoPin, position: { x: 45, y: 0 } }]
+  }
+
+  if (type === 'color') {
+    if (candidates.length < 5) return sensors
+    const [pin, s0Pin, s1Pin, s2Pin, s3Pin] = candidates
+    return [...sensors, { id: nanoid(), type, pin, s0Pin, s1Pin, s2Pin, s3Pin, position: { x: 45, y: 0 } }]
+  }
+
+  const pin = candidates[0]
+  if (!pin) return sensors
   return [...sensors, { id: nanoid(), type, pin, position: { x: 45, y: 0 } }]
 }

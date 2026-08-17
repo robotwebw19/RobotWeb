@@ -1,5 +1,5 @@
-import type { IrMode, SensorType } from '../types/domain'
-import { ANALOG_PINS, DIGITAL_PINS } from './pins'
+import type { SensorType } from '../types/domain'
+import { DIGITAL_PINS } from './pins'
 
 export interface SensorCatalogEntry {
   type: SensorType
@@ -15,7 +15,9 @@ export const sensorCatalog: SensorCatalogEntry[] = [
     type: 'ir',
     priceCredits: 50,
     weightGrams: 5,
-    availablePins: ANALOG_PINS,
+    // Digital-only (IR analog mode was removed) — wired to a digital pin like a real
+    // photointerrupter/reflectance module, not an analog input.
+    availablePins: DIGITAL_PINS,
   },
   {
     type: 'ultrasonic',
@@ -38,4 +40,3 @@ export function getCatalogEntry(type: SensorType): SensorCatalogEntry {
 }
 
 export const IR_COUNT_OPTIONS = [2, 3, 5, 8] as const
-export const IR_MODE_OPTIONS: IrMode[] = ['digital', 'analog']

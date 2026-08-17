@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../state/authStore'
 import { useTranslation } from '../../i18n/useTranslation'
 import loginAvatar from './login-avatar.png'
+import { DigitCodeInput } from './DigitCodeInput'
 import styles from './LoginPage.module.css'
 
 export function LoginPage() {
@@ -15,11 +16,6 @@ export function LoginPage() {
   const loginAsAdmin = useAuthStore((state) => state.loginAsAdmin)
   const navigate = useNavigate()
   const { t } = useTranslation()
-
-  function handleStudentIdChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const digitsOnly = event.target.value.replace(/\D/g, '').slice(0, 5)
-    setStudentId(digitsOnly)
-  }
 
   async function handleStudentSubmit(event: React.FormEvent) {
     event.preventDefault()
@@ -84,24 +80,11 @@ export function LoginPage() {
     <div className={styles.page}>
       <form className={styles.card} onSubmit={handleStudentSubmit}>
         <img className={styles.avatar} src={loginAvatar} alt="" aria-hidden="true" />
-        <h1 className={styles.brand}>
-          <span className={styles.brandName}>{t('login.brand')}</span>
-          {' '}
-          <span className={styles.brandTagline}>{t('login.brandTagline')}</span>
-        </h1>
-        <p className={styles.subtitle}>{t('login.subtitle')}</p>
-        <input
-          className={styles.digits}
-          type="text"
-          inputMode="numeric"
-          pattern="\d*"
-          autoFocus
-          maxLength={5}
-          value={studentId}
-          onChange={handleStudentIdChange}
-          aria-label={t('login.idLabel')}
-          placeholder="•••••"
-        />
+        <h1 className={styles.brand}>{t('login.brand')}</h1>
+        <div className={`${styles.idWrap} ${studentId.length === 5 ? styles.complete : ''}`}>
+          <p className={styles.idHint}>{t('login.idHint')}</p>
+          <DigitCodeInput length={5} value={studentId} onChange={setStudentId} autoFocus label={t('login.idLabel')} />
+        </div>
         <button className={styles.submit} type="submit" disabled={studentId.length !== 5 || submitting}>
           {t('login.continue')}
         </button>

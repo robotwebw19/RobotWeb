@@ -10,9 +10,8 @@ export const translations = {
   'nav.admin': { en: 'Admin', th: 'แอดมิน' },
 
   // Login
-  'login.brand': { en: 'URRWNM', th: 'URRWNM' },
-  'login.brandTagline': { en: 'Line Tracking Robot', th: 'Line Tracking Robot' },
-  'login.subtitle': { en: 'Enter your 5-digit student ID to continue', th: 'กรอกรหัสนักเรียน 5 หลักเพื่อดำเนินการต่อ' },
+  'login.brand': { en: 'URRWNM Line Tracking Robot', th: 'URRWNM Line Tracking Robot' },
+  'login.idHint': { en: 'Enter your 5-digit student ID', th: 'กรอกรหัสนักเรียน 5 หลัก' },
   'login.idLabel': { en: '5-digit student ID', th: 'รหัสนักเรียน 5 หลัก' },
   'login.continue': { en: 'Continue', th: 'ดำเนินการต่อ' },
   'login.adminLogin': { en: 'Admin login', th: 'เข้าสู่ระบบแอดมิน' },
@@ -47,16 +46,20 @@ export const translations = {
 
   // Sensor configurator
   'sensors.applyRow': { en: 'Apply {count}-sensor row', th: 'ใช้แถวเซนเซอร์ {count} ตัว' },
-  'sensors.digitalMode': { en: 'Digital (0/1)', th: 'ดิจิทัล (0/1)' },
-  'sensors.analogMode': { en: 'Analog (0-1023)', th: 'อนาล็อก (0-1023)' },
   'sensors.mounted': { en: 'Mounted', th: 'ติดตั้งแล้ว' },
-  'sensors.irModeLabel': { en: 'IR sensor mode', th: 'โหมดเซนเซอร์อินฟราเรด' },
   'sensors.add': { en: 'Add', th: 'เพิ่ม' },
   'sensors.noneMounted': { en: 'No sensors mounted yet.', th: 'ยังไม่ได้ติดตั้งเซนเซอร์' },
   'sensors.remove': { en: 'Remove', th: 'ลบ' },
   'sensors.saveRobot': { en: 'Save robot', th: 'บันทึกหุ่นยนต์' },
   'sensors.saveChanges': { en: 'Save changes', th: 'บันทึกการเปลี่ยนแปลง' },
   'sensors.pin': { en: 'Pin', th: 'พิน' },
+  'sensors.trigPin': { en: 'Trig', th: 'ขาส่ง (Trig)' },
+  'sensors.echoPin': { en: 'Echo', th: 'ขารับ (Echo)' },
+  'sensors.outPin': { en: 'OUT', th: 'ขาสัญญาณออก (OUT)' },
+  'sensors.s0Pin': { en: 'S0', th: 'S0' },
+  'sensors.s1Pin': { en: 'S1', th: 'S1' },
+  'sensors.s2Pin': { en: 'S2', th: 'S2' },
+  'sensors.s3Pin': { en: 'S3', th: 'S3' },
   'sensors.placementPreview': { en: 'Sensor placement preview', th: 'ตัวอย่างตำแหน่งเซนเซอร์' },
   'validation.duplicatePin': {
     en: 'Pin {pin} is assigned to more than one sensor.',
@@ -76,13 +79,13 @@ export const translations = {
   },
   'catalog.ultrasonic.label': { en: 'Ultrasonic', th: 'อัลตราโซนิก' },
   'catalog.ultrasonic.description': {
-    en: 'Measures distance to the nearest obstacle ahead, in cm.',
-    th: 'วัดระยะห่างจากสิ่งกีดขวางที่ใกล้ที่สุดด้านหน้า หน่วยเซนติเมตร',
+    en: 'Measures distance to the nearest obstacle ahead, in cm. Wired like a real HC-SR04: a Trig pin you pulse, an Echo pin you read with pulseIn().',
+    th: 'วัดระยะห่างจากสิ่งกีดขวางที่ใกล้ที่สุดด้านหน้า หน่วยเซนติเมตร ต่อสายเหมือน HC-SR04 จริง: ขา Trig ที่ส่งพัลส์ กับขา Echo ที่อ่านด้วย pulseIn()',
   },
   'catalog.color.label': { en: 'Color', th: 'ตรวจจับสี' },
   'catalog.color.description': {
-    en: 'Reads the color of the floor beneath the robot.',
-    th: 'อ่านค่าสีของพื้นใต้ตัวหุ่นยนต์',
+    en: 'Reads the color of the floor beneath the robot. Wired like a real TCS230: S0-S3 select which color filter is active, OUT is read with pulseIn().',
+    th: 'อ่านค่าสีของพื้นใต้ตัวหุ่นยนต์ ต่อสายเหมือน TCS230 จริง: S0-S3 เลือกฟิลเตอร์สีที่ใช้งาน ส่วน OUT อ่านด้วย pulseIn()',
   },
   'catalog.motor.left.label': { en: 'Left Motor', th: 'มอเตอร์ซ้าย' },
   'catalog.motor.right.label': { en: 'Right Motor', th: 'มอเตอร์ขวา' },
@@ -220,7 +223,7 @@ export const translations = {
   'level.level-02-curve.name': { en: '2. Curved Line', th: '2. เส้นโค้ง' },
   'level.level-03-multi-junction.name': { en: '3. Multi-Way Junction', th: '3. ทางแยกหลายทาง' },
   'level.level-04-gapped-line.name': { en: '4. Gapped Line', th: '4. เส้นขาดช่วง' },
-  'level.level-05-color-zone.name': { en: '5. Color Zone Response', th: '5. ตอบสนองจุดสี' },
+  'level.level-05-color-zone.name': { en: '5. Inverted Circle', th: '5. วงกลมสลับสี' },
 
   // Common
 } satisfies Record<string, Entry>

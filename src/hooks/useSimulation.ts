@@ -11,6 +11,8 @@ export interface UseSimulationParams {
   colorZones: ColorZone[]
   sensors: SensorConfig[]
   startPosition: StartPosition
+  /** See types/domain.ts Level.lineInversionBoundaryY. */
+  lineInversionBoundaryY?: number
   /** Called once per tick before physics, e.g. to pump the interpreter (see useInterpreterConsole). */
   onBeforePhysicsTick?: (currentElapsedMs: number) => void
 }
@@ -28,6 +30,7 @@ export function useSimulation({
   colorZones,
   sensors,
   startPosition,
+  lineInversionBoundaryY,
   onBeforePhysicsTick,
 }: UseSimulationParams) {
   const setStatus = useSimulationStore((state) => state.setStatus)
@@ -49,6 +52,7 @@ export function useSimulation({
         sensors,
         robotRadiusPx: ROBOT_RADIUS_PX,
         wheelBasePx: ROBOT_WHEEL_BASE_PX,
+        lineInversionBoundaryY,
       },
       {
         getSimState: () => useSimulationStore.getState().simState,
@@ -65,7 +69,7 @@ export function useSimulation({
       loop.stop()
       loopRef.current = null
     }
-  }, [track, obstacles, colorZones, sensors, startX, startY, startHeadingDeg, resetToPose])
+  }, [track, obstacles, colorZones, sensors, startX, startY, startHeadingDeg, lineInversionBoundaryY, resetToPose])
 
   return {
     run: () => setStatus('running'),

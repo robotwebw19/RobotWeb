@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
-import type { IrMode, MotorConfig, MotorSide, RobotConfig, SensorConfig } from '../../types/domain'
+import type { MotorConfig, MotorSide, RobotConfig, SensorConfig } from '../../types/domain'
 import { IR_COUNT_OPTIONS, sensorCatalog } from '../../robot/sensorCatalog'
 import { addSingleSensor, buildIrRow } from '../../robot/sensorFactory'
+import { sensorPins } from '../../robot/sensorPins'
 import { motorCatalog } from '../../robot/motorCatalog'
 import { addMotor, removeMotor } from '../../robot/motorFactory'
 import { validateRobotConfig } from '../../robot/robotConfigValidation'
@@ -24,6 +25,26 @@ const CATALOG_LABEL_KEYS: Record<SensorConfig['type'], TranslationKey> = {
   color: 'catalog.color.label',
 }
 
+type PinField = 'pin' | 'echoPin' | 's0Pin' | 's1Pin' | 's2Pin' | 's3Pin'
+
+/** Which pin fields a sensor type wires, and the label for each — one entry means the plain,
+ * unlabeled select IR/color-as-a-single-pin used to have; more than one shows a label per pin so
+ * ultrasonic's Trig/Echo and color's OUT/S0-S3 read unambiguously. */
+const PIN_FIELDS_BY_TYPE: Record<SensorConfig['type'], { field: PinField; labelKey: TranslationKey }[]> = {
+  ir: [{ field: 'pin', labelKey: 'sensors.pin' }],
+  ultrasonic: [
+    { field: 'pin', labelKey: 'sensors.trigPin' },
+    { field: 'echoPin', labelKey: 'sensors.echoPin' },
+  ],
+  color: [
+    { field: 'pin', labelKey: 'sensors.outPin' },
+    { field: 's0Pin', labelKey: 'sensors.s0Pin' },
+    { field: 's1Pin', labelKey: 'sensors.s1Pin' },
+    { field: 's2Pin', labelKey: 'sensors.s2Pin' },
+    { field: 's3Pin', labelKey: 'sensors.s3Pin' },
+  ],
+}
+
 const MOTOR_LABEL_KEYS: Record<MotorSide, TranslationKey> = {
   left: 'catalog.motor.left.label',
   right: 'catalog.motor.right.label',
@@ -35,14 +56,13 @@ export function SensorConfigurator({ initialConfig, onSave, saveLabel }: SensorC
   const [sensors, setSensors] = useState<SensorConfig[]>(initialConfig.sensors)
   const [motors, setMotors] = useState<MotorConfig[]>(initialConfig.motors)
   const [irCount, setIrCount] = useState<number>(sensors.filter((s) => s.type === 'ir').length || 2)
-  const [irMode, setIrMode] = useState<IrMode>(sensors.find((s) => s.type === 'ir')?.irMode ?? 'digital')
 
   const nonIrSensors = useMemo(() => sensors.filter((s) => s.type !== 'ir'), [sensors])
   const validation = validateRobotConfig(sensors, motors)
-  const usedPins = [...sensors.map((s) => s.pin), ...motors.map((m) => m.pin)]
+  const usedPins = [...sensors.flatMap(sensorPins), ...motors.flatMap((m) => [m.in1Pin, m.in2Pin, m.enablePin])]
 
   function applyIrRow() {
-    setSensors([...buildIrRow(irCount, irMode, nonIrSensors), ...nonIrSensors])
+    setSensors([...buildIrRow(irCount, nonIrSensors), ...nonIrSensors])
   }
 
   function handleRemove(id: string) {
@@ -54,8 +74,8 @@ export function SensorConfigurator({ initialConfig, onSave, saveLabel }: SensorC
     setSensors((prev) => (prev.some((s) => s.type === type) ? prev.filter((s) => s.type !== type) : addSingleSensor(type, prev)))
   }
 
-  function handlePinChange(id: string, pin: string) {
-    setSensors((prev) => prev.map((s) => (s.id === id ? { ...s, pin } : s)))
+  function handleSensorPinChange(id: string, field: PinField, pin: string) {
+    setSensors((prev) => prev.map((s) => (s.id === id ? { ...s, [field]: pin } : s)))
   }
 
   function handleToggleMotor(side: MotorSide) {
@@ -87,15 +107,6 @@ export function SensorConfigurator({ initialConfig, onSave, saveLabel }: SensorC
                       </button>
                     ))}
                   </div>
-                  <select
-                    className={styles.field}
-                    value={irMode}
-                    onChange={(event) => setIrMode(event.target.value as IrMode)}
-                    aria-label={t('sensors.irModeLabel')}
-                  >
-                    <option value="digital">{t('sensors.digitalMode')}</option>
-                    <option value="analog">{t('sensors.analogMode')}</option>
-                  </select>
                   <button type="button" className={styles.applyButton} onClick={applyIrRow}>
                     {t('sensors.applyRow', { count: irCount })}
                   </button>
@@ -121,7 +132,7 @@ export function SensorConfigurator({ initialConfig, onSave, saveLabel }: SensorC
           {motorCatalog.map((entry) => {
             const mounted = motors.some((m) => m.side === entry.side)
             const label = t(MOTOR_LABEL_KEYS[entry.side])
-            const tooltip = `${label} — ${t(MOTOR_DESCRIPTION_KEY)} (${entry.priceCredits}cr, ${entry.weightGrams}g, ${entry.pin})`
+            const tooltip = `${label} — ${t(MOTOR_DESCRIPTION_KEY)} (${entry.priceCredits}cr, ${entry.weightGrams}g, ${entry.in1Pin}/${entry.in2Pin}/${entry.enablePin})`
             return (
               <div key={entry.side} className={styles.motorCard} title={tooltip}>
                 <strong className={styles.label}>{label}</strong>
@@ -147,7 +158,7 @@ export function SensorConfigurator({ initialConfig, onSave, saveLabel }: SensorC
         {motors.map((motor) => (
           <div key={motor.id} className={styles.mountedRow}>
             <span>{t(MOTOR_LABEL_KEYS[motor.side])}</span>
-            <span>{motor.pin}</span>
+            <span>{motor.in1Pin}/{motor.in2Pin}/{motor.enablePin}</span>
           </div>
         ))}
         {sensors.map((sensor) => {
@@ -156,13 +167,19 @@ export function SensorConfigurator({ initialConfig, onSave, saveLabel }: SensorC
           return (
             <div key={sensor.id} className={styles.mountedRow}>
               <span>{t(CATALOG_LABEL_KEYS[sensor.type])}</span>
-              <PinAssignmentSelect
-                value={sensor.pin}
-                options={catalogEntry.availablePins}
-                usedPins={usedPins}
-                onChange={(pin) => handlePinChange(sensor.id, pin)}
-              />
-              {sensor.type === 'ir' && <span>{sensor.irMode}</span>}
+              {PIN_FIELDS_BY_TYPE[sensor.type].map(({ field, labelKey }) => (
+                <span key={field} className={styles.pinGroup}>
+                  {PIN_FIELDS_BY_TYPE[sensor.type].length > 1 && (
+                    <span className={styles.pinLabel}>{t(labelKey)}</span>
+                  )}
+                  <PinAssignmentSelect
+                    value={sensor[field] ?? ''}
+                    options={catalogEntry.availablePins}
+                    usedPins={usedPins}
+                    onChange={(pin) => handleSensorPinChange(sensor.id, field, pin)}
+                  />
+                </span>
+              ))}
               {/* Ultrasonic/color remove via the same catalog toggle button above; only IR — a
                   batch row control, not a per-sensor toggle — still needs its own remove here. */}
               {sensor.type === 'ir' && (

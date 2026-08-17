@@ -1,15 +1,16 @@
-import type { SensorConfig } from '../../types/domain'
-import type { SensorReading } from '../../sim/engine/SensorSampling'
-import { MOTOR_SPEED_SCALE_PX_PER_SEC_PER_UNIT } from '../../utils/constants'
+import type { ColorZoneColor, MotorConfig, SensorConfig } from '../../types/domain'
+import type { ColorChannel, SensorReading } from '../../sim/engine/SensorSampling'
+import { colorChannelPulseUs } from '../../sim/engine/SensorSampling'
+import { MOTOR_SPEED_SCALE_PX_PER_SEC_PER_UNIT, SPEED_OF_SOUND_CM_PER_US } from '../../utils/constants'
 import { RuntimeError } from './errors'
 import type { ExecutionContext, RuntimeValue } from './ExecutionContext'
 import { asNumber, asString } from './values'
 
 export interface ArduinoRuntimeDeps {
   sensors: SensorConfig[]
+  motors: MotorConfig[]
   getSensorReadings: () => Record<string, SensorReading>
   getElapsedMs: () => number
-  setMotorSpeeds: (left: number, right: number) => void
   onSerialOutput: (text: string) => void
 }
 
@@ -28,10 +29,17 @@ function formatSerialValue(value: RuntimeValue): string {
 export class ArduinoRuntimeAPI {
   private readonly deps: ArduinoRuntimeDeps
   private readonly sensorByPin: Map<string, SensorConfig>
+  private readonly ultrasonicByEchoPin: Map<string, SensorConfig>
+  private readonly colorByOutPin: Map<string, SensorConfig>
 
   constructor(deps: ArduinoRuntimeDeps) {
     this.deps = deps
     this.sensorByPin = new Map(deps.sensors.map((sensor) => [sensor.pin, sensor]))
+    this.ultrasonicByEchoPin = new Map(
+      deps.sensors.filter((sensor): sensor is SensorConfig & { echoPin: string } => sensor.echoPin !== undefined)
+        .map((sensor) => [sensor.echoPin, sensor]),
+    )
+    this.colorByOutPin = new Map(deps.sensors.filter((sensor) => sensor.type === 'color').map((sensor) => [sensor.pin, sensor]))
   }
 
   call(name: string, args: RuntimeValue[], context: ExecutionContext, line: number): RuntimeValue {
@@ -48,20 +56,10 @@ export class ArduinoRuntimeAPI {
         return this.analogWrite(args, context, line)
       case 'delay':
         return this.delay(args, context, line)
-      case 'setMotorSpeed':
-        return this.setMotorSpeed(args, line)
-      case 'moveForward':
-        return this.moveForward(args, line)
-      case 'turnLeft':
-        return this.turnLeft(args, line)
-      case 'turnRight':
-        return this.turnRight(args, line)
-      case 'stopMotors':
-        return this.stopMotors()
-      case 'readUltrasonic':
-        return this.readUltrasonic(args, line)
-      case 'readColorSensor':
-        return this.readColorSensor(args, line)
+      case 'delayMicroseconds':
+        return this.delayMicroseconds(args, context, line)
+      case 'pulseIn':
+        return this.pulseIn(args, context, line)
       case 'Serial.print':
         return this.serialPrint(args, false)
       case 'Serial.println':
@@ -92,19 +90,13 @@ export class ArduinoRuntimeAPI {
   private digitalRead(args: RuntimeValue[], line: number): RuntimeValue {
     const pin = asString(args[0])
     const sensor = this.getSensor(pin, 'ir', 'digitalRead', line)
-    if (sensor.irMode === 'analog') {
-      throw new RuntimeError(`digitalRead(${pin}): sensor is configured for analog mode — use analogRead() instead`, line)
-    }
     return this.deps.getSensorReadings()[sensor.id] ?? 0
   }
 
   private analogRead(args: RuntimeValue[], line: number): RuntimeValue {
     const pin = asString(args[0])
-    const sensor = this.getSensor(pin, 'ir', 'analogRead', line)
-    if (sensor.irMode !== 'analog') {
-      throw new RuntimeError(`analogRead(${pin}): sensor is configured for digital mode — use digitalRead() instead`, line)
-    }
-    return this.deps.getSensorReadings()[sensor.id] ?? 0
+    this.getSensor(pin, 'ir', 'analogRead', line)
+    throw new RuntimeError(`analogRead(${pin}): IR sensors are digital-only — use digitalRead() instead`, line)
   }
 
   private digitalWrite(args: RuntimeValue[], context: ExecutionContext, line: number): RuntimeValue {
@@ -134,49 +126,79 @@ export class ArduinoRuntimeAPI {
     return 0
   }
 
-  private readUltrasonic(args: RuntimeValue[], line: number): RuntimeValue {
+  private delayMicroseconds(args: RuntimeValue[], context: ExecutionContext, line: number): RuntimeValue {
+    const us = asNumber(args[0], 'delayMicroseconds duration', line)
+    context.waitUntilSimMs = this.deps.getElapsedMs() + us / 1000
+    context.resetStatementCounter()
+    return 0
+  }
+
+  /**
+   * pulseIn() serves two real sensors here, resolved by which pin was passed:
+   *
+   * HC-SR04 (ultrasonic): trigger `pin` first (a plain digitalWrite HIGH/LOW pulse — no sensor
+   * lookup needed for that, it's just an output pin), then `pulseIn(echoPin, HIGH)` measures the
+   * round-trip time. The simulator already knows the true distance each tick (see
+   * SensorSampling.sampleUltrasonicCm), so this returns the equivalent pulse duration for that
+   * distance directly rather than timing an actual pulse — the formula a student's own code
+   * inverts is the same one real HC-SR04 datasheets give: distance = duration * 0.0343 / 2.
+   *
+   * TCS230/TCS3200 (color): set S2/S3 first (digitalWrite, same as any output pin) to select
+   * which photodiode filter is active, then `pulseIn(outPin, LOW)` reads that channel's
+   * frequency as a pulse duration — short means strong (that color is present), long means weak.
+   * See SensorSampling.colorChannelPulseUs for how the duration is synthesized from ground truth.
+   */
+  private pulseIn(args: RuntimeValue[], context: ExecutionContext, line: number): RuntimeValue {
     const pin = asString(args[0])
-    const sensor = this.getSensor(pin, 'ultrasonic', 'readUltrasonic', line)
-    return this.deps.getSensorReadings()[sensor.id] ?? 0
+
+    const ultrasonic = this.ultrasonicByEchoPin.get(pin)
+    if (ultrasonic) {
+      const distanceCm = this.deps.getSensorReadings()[ultrasonic.id]
+      if (typeof distanceCm !== 'number') return 0
+      return Math.round((distanceCm * 2) / SPEED_OF_SOUND_CM_PER_US)
+    }
+
+    const colorSensor = this.colorByOutPin.get(pin)
+    if (colorSensor) {
+      const channel = this.selectedColorChannel(colorSensor, context)
+      if (!channel) return 0 // S2=HIGH,S3=LOW selects Clear (unfiltered) — not modeled.
+      const trueColor = this.deps.getSensorReadings()[colorSensor.id] as ColorZoneColor
+      return colorChannelPulseUs(trueColor, channel)
+    }
+
+    throw new RuntimeError(`pulseIn(${pin}): no ultrasonic echo pin or color OUT pin wired to ${pin}`, line)
   }
 
-  private readColorSensor(args: RuntimeValue[], line: number): RuntimeValue {
-    const pin = asString(args[0])
-    const sensor = this.getSensor(pin, 'color', 'readColorSensor', line)
-    return this.deps.getSensorReadings()[sensor.id] ?? 'white'
+  /** Real TCS230 S2/S3 truth table: LOW/LOW=red, HIGH/HIGH=green, LOW/HIGH=blue, HIGH/LOW=clear. */
+  private selectedColorChannel(sensor: SensorConfig, context: ExecutionContext): ColorChannel | null {
+    const s2 = sensor.s2Pin ? context.getDigitalPinState(sensor.s2Pin) : 0
+    const s3 = sensor.s3Pin ? context.getDigitalPinState(sensor.s3Pin) : 0
+    if (s2 === 0 && s3 === 0) return 'red'
+    if (s2 === 1 && s3 === 1) return 'green'
+    if (s2 === 0 && s3 === 1) return 'blue'
+    return null
   }
 
-  private setMotorSpeed(args: RuntimeValue[], line: number): RuntimeValue {
-    const left = asNumber(args[0], 'setMotorSpeed left', line)
-    const right = asNumber(args[1], 'setMotorSpeed right', line)
-    this.deps.setMotorSpeeds(left * MOTOR_SPEED_SCALE_PX_PER_SEC_PER_UNIT, right * MOTOR_SPEED_SCALE_PX_PER_SEC_PER_UNIT)
-    return 0
-  }
-
-  private moveForward(args: RuntimeValue[], line: number): RuntimeValue {
-    const speed = asNumber(args[0], 'moveForward speed', line) * MOTOR_SPEED_SCALE_PX_PER_SEC_PER_UNIT
-    this.deps.setMotorSpeeds(speed, speed)
-    return 0
-  }
-
-  private turnLeft(args: RuntimeValue[], line: number): RuntimeValue {
-    // heading convention: headingDeg increases clockwise on screen (see RobotPhysics.ts), so a
-    // real left turn (counterclockwise) needs a *decreasing* heading, i.e. right wheel slower
-    // than left — left wheel forward, right wheel backward for a pivot turn.
-    const speed = asNumber(args[0], 'turnLeft speed', line) * MOTOR_SPEED_SCALE_PX_PER_SEC_PER_UNIT
-    this.deps.setMotorSpeeds(speed, -speed)
-    return 0
-  }
-
-  private turnRight(args: RuntimeValue[], line: number): RuntimeValue {
-    const speed = asNumber(args[0], 'turnRight speed', line) * MOTOR_SPEED_SCALE_PX_PER_SEC_PER_UNIT
-    this.deps.setMotorSpeeds(-speed, speed)
-    return 0
-  }
-
-  private stopMotors(): RuntimeValue {
-    this.deps.setMotorSpeeds(0, 0)
-    return 0
+  /**
+   * Reads each motor's real L298N control pins — IN1/IN2 direction (digitalWrite HIGH/LOW: one
+   * HIGH one LOW drives, matching values stop/brake) and the enable pin's PWM magnitude
+   * (analogWrite 0-255) — and combines them into a signed px/s speed, exactly what a real driver
+   * board does with those three pins. Called once per interpreter pump, after student code runs,
+   * not from inside `call()` — motor speed is a pin *state*, not a one-shot command.
+   */
+  computeMotorSpeeds(context: ExecutionContext): { left: number; right: number } {
+    let left = 0
+    let right = 0
+    for (const motor of this.deps.motors) {
+      const in1 = context.getDigitalPinState(motor.in1Pin)
+      const in2 = context.getDigitalPinState(motor.in2Pin)
+      const direction = in1 === 1 && in2 === 0 ? 1 : in1 === 0 && in2 === 1 ? -1 : 0
+      const magnitude = context.getAnalogPinState(motor.enablePin)
+      const speed = direction * magnitude * MOTOR_SPEED_SCALE_PX_PER_SEC_PER_UNIT
+      if (motor.side === 'left') left = speed
+      else right = speed
+    }
+    return { left, right }
   }
 
   private serialPrint(args: RuntimeValue[], newline: boolean): RuntimeValue {

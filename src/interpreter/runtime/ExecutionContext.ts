@@ -81,8 +81,20 @@ export class ExecutionContext {
     this.digitalPinStates.set(pin, value)
   }
 
+  /** Defaults to 0 (LOW) — a pin a student hasn't written yet reads as LOW, same as real
+   * hardware without a pull-up. Used by pulseIn() to see a color sensor's current S2/S3
+   * filter-select state, set by the student's own prior digitalWrite calls this tick. */
+  getDigitalPinState(pin: string): 0 | 1 {
+    return this.digitalPinStates.get(pin) ?? 0
+  }
+
   setAnalogPinState(pin: string, value: number): void {
     this.analogPinStates.set(pin, value)
+  }
+
+  /** Defaults to 0 — an ENA/ENB PWM pin a student hasn't written yet reads as 0 (motor off). */
+  getAnalogPinState(pin: string): number {
+    return this.analogPinStates.get(pin) ?? 0
   }
 
   /** Called on every executed leaf statement; throws if a loop() iteration runs away without delay(). */

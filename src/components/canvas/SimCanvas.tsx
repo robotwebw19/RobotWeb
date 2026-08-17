@@ -16,6 +16,8 @@ interface SimCanvasProps {
   obstacles: Obstacle[]
   colorZones: ColorZone[]
   finishZone: FinishZone
+  /** See types/domain.ts Level.lineInversionBoundaryY. */
+  lineInversionBoundaryY?: number
   sensors: SensorConfig[]
   pose: Pose
   leftMotorSpeed?: number
@@ -35,6 +37,7 @@ export function SimCanvas({
   obstacles,
   colorZones,
   finishZone,
+  lineInversionBoundaryY,
   sensors,
   pose,
   leftMotorSpeed,
@@ -45,9 +48,12 @@ export function SimCanvas({
     <Stage width={width} height={height}>
       <Layer>
         <Rect x={0} y={0} width={width} height={height} fill="#f7f7f5" />
+        {lineInversionBoundaryY !== undefined && (
+          <Rect x={0} y={lineInversionBoundaryY} width={width} height={height - lineInversionBoundaryY} fill="#212529" />
+        )}
         <ColorZoneLayer colorZones={colorZones} />
         <FinishZoneLayer finishZone={finishZone} />
-        <TrackLayer trackPath={trackPath} />
+        <TrackLayer trackPath={trackPath} inversionBoundaryY={lineInversionBoundaryY} />
         <ObstacleLayer obstacles={obstacles} />
         <RobotSprite pose={pose} leftMotorSpeed={leftMotorSpeed} rightMotorSpeed={rightMotorSpeed} />
         <SensorOverlay pose={pose} sensors={sensors} sensorReadings={sensorReadings} />

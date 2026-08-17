@@ -8,7 +8,7 @@ import { stepPose, type Pose } from '../sim/engine/RobotPhysics'
 import { sampleAllSensors, type SensorReading } from '../sim/engine/SensorSampling'
 import { findCollidingObstacle } from '../sim/engine/CollisionDetection'
 import { ROBOT_RADIUS_PX, ROBOT_WHEEL_BASE_PX, MAX_OFF_TRACK_MS_BEFORE_FAIL, MAX_STATEMENTS_PER_FRAME } from '../utils/constants'
-import type { Level, RequiredEquipmentItem, SensorConfig } from '../types/domain'
+import type { Level, MotorConfig, RequiredEquipmentItem, SensorConfig } from '../types/domain'
 
 /**
  * Rebuilds robot sensors from a level's requiredEquipment, using the same IR row spacing the
@@ -27,16 +27,38 @@ function sensorsFromEquipment(equipment: RequiredEquipmentItem[]): SensorConfig[
         type: 'ir',
         pin: item.pin,
         position: { x: 40, y: irOffsets[irIndex] ?? 0 },
-        irMode: item.irMode,
       })
       irIndex++
     } else if (item.type === 'ultrasonic') {
-      sensors.push({ id: item.pin, type: 'ultrasonic', pin: item.pin, position: { x: 45, y: 0 } })
+      sensors.push({ id: item.pin, type: 'ultrasonic', pin: item.pin, echoPin: item.echoPin, position: { x: 45, y: 0 } })
     } else {
-      sensors.push({ id: item.pin, type: 'color', pin: item.pin, position: { x: 45, y: 0 } })
+      sensors.push({
+        id: item.pin,
+        type: 'color',
+        pin: item.pin,
+        s0Pin: item.s0Pin,
+        s1Pin: item.s1Pin,
+        s2Pin: item.s2Pin,
+        s3Pin: item.s3Pin,
+        position: { x: 45, y: 0 },
+      })
     }
   }
   return sensors
+}
+
+/** Rebuilds motors from a level's requiredEquipment — same fixed 3-pin-per-side shape motorCatalog assigns. */
+function motorsFromEquipment(equipment: RequiredEquipmentItem[]): MotorConfig[] {
+  return equipment
+    .filter((item): item is Extract<RequiredEquipmentItem, { kind: 'motor' }> => item.kind === 'motor')
+    .map((item) => ({
+      id: item.side,
+      side: item.side,
+      in1Pin: item.in1Pin,
+      in2Pin: item.in2Pin,
+      enablePin: item.enablePin,
+      position: { x: 0, y: 0 },
+    }))
 }
 
 interface PlaythroughResult {
@@ -54,22 +76,27 @@ interface PlaythroughResult {
 function playLevel(level: Level, dtMs = 16, testBudgetMs = 45_000): PlaythroughResult {
   const track = new TrackModel(level.trackPath)
   const sensors = sensorsFromEquipment(level.requiredEquipment ?? [])
+  const motors = motorsFromEquipment(level.requiredEquipment ?? [])
 
   let pose: Pose = { ...level.startPosition }
   let leftSpeed = 0
   let rightSpeed = 0
   let elapsedMs = 0
   let offTrackMs = 0
-  let readings: Record<string, SensorReading> = sampleAllSensors(pose, sensors, track, level.obstacles, level.colorZones)
+  let readings: Record<string, SensorReading> = sampleAllSensors(
+    pose,
+    sensors,
+    track,
+    level.obstacles,
+    level.colorZones,
+    level.lineInversionBoundaryY,
+  )
 
   const api = new ArduinoRuntimeAPI({
     sensors,
+    motors,
     getSensorReadings: () => readings,
     getElapsedMs: () => elapsedMs,
-    setMotorSpeeds: (left, right) => {
-      leftSpeed = left
-      rightSpeed = right
-    },
     onSerialOutput: () => {},
   })
 
@@ -87,12 +114,13 @@ function playLevel(level: Level, dtMs = 16, testBudgetMs = 45_000): PlaythroughR
       for (let i = 0; i < MAX_STATEMENTS_PER_FRAME; i++) {
         if (interpreter.step() === 'waiting') break
       }
+      ;({ left: leftSpeed, right: rightSpeed } = interpreter.getMotorSpeeds())
     } catch (error) {
       return { passed: false, elapsedMs, reason: 'runtime-error', error: String(error) }
     }
 
     pose = stepPose(pose, leftSpeed, rightSpeed, ROBOT_WHEEL_BASE_PX, dtMs / 1000)
-    readings = sampleAllSensors(pose, sensors, track, level.obstacles, level.colorZones)
+    readings = sampleAllSensors(pose, sensors, track, level.obstacles, level.colorZones, level.lineInversionBoundaryY)
     elapsedMs = nextElapsedMs
 
     if (findCollidingObstacle(pose, ROBOT_RADIUS_PX, level.obstacles) !== null) {

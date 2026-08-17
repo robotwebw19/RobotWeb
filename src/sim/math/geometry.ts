@@ -25,6 +25,44 @@ export function distanceToPolylines(p: Vector2, polylines: Vector2[][]): number 
 }
 
 /**
+ * Splits a polyline into alternating-color sub-segments at every crossing of `boundaryY`,
+ * inserting the exact interpolated crossing point so each sub-segment stays entirely on one
+ * side. Rendering-only counterpart to SensorSampling's inversion logic (see
+ * types/domain.ts Level.lineInversionBoundaryY) — draws the line so a student can see which
+ * half currently reads inverted.
+ */
+export function splitPolylineByBoundaryY(
+  points: Vector2[],
+  boundaryY: number,
+): { points: Vector2[]; inverted: boolean }[] {
+  if (points.length === 0) return []
+
+  const segments: { points: Vector2[]; inverted: boolean }[] = []
+  let current: Vector2[] = [points[0]]
+  let currentInverted = points[0].y >= boundaryY
+
+  for (let i = 1; i < points.length; i++) {
+    const prev = points[i - 1]
+    const next = points[i]
+    const nextInverted = next.y >= boundaryY
+
+    if (nextInverted !== currentInverted) {
+      const t = (boundaryY - prev.y) / (next.y - prev.y)
+      const crossing: Vector2 = { x: prev.x + (next.x - prev.x) * t, y: boundaryY }
+      current.push(crossing)
+      segments.push({ points: current, inverted: currentInverted })
+      current = [crossing]
+      currentInverted = nextInverted
+    }
+
+    current.push(next)
+  }
+  segments.push({ points: current, inverted: currentInverted })
+
+  return segments
+}
+
+/**
  * Distance from `origin` along the (unit) `direction` vector to the nearest point on a circle,
  * or `null` if the ray misses the circle or the circle is entirely behind the origin.
  */

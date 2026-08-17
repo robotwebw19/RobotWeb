@@ -5,13 +5,13 @@ export interface Vector2 {
 
 export type SensorType = 'ir' | 'ultrasonic' | 'color'
 
-export type IrMode = 'digital' | 'analog'
-
 export interface SensorConfig {
   /** Stable id for this sensor instance within a robot (not the Arduino pin). */
   id: string
   type: SensorType
-  /** Arduino pin this sensor is wired to, e.g. "A0", "D2". Must be unique per robot. */
+  /** Arduino pin this sensor is wired to, e.g. "A0", "D2". Must be unique per robot. For an
+   * ultrasonic sensor this is the Trig (output) pin (see `echoPin`); for a color sensor this is
+   * the OUT (frequency output) pin (see `s0Pin`-`s3Pin`). */
   pin: string
   /**
    * Offset from the robot's center, in world units, robot-local frame at heading 0:
@@ -19,8 +19,17 @@ export interface SensorConfig {
    * heading (see sim/math/vector2.ts `rotate`) to get a world-space position.
    */
   position: Vector2
-  /** IR sensors only: digital (0/1) vs analog (0-1023 reflectance) reading mode. */
-  irMode?: IrMode
+  /** Ultrasonic sensors only: the Echo (input) pin, wired alongside `pin` (Trig) — a real
+   * HC-SR04 needs both, `pulseIn(echoPin, HIGH)` after triggering `pin`. */
+  echoPin?: string
+  /** Color sensors only: a real TCS230/TCS3200's frequency-scaling select pins — wired for
+   * realism (typically set once in setup(), e.g. S0=HIGH/S1=LOW), not read by the simulator. */
+  s0Pin?: string
+  s1Pin?: string
+  /** Color sensors only: the filter-select pins — S2/S3 choose which color's photodiode `pin`
+   * (OUT) reports: LOW/LOW=red, HIGH/HIGH=green, LOW/HIGH=blue, HIGH/LOW=clear (unfiltered). */
+  s2Pin?: string
+  s3Pin?: string
   /** Ultrasonic sensors only: beam direction offset from robot heading, in degrees. */
   mountAngleDeg?: number
 }
@@ -31,8 +40,12 @@ export interface MotorConfig {
   /** Stable id for this motor instance within a robot (not the Arduino pin). */
   id: string
   side: MotorSide
-  /** Arduino pin this motor's driver is wired to, e.g. "M1". Fixed 1:1 with `side`. */
-  pin: string
+  /** Real L298N control pins for this motor, fixed 1:1 with `side`: IN1/IN2 pick direction
+   * (digitalWrite HIGH/LOW — one HIGH one LOW drives, matching values stop/brake), enablePin
+   * sets speed magnitude (analogWrite 0-255 PWM). */
+  in1Pin: string
+  in2Pin: string
+  enablePin: string
   /** Offset from the robot's center, robot-local frame — see SensorConfig.position. */
   position: Vector2
 }
@@ -107,6 +120,12 @@ export interface Level {
   colorZones: ColorZone[]
   startPosition: StartPosition
   finishZone: FinishZone
+  /** World-space Y splitting this track into two reflectance polarities — a real digital line
+   * sensor has a fixed light/dark threshold, so if the line/ground colors swap, the digitalRead
+   * bit that means "on the line" swaps too. Points with y < this stay normal (black line/white
+   * ground, matching every other level); y >= this are inverted (white line/black ground).
+   * Undefined = no inversion. See sim/engine/SensorSampling.ts sampleIrDigital. */
+  lineInversionBoundaryY?: number
   timeLimitMs: number
   parConditions: ParConditions
   /** studentId of the creator, or undefined for built-in seed levels. */
@@ -118,8 +137,17 @@ export interface Level {
 }
 
 export type RequiredEquipmentItem =
-  | { kind: 'sensor'; type: SensorType; pin: string; irMode?: IrMode }
-  | { kind: 'motor'; side: MotorSide; pin: string }
+  | {
+      kind: 'sensor'
+      type: SensorType
+      pin: string
+      echoPin?: string
+      s0Pin?: string
+      s1Pin?: string
+      s2Pin?: string
+      s3Pin?: string
+    }
+  | { kind: 'motor'; side: MotorSide; in1Pin: string; in2Pin: string; enablePin: string }
 
 export interface UserCode {
   studentId: string

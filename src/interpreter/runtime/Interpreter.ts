@@ -1,10 +1,14 @@
-import type { Assign, Program, Statement, Expression, VarType } from '../../types/interpreter'
+import type { Assign, FunctionDecl, Program, Statement, Expression, VarType } from '../../types/interpreter'
 import { ExecutionContext, type RuntimeValue } from './ExecutionContext'
 import type { ArduinoRuntimeAPI } from './ArduinoRuntimeAPI'
 import { RuntimeError } from './errors'
 import { asBoolean, asNumber, asString } from './values'
 
 export type StepResult = 'ok' | 'waiting' | 'iteration-complete'
+
+/** A helper function calling itself (directly or via others) would otherwise recurse until the
+ * JS call stack overflows, since user-function bodies run synchronously (see callUserFunction). */
+const MAX_USER_FUNCTION_DEPTH = 64
 
 function defaultValueForType(varType: VarType): RuntimeValue {
   if (varType === 'bool') return false
@@ -29,6 +33,7 @@ export class Interpreter {
   private setupCompleted = false
   private currentGenerator: Generator<void, void, void> | null = null
   private currentLine = 0
+  private userFunctionDepth = 0
 
   constructor(program: Program, api: ArduinoRuntimeAPI) {
     this.program = program
@@ -46,6 +51,12 @@ export class Interpreter {
 
   isWaitingOnDelay(): boolean {
     return this.context.waitUntilSimMs !== null
+  }
+
+  /** Reads the current motor pin states (see ArduinoRuntimeAPI.computeMotorSpeeds) — call after
+   * pumping step() so this tick's digitalWrite/analogWrite calls are reflected. */
+  getMotorSpeeds(): { left: number; right: number } {
+    return this.api.computeMotorSpeeds(this.context)
   }
 
   getDelayRemainingMs(elapsedMs: number): number {
@@ -195,9 +206,37 @@ export class Interpreter {
       }
       case 'Binary':
         return this.evalBinary(expr.operator, expr.left, expr.right)
-      case 'Call':
+      case 'Call': {
+        const userFn = this.program.functions.find(
+          (fn) => fn.name === expr.callee && fn.name !== 'setup' && fn.name !== 'loop',
+        )
+        if (userFn) return this.callUserFunction(userFn)
         return this.api.call(expr.callee, expr.args.map((arg) => this.evalExpr(arg)), this.context, expr.line)
+      }
     }
+  }
+
+  /**
+   * Student-declared `void name() {}` helpers (e.g. `void applyMotorSpeeds() {}`) — a real Arduino
+   * pattern for factoring out repeated pin sequences. The parser only accepts zero-arg
+   * declarations, so no argument binding is needed. Runs the body's statement generator to
+   * completion synchronously (not yielded out to step()'s per-statement budget) since these are
+   * small, bounded helpers — countStatement() still fires per statement, so a runaway loop inside
+   * one is still caught by the busy-loop guard.
+   */
+  private callUserFunction(fn: FunctionDecl): RuntimeValue {
+    if (this.userFunctionDepth >= MAX_USER_FUNCTION_DEPTH) {
+      throw new RuntimeError(`Too many nested calls to ${fn.name}() — check for infinite recursion`, fn.line)
+    }
+    this.userFunctionDepth++
+    try {
+      const gen = this.execBlock(fn.body)
+      let result = gen.next()
+      while (!result.done) result = gen.next()
+    } finally {
+      this.userFunctionDepth--
+    }
+    return 0
   }
 
   private evalBinary(operator: string, leftExpr: Expression, rightExpr: Expression): RuntimeValue {

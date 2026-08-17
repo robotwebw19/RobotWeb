@@ -18,6 +18,7 @@ interface CenterPanelProps {
   obstacles: Obstacle[]
   colorZones: ColorZone[]
   finishZone: FinishZone
+  lineInversionBoundaryY?: number
   sensors: SensorConfig[]
   resultOutcome: LevelOutcome | null
   onRun: () => void
@@ -30,6 +31,7 @@ export function CenterPanel({
   obstacles,
   colorZones,
   finishZone,
+  lineInversionBoundaryY,
   sensors,
   resultOutcome,
   onRun,
@@ -73,6 +75,7 @@ export function CenterPanel({
             obstacles={obstacles}
             colorZones={colorZones}
             finishZone={finishZone}
+            lineInversionBoundaryY={lineInversionBoundaryY}
             sensors={sensors}
             pose={pose}
             leftMotorSpeed={leftMotorSpeed}

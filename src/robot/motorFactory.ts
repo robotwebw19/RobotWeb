@@ -6,7 +6,10 @@ import { getMotorCatalogEntry } from './motorCatalog'
 export function addMotor(side: MotorSide, motors: MotorConfig[]): MotorConfig[] {
   if (motors.some((motor) => motor.side === side)) return motors
   const entry = getMotorCatalogEntry(side)
-  return [...motors, { id: nanoid(), side, pin: entry.pin, position: entry.position }]
+  return [
+    ...motors,
+    { id: nanoid(), side, in1Pin: entry.in1Pin, in2Pin: entry.in2Pin, enablePin: entry.enablePin, position: entry.position },
+  ]
 }
 
 export function removeMotor(side: MotorSide, motors: MotorConfig[]): MotorConfig[] {

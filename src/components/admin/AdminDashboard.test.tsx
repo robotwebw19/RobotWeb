@@ -31,7 +31,7 @@ describe('AdminLevelsTab', () => {
 
     // First seed level is selected by default and shows its solution code.
     expect(await screen.findByRole('heading', { name: /1\. เส้นตรง/ })).toBeInTheDocument()
-    expect(screen.getByText(/pinMode\(A0, INPUT\)/)).toBeInTheDocument()
+    expect(screen.getByText(/pinMode\(D2, INPUT\)/)).toBeInTheDocument()
 
     fireEvent.click(await screen.findByText('Community Level'))
     expect(await screen.findByRole('button', { name: 'ลบด่าน' })).toBeInTheDocument()

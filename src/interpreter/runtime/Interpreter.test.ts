@@ -2,19 +2,21 @@ import { describe, expect, it } from 'vitest'
 import { parseProgram } from '../parser/parser'
 import { Interpreter } from './Interpreter'
 import { ArduinoRuntimeAPI, type ArduinoRuntimeDeps } from './ArduinoRuntimeAPI'
-import type { SensorConfig } from '../../types/domain'
+import type { MotorConfig, SensorConfig } from '../../types/domain'
 import { RuntimeError } from './errors'
+
+const leftMotor: MotorConfig = { id: 'm1', side: 'left', in1Pin: 'IN1', in2Pin: 'IN2', enablePin: 'ENA', position: { x: 0, y: 0 } }
+const rightMotor: MotorConfig = { id: 'm2', side: 'right', in1Pin: 'IN3', in2Pin: 'IN4', enablePin: 'ENB', position: { x: 0, y: 0 } }
 
 function build(source: string, overrides: Partial<ArduinoRuntimeDeps> = {}) {
   const serialOutput: string[] = []
-  const motorCalls: [number, number][] = []
   let elapsedMs = 0
 
   const deps: ArduinoRuntimeDeps = {
     sensors: [],
+    motors: [],
     getSensorReadings: () => ({}),
     getElapsedMs: () => elapsedMs,
-    setMotorSpeeds: (left, right) => motorCalls.push([left, right]),
     onSerialOutput: (text) => serialOutput.push(text),
     ...overrides,
   }
@@ -26,7 +28,7 @@ function build(source: string, overrides: Partial<ArduinoRuntimeDeps> = {}) {
     interpreter.notifyElapsed(elapsedMs)
   }
 
-  return { interpreter, serialOutput, motorCalls, advanceElapsed }
+  return { interpreter, serialOutput, advanceElapsed }
 }
 
 describe('Interpreter — setup/loop lifecycle', () => {
@@ -50,66 +52,134 @@ describe('Interpreter — setup/loop lifecycle', () => {
   })
 })
 
-describe('Interpreter — motor commands', () => {
-  it('turnLeft decreases heading (counterclockwise, a real left turn) and turnRight increases it', () => {
-    // Cross-check against RobotPhysics: heading increases clockwise on screen (see
-    // RobotPhysics.test.ts "turns in place" — left=-50,right=50 increases heading). A real left
-    // turn must therefore be left-forward/right-backward: left > right.
-    const left = build(`void setup() { turnLeft(100); } void loop() {}`)
-    left.interpreter.step()
-    expect(left.motorCalls).toEqual([[60, -60]])
-
-    const right = build(`void setup() { turnRight(100); } void loop() {}`)
-    right.interpreter.step()
-    expect(right.motorCalls).toEqual([[-60, 60]])
+describe('Interpreter — motor commands (real L298N pins, read via getMotorSpeeds)', () => {
+  it('reads IN1/IN2 direction and the ENA/ENB PWM magnitude into a signed px/s speed per side', () => {
+    const { interpreter } = build(
+      `
+        void setup() {
+          pinMode(IN1, OUTPUT);
+          pinMode(IN2, OUTPUT);
+          pinMode(ENA, OUTPUT);
+          pinMode(IN3, OUTPUT);
+          pinMode(IN4, OUTPUT);
+          pinMode(ENB, OUTPUT);
+          digitalWrite(IN1, HIGH);
+          digitalWrite(IN2, LOW);
+          analogWrite(ENA, 100);
+          digitalWrite(IN3, LOW);
+          digitalWrite(IN4, HIGH);
+          analogWrite(ENB, 100);
+        }
+        void loop() {}
+      `,
+      { motors: [leftMotor, rightMotor] },
+    )
+    for (let i = 0; i < 20; i++) interpreter.step()
+    expect(interpreter.getMotorSpeeds()).toEqual({ left: 60, right: -60 })
   })
 
-  it('moveForward drives both wheels equally and stopMotors zeroes them', () => {
-    const { interpreter, motorCalls } = build(`
-      void setup() {
-        moveForward(100);
-        stopMotors();
-      }
+  it('matching (or unset) direction pins reads as stopped, regardless of PWM value', () => {
+    const { interpreter } = build(
+      `
+        void setup() {
+          pinMode(ENA, OUTPUT);
+          analogWrite(ENA, 200); // PWM alone shouldn't move the wheel without a direction set
+        }
+        void loop() {}
+      `,
+      { motors: [leftMotor] },
+    )
+    for (let i = 0; i < 10; i++) interpreter.step()
+    expect(interpreter.getMotorSpeeds().left).toBe(0)
+  })
+
+  it('supports a zero-arg helper function driving both motors — the real Arduino void-helper pattern', () => {
+    const { interpreter } = build(
+      `
+        int leftSpeed = 0;
+        int rightSpeed = 0;
+
+        void setup() {
+          pinMode(IN1, OUTPUT);
+          pinMode(IN2, OUTPUT);
+          pinMode(ENA, OUTPUT);
+          pinMode(IN3, OUTPUT);
+          pinMode(IN4, OUTPUT);
+          pinMode(ENB, OUTPUT);
+        }
+
+        void applyMotorSpeeds() {
+          if (leftSpeed > 0) {
+            digitalWrite(IN1, HIGH);
+            digitalWrite(IN2, LOW);
+            analogWrite(ENA, leftSpeed);
+          } else {
+            digitalWrite(IN1, LOW);
+            digitalWrite(IN2, LOW);
+            analogWrite(ENA, 0);
+          }
+          digitalWrite(IN3, LOW);
+          digitalWrite(IN4, LOW);
+          analogWrite(ENB, 0);
+        }
+
+        void loop() {
+          leftSpeed = 120;
+          applyMotorSpeeds();
+        }
+      `,
+      { motors: [leftMotor, rightMotor] },
+    )
+    for (let i = 0; i < 20; i++) interpreter.step()
+    expect(interpreter.getMotorSpeeds()).toEqual({ left: 72, right: 0 }) // 120 * 0.6 scale
+  })
+
+  it('a helper function calling itself throws a clear RuntimeError instead of overflowing the stack', () => {
+    const { interpreter } = build(`
+      void recurse() { recurse(); }
+      void setup() { recurse(); }
       void loop() {}
     `)
-    interpreter.step()
-    interpreter.step()
-    expect(motorCalls).toEqual([
-      [60, 60],
-      [0, 0],
-    ])
+    expect(() => interpreter.step()).toThrow(/nested calls to recurse/)
   })
 })
 
 describe('Interpreter — delay()', () => {
-  it('pauses without blocking and keeps the last motor command active until the delay elapses', () => {
-    const { interpreter, motorCalls, advanceElapsed } = build(`
-      void setup() {
-        setMotorSpeed(100, 100);
-        delay(500);
-        stopMotors();
-      }
-      void loop() {}
-    `)
+  it('pauses without blocking and keeps the last motor pin state active until the delay elapses', () => {
+    const { interpreter, advanceElapsed } = build(
+      `
+        void setup() {
+          pinMode(IN1, OUTPUT);
+          pinMode(IN2, OUTPUT);
+          pinMode(ENA, OUTPUT);
+          digitalWrite(IN1, HIGH);
+          digitalWrite(IN2, LOW);
+          analogWrite(ENA, 100);
+          delay(500);
+          digitalWrite(IN1, LOW);
+          digitalWrite(IN2, LOW);
+          analogWrite(ENA, 0);
+        }
+        void loop() {}
+      `,
+      { motors: [leftMotor] },
+    )
 
-    interpreter.step() // setMotorSpeed(100, 100)
-    expect(motorCalls).toEqual([[60, 60]])
+    for (let i = 0; i < 6; i++) interpreter.step() // pinMode x3, digitalWrite x2, analogWrite
+    expect(interpreter.getMotorSpeeds().left).toBe(60)
 
     interpreter.step() // delay(500)
     expect(interpreter.isWaitingOnDelay()).toBe(true)
     expect(interpreter.step()).toBe('waiting')
-    expect(motorCalls).toHaveLength(1)
+    expect(interpreter.getMotorSpeeds().left).toBe(60) // still driving through the delay
 
     advanceElapsed(499)
     expect(interpreter.step()).toBe('waiting')
 
     advanceElapsed(1)
     expect(interpreter.isWaitingOnDelay()).toBe(false)
-    interpreter.step() // stopMotors()
-    expect(motorCalls).toEqual([
-      [60, 60],
-      [0, 0],
-    ])
+    for (let i = 0; i < 3; i++) interpreter.step() // digitalWrite x2, analogWrite after the delay
+    expect(interpreter.getMotorSpeeds().left).toBe(0)
   })
 })
 
@@ -135,7 +205,7 @@ describe('Interpreter — busy-loop guard', () => {
       void setup() {}
       void loop() {
         for (int i = 0; i < 5; i = i + 1) {}
-        stopMotors();
+        Serial.print("");
       }
     `)
     expect(() => {
@@ -157,9 +227,24 @@ describe('Interpreter — arithmetic errors', () => {
 })
 
 describe('Interpreter — sensor reads', () => {
-  const irSensor: SensorConfig = { id: 'ir1', type: 'ir', pin: 'A0', position: { x: 0, y: 0 }, irMode: 'digital' }
-  const ultrasonicSensor: SensorConfig = { id: 'us1', type: 'ultrasonic', pin: 'D7', position: { x: 0, y: 0 } }
-  const colorSensor: SensorConfig = { id: 'cs1', type: 'color', pin: 'D8', position: { x: 0, y: 0 } }
+  const irSensor: SensorConfig = { id: 'ir1', type: 'ir', pin: 'A0', position: { x: 0, y: 0 } }
+  const ultrasonicSensor: SensorConfig = {
+    id: 'us1',
+    type: 'ultrasonic',
+    pin: 'D7',
+    echoPin: 'D6',
+    position: { x: 0, y: 0 },
+  }
+  const colorSensor: SensorConfig = {
+    id: 'cs1',
+    type: 'color',
+    pin: 'D8',
+    s0Pin: 'D9',
+    s1Pin: 'D10',
+    s2Pin: 'D11',
+    s3Pin: 'D12',
+    position: { x: 0, y: 0 },
+  }
 
   it('throws a clear error when reading an unconfigured pin', () => {
     const { interpreter } = build(`
@@ -169,38 +254,126 @@ describe('Interpreter — sensor reads', () => {
     expect(() => interpreter.step()).toThrow(/no sensor is wired to pin A0/)
   })
 
-  it('throws when using digitalRead on a pin configured for analog mode', () => {
-    const analogIr: SensorConfig = { ...irSensor, irMode: 'analog' }
+  it('throws when calling analogRead on an IR sensor — IR is digital-only', () => {
     const { interpreter } = build(
-      `void setup() { int v = digitalRead(A0); } void loop() {}`,
-      { sensors: [analogIr] },
+      `void setup() { int v = analogRead(A0); } void loop() {}`,
+      { sensors: [irSensor] },
     )
-    expect(() => interpreter.step()).toThrow(/analogRead/)
+    expect(() => interpreter.step()).toThrow(/digital-only/)
   })
 
-  it('reads ultrasonic distance and color sensor readings by pin', () => {
+  it('pulseIn(echoPin) converts the physics distance into the matching real HC-SR04 duration', () => {
     const { interpreter, serialOutput } = build(
       `
         void setup() {}
         void loop() {
-          Serial.println(readUltrasonic(D7));
-          Serial.println(readColorSensor(D8));
+          Serial.println(pulseIn(D6, HIGH));
         }
       `,
       {
-        sensors: [ultrasonicSensor, colorSensor],
-        getSensorReadings: () => ({ us1: 42, cs1: 'red' }),
+        // 34.3cm round-trip at 0.0343 cm/us -> exactly 2000us: duration = distance*2/0.0343.
+        sensors: [ultrasonicSensor],
+        getSensorReadings: () => ({ us1: 34.3 }),
       },
     )
     interpreter.step() // empty setup() completes immediately
-    for (let i = 0; i < 3; i++) interpreter.step() // one loop() iteration: 2 statements + iteration-complete
+    for (let i = 0; i < 2; i++) interpreter.step() // one loop() iteration: 1 statement + iteration-complete
 
-    expect(serialOutput).toEqual(['42\n', 'red\n'])
+    expect(serialOutput).toEqual(['2000\n'])
   })
 
-  it('throws RuntimeError (not a generic error) for a wrong-type sensor call', () => {
+  it("pulseIn on a color sensor's OUT pin selects the channel via S2/S3 — real TCS230 truth table (LOW/LOW=red, HIGH/HIGH=green, LOW/HIGH=blue)", () => {
+    const { interpreter, serialOutput } = build(
+      `
+        void setup() {
+          pinMode(D11, OUTPUT);
+          pinMode(D12, OUTPUT);
+        }
+        void loop() {
+          digitalWrite(D11, LOW);
+          digitalWrite(D12, LOW);
+          Serial.println(pulseIn(D8, LOW)); // red channel
+
+          digitalWrite(D11, HIGH);
+          digitalWrite(D12, HIGH);
+          Serial.println(pulseIn(D8, LOW)); // green channel
+
+          digitalWrite(D11, LOW);
+          digitalWrite(D12, HIGH);
+          Serial.println(pulseIn(D8, LOW)); // blue channel
+        }
+      `,
+      {
+        sensors: [colorSensor],
+        getSensorReadings: () => ({ cs1: 'red' }),
+      },
+    )
+    // True color is 'red': only the red channel should come back strong (short pulse).
+    for (let i = 0; i < 30 && serialOutput.length < 3; i++) interpreter.step()
+
+    expect(serialOutput).toEqual(['50\n', '600\n', '600\n'])
+  })
+
+  it('white reflects every channel strong; black leaves every channel weak', () => {
+    const { interpreter, serialOutput } = build(
+      `
+        void setup() {}
+        void loop() {
+          Serial.println(pulseIn(D8, LOW));
+        }
+      `,
+      { sensors: [colorSensor], getSensorReadings: () => ({ cs1: 'white' }) },
+    )
+    for (let i = 0; i < 5 && serialOutput.length < 1; i++) interpreter.step()
+    expect(serialOutput).toEqual(['50\n']) // S2/S3 default LOW/LOW (red channel) — white is strong on every channel
+
+    const black = build(
+      `
+        void setup() {}
+        void loop() {
+          Serial.println(pulseIn(D8, LOW));
+        }
+      `,
+      { sensors: [colorSensor], getSensorReadings: () => ({ cs1: 'black' }) },
+    )
+    for (let i = 0; i < 5 && black.serialOutput.length < 1; i++) black.interpreter.step()
+    expect(black.serialOutput).toEqual(['600\n'])
+  })
+
+  it('supports the full real trig/echo sequence: pinMode, digitalWrite pulse, delayMicroseconds, then pulseIn', () => {
+    const { interpreter, serialOutput, advanceElapsed } = build(
+      `
+        void setup() {
+          pinMode(D7, OUTPUT);
+        }
+        void loop() {
+          digitalWrite(D7, LOW);
+          delayMicroseconds(2);
+          digitalWrite(D7, HIGH);
+          delayMicroseconds(10);
+          digitalWrite(D7, LOW);
+          int duration = pulseIn(D6, HIGH);
+          Serial.println(duration);
+        }
+      `,
+      {
+        sensors: [ultrasonicSensor],
+        getSensorReadings: () => ({ us1: 34.3 }),
+      },
+    )
+
+    // Pump the interpreter, nudging simulated time forward whenever a delayMicroseconds() pause
+    // is blocking, until one full loop() iteration completes and prints.
+    for (let i = 0; i < 20 && serialOutput.length === 0; i++) {
+      if (interpreter.step() === 'waiting') advanceElapsed(1)
+    }
+
+    expect(serialOutput).toEqual(['2000\n'])
+  })
+
+  it('throws RuntimeError (not a generic error) for pulseIn on a pin with no ultrasonic echo wired', () => {
     const { interpreter } = build(
-      `void setup() { float d = readUltrasonic(A0); } void loop() {}`,
+      `void setup() { int d = pulseIn(A0, HIGH); } void loop() {}`,
       { sensors: [irSensor] },
     )
     let caught: unknown
@@ -243,22 +416,18 @@ describe('Interpreter — control flow and formatting', () => {
     expect(serialOutput).toEqual(['1.50\n', '1\n'])
   })
 
-  it('declares a string variable and compares it to a color sensor reading', () => {
-    const colorSensor: SensorConfig = { id: 'cs1', type: 'color', pin: 'D8', position: { x: 0, y: 0 } }
-    const { interpreter, serialOutput } = build(
-      `
-        void setup() {
-          string color = readColorSensor(D8);
-          if (color == "red") {
-            Serial.println("stop");
-          } else {
-            Serial.println("go");
-          }
+  it('declares a string variable and compares it with ==', () => {
+    const { interpreter, serialOutput } = build(`
+      void setup() {
+        string color = "red";
+        if (color == "red") {
+          Serial.println("stop");
+        } else {
+          Serial.println("go");
         }
-        void loop() {}
-      `,
-      { sensors: [colorSensor], getSensorReadings: () => ({ cs1: 'red' }) },
-    )
+      }
+      void loop() {}
+    `)
     for (let i = 0; i < 10; i++) interpreter.step()
     expect(serialOutput).toEqual(['stop\n'])
   })

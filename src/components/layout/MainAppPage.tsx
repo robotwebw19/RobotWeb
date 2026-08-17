@@ -19,6 +19,7 @@ export function MainAppPage() {
   const user = useAuthStore((state) => state.user)
   const studentId = user?.studentId ?? ''
   const sensors = user?.robotConfig.sensors ?? []
+  const motors = user?.robotConfig.motors ?? []
 
   const selectedLevelId = useLevelSelectionStore((state) => state.selectedLevelId)
   const [level, setLevel] = useState<Level>(
@@ -62,6 +63,7 @@ export function MainAppPage() {
     colorZones: level.colorZones,
     sensors,
     startPosition: level.startPosition,
+    lineInversionBoundaryY: level.lineInversionBoundaryY,
     onBeforePhysicsTick: stepInterpreterBudgeted,
   })
 
@@ -79,7 +81,7 @@ export function MainAppPage() {
     }
     resetProgress()
     reset()
-    if (loadProgram(sourceCode, sensors)) run()
+    if (loadProgram(sourceCode, sensors, motors)) run()
   }
 
   function handleCheckCode() {
@@ -101,6 +103,7 @@ export function MainAppPage() {
           obstacles={level.obstacles}
           colorZones={level.colorZones}
           finishZone={level.finishZone}
+          lineInversionBoundaryY={level.lineInversionBoundaryY}
           sensors={sensors}
           resultOutcome={lastOutcome}
           onRun={handleRun}

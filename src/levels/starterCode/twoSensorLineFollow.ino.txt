@@ -1,29 +1,74 @@
 // Basic 2-sensor line follower.
-// In the Sensor Configurator, apply a 2-sensor IR row in digital mode
-// (this assigns pins A0 and A1 by default).
+// In the Sensor Configurator, apply a 2-sensor IR row (this assigns pins D2 and D3 by default).
+// Motors wire to fixed L298N pins: left = IN1/IN2/ENA, right = IN3/IN4/ENB.
+
+int leftSpeed = 0;
+int rightSpeed = 0;
 
 void setup() {
-  pinMode(A0, INPUT);
-  pinMode(A1, INPUT);
+  pinMode(D2, INPUT);
+  pinMode(D3, INPUT);
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(ENA, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+  pinMode(ENB, OUTPUT);
+}
+
+// Turns leftSpeed/rightSpeed into real IN1/IN2/ENA + IN3/IN4/ENB pin writes.
+void applyMotorSpeeds() {
+  if (leftSpeed > 0) {
+    digitalWrite(IN1, HIGH);
+    digitalWrite(IN2, LOW);
+    analogWrite(ENA, leftSpeed);
+  } else if (leftSpeed < 0) {
+    digitalWrite(IN1, LOW);
+    digitalWrite(IN2, HIGH);
+    analogWrite(ENA, -leftSpeed);
+  } else {
+    digitalWrite(IN1, LOW);
+    digitalWrite(IN2, LOW);
+    analogWrite(ENA, 0);
+  }
+
+  if (rightSpeed > 0) {
+    digitalWrite(IN3, HIGH);
+    digitalWrite(IN4, LOW);
+    analogWrite(ENB, rightSpeed);
+  } else if (rightSpeed < 0) {
+    digitalWrite(IN3, LOW);
+    digitalWrite(IN4, HIGH);
+    analogWrite(ENB, -rightSpeed);
+  } else {
+    digitalWrite(IN3, LOW);
+    digitalWrite(IN4, LOW);
+    analogWrite(ENB, 0);
+  }
 }
 
 void loop() {
-  int left = digitalRead(A0);
-  int right = digitalRead(A1);
+  int left = digitalRead(D2);
+  int right = digitalRead(D3);
 
   if (left == 1 && right == 1) {
     // Both sensors on the line: drive straight.
-    moveForward(150);
+    leftSpeed = 150;
+    rightSpeed = 150;
   } else if (left == 1 && right == 0) {
     // Only the left sensor sees the line: veer left.
-    turnLeft(100);
+    leftSpeed = 100;
+    rightSpeed = -100;
   } else if (left == 0 && right == 1) {
     // Only the right sensor sees the line: veer right.
-    turnRight(100);
+    leftSpeed = -100;
+    rightSpeed = 100;
   } else {
     // Both sensors off the line: stop and reassess.
-    stopMotors();
+    leftSpeed = 0;
+    rightSpeed = 0;
   }
+  applyMotorSpeeds();
 
   delay(20);
 }

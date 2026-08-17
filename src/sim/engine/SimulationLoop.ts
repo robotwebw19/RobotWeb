@@ -13,6 +13,8 @@ export interface SimulationLoopDeps {
   sensors: SensorConfig[]
   robotRadiusPx: number
   wheelBasePx: number
+  /** See types/domain.ts Level.lineInversionBoundaryY. */
+  lineInversionBoundaryY?: number
 }
 
 export interface SimulationLoopHandlers {
@@ -94,6 +96,7 @@ export class SimulationLoop {
       this.deps.track,
       this.deps.obstacles,
       this.deps.colorZones,
+      this.deps.lineInversionBoundaryY,
     )
     const collided = findCollidingObstacle(nextPose, this.deps.robotRadiusPx, this.deps.obstacles) !== null
     const onTrack = this.deps.track.isOnTrack(nextPose)

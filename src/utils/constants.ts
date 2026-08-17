@@ -6,9 +6,20 @@ export const ROBOT_RADIUS_PX = 40
 export const ROBOT_WHEEL_BASE_PX = 60
 
 export const LINE_HALF_WIDTH_PX = 8
-export const IR_SENSE_RADIUS_PX = 20
 
 export const ULTRASONIC_MAX_RANGE_CM = 200
+
+/** Speed of sound, cm per microsecond (0.0343 cm/µs ≈ 343 m/s at room temperature) — the real
+ * HC-SR04 constant, used to convert a physics distance reading into the pulseIn() duration a
+ * student's own code measures, and back. */
+export const SPEED_OF_SOUND_CM_PER_US = 0.0343
+
+/** TCS230-style color read: the channel matching the surface's true color pulses fast (a short
+ * pulseIn() duration — strong signal); the other two channels pulse slow. Real hardware values
+ * vary with lighting/calibration; these are representative round numbers for a two-threshold
+ * classroom read, the same way real TCS230 tutorials tell students to calibrate their own. */
+export const COLOR_CHANNEL_STRONG_PULSE_US = 50
+export const COLOR_CHANNEL_WEAK_PULSE_US = 600
 
 export const MAX_OFF_TRACK_MS_BEFORE_FAIL = 1000
 

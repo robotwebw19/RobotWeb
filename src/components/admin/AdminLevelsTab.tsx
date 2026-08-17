@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { levelRepository } from '../../data'
+import { sensorPins } from '../../robot/sensorPins'
 import { useTranslation } from '../../i18n/useTranslation'
 import type { TranslationKey } from '../../i18n/translations'
 import type { Level, MotorSide, RequiredEquipmentItem, SensorType } from '../../types/domain'
@@ -16,9 +17,8 @@ const MOTOR_LABEL_KEYS: Record<MotorSide, TranslationKey> = {
 }
 
 function equipmentLabel(item: RequiredEquipmentItem, t: (key: TranslationKey) => string): string {
-  if (item.kind === 'motor') return `${t(MOTOR_LABEL_KEYS[item.side])} (${item.pin})`
-  const mode = item.irMode ? ` — ${t(item.irMode === 'analog' ? 'sensors.analogMode' : 'sensors.digitalMode')}` : ''
-  return `${t(SENSOR_LABEL_KEYS[item.type])} (${item.pin})${mode}`
+  if (item.kind === 'motor') return `${t(MOTOR_LABEL_KEYS[item.side])} (${item.in1Pin}/${item.in2Pin}/${item.enablePin})`
+  return `${t(SENSOR_LABEL_KEYS[item.type])} (${sensorPins(item).join(', ')})`
 }
 
 export function AdminLevelsTab() {

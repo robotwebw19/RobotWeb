@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
 import { nanoid } from 'nanoid'
-import type { SensorConfig } from '../types/domain'
+import type { MotorConfig, SensorConfig } from '../types/domain'
 import { ArduinoRuntimeAPI, Interpreter, ParseError, RuntimeError, parseProgram } from '../interpreter'
 import { useSimulationStore } from '../state/simulationStore'
 import { MAX_STATEMENTS_PER_FRAME } from '../utils/constants'
@@ -34,16 +34,16 @@ export function useInterpreterConsole() {
   }, [])
 
   const loadProgram = useCallback(
-    (sourceCode: string, sensors: SensorConfig[]): boolean => {
+    (sourceCode: string, sensors: SensorConfig[], motors: MotorConfig[]): boolean => {
       setConsoleLines([])
       setCodeError(null)
       try {
         const program = parseProgram(sourceCode)
         const api = new ArduinoRuntimeAPI({
           sensors,
+          motors,
           getSensorReadings: () => useSimulationStore.getState().simState.sensorReadings,
           getElapsedMs: () => useSimulationStore.getState().simState.elapsedMs,
-          setMotorSpeeds: (left, right) => useSimulationStore.getState().setMotorSpeeds(left, right),
           onSerialOutput: (text) => appendLine(text.replace(/\n$/, ''), 'log'),
         })
         interpreterRef.current = new Interpreter(program, api)
@@ -99,6 +99,8 @@ export function useInterpreterConsole() {
         for (let i = 0; i < MAX_STATEMENTS_PER_FRAME; i++) {
           if (interpreter.step() === 'waiting') break
         }
+        const { left, right } = interpreter.getMotorSpeeds()
+        useSimulationStore.getState().setMotorSpeeds(left, right)
       } catch (error) {
         interpreterRef.current = null
         useSimulationStore.getState().setStatus('paused')

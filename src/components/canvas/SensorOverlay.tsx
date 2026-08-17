@@ -24,7 +24,7 @@ const COLOR_BY_TYPE: Record<SensorConfig['type'], string> = {
 function isDetecting(sensor: SensorConfig, reading: SensorReading | undefined): boolean {
   if (reading === undefined) return false
   if (sensor.type === 'ir') {
-    return sensor.irMode === 'analog' ? (reading as number) >= 512 : reading === 1
+    return reading === 1
   }
   if (sensor.type === 'ultrasonic') {
     return (reading as number) <= ULTRASONIC_MAX_RANGE_CM * 0.25

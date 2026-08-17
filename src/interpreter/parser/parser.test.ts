@@ -80,10 +80,12 @@ describe('parseProgram', () => {
   })
 
   it('parses string variable declarations', () => {
+    // The parser doesn't know or care about specific function names — any call-expression
+    // initializer exercises the same VarDecl parsing path.
     const program = parseProgram(`
       void setup() {}
       void loop() {
-        string color = readColorSensor(D8);
+        string color = readSensor(D8);
       }
     `)
     expect(program.functions[1].body[0]).toMatchObject({ kind: 'VarDecl', varType: 'string', name: 'color' })

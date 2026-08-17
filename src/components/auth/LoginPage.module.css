@@ -25,6 +25,7 @@
 }
 
 .card {
+  container-type: inline-size;
   width: 100%;
   max-width: 360px;
   padding: 32px;
@@ -66,28 +67,18 @@
 }
 
 /* The app's wordmark, not a generic page heading — same copper-on-dark treatment as the navbar
-   logo (DESIGN.md: "the navbar's pad mark and wordmark" is a named legitimate copper use), sized
-   for a hero moment on the single screen every student sees first. */
+   logo (DESIGN.md: "the navbar's pad mark and wordmark" is a named legitimate copper use).
+   font-size is a container-query fraction of the card's own width (not a guessed px value) so
+   it scales up to fill the same width as the 5-digit-box row below it, on any card size, without
+   ever risking overflow — capped so it never grows unreasonably large on a wide card either. */
 .brand {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  margin-bottom: 8px;
-}
-
-.brandName {
-  font-size: 20px;
+  margin-bottom: 20px;
+  font-size: clamp(15px, 6cqi, 20px);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.02em;
   color: var(--accent);
-}
-
-.brandTagline {
-  font-size: 14px;
-  font-weight: 400;
-  color: var(--text-muted);
+  white-space: nowrap;
 }
 
 /* The plain page heading used by the admin-mode form — unlike .brand, this isn't a wordmark. */
@@ -96,24 +87,59 @@
   margin-bottom: 8px;
 }
 
-.subtitle {
-  color: var(--text-muted);
+/* Collapsed (zero height, not just invisible) until the student actually engages the code boxes
+   (focus-within), then collapses again once all 5 are filled — no reserved empty gap sitting
+   above the boxes while idle. */
+.idHint {
+  max-height: 0;
+  margin: 0;
+  overflow: hidden;
+  opacity: 0;
   font-size: 14px;
-  margin-bottom: 24px;
+  color: var(--text-muted);
+  transition:
+    max-height 150ms ease-out,
+    opacity 100ms ease-out,
+    margin 150ms ease-out;
 }
 
+.idWrap:focus-within .idHint {
+  max-height: 24px;
+  margin: 0 0 16px;
+  opacity: 1;
+}
+
+.idWrap.complete .idHint {
+  max-height: 0;
+  margin: 0;
+  opacity: 0;
+}
+
+/* The admin-mode username field only now — the student ID field is DigitCodeInput below. Height
+   + matching line-height (instead of vertical padding) centers the text vertically regardless of
+   which font-size is rendering (the admin form overrides font-size/letter-spacing inline). */
 .digits {
-  font-size: 32px;
-  letter-spacing: 12px;
+  font-size: 28px;
+  letter-spacing: 10px;
   text-align: center;
   width: 100%;
-  padding: 12px 0;
+  height: 52px;
+  line-height: 52px;
+  padding: 0;
   border: 1px solid var(--border);
   border-radius: 4px;
   background: var(--bg);
   color: var(--text-h);
   font-family: var(--mono);
   transition: border-color 150ms ease-out;
+}
+
+.digits::placeholder {
+  font-size: 14px;
+  letter-spacing: 0;
+  font-family: var(--sans);
+  color: var(--text-muted);
+  text-align: center;
 }
 
 .digits:focus {

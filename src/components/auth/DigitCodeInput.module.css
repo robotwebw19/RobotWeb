@@ -1,0 +1,37 @@
+.row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* flex:1 + max-width (not a fixed px width) so the 5 boxes shrink together on a narrow phone
+   instead of overflowing the 360px card; font-size scales down with them via clamp(). */
+.cell {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 52px;
+  aspect-ratio: 1 / 1.08;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text-h);
+  font-family: var(--mono);
+  font-size: clamp(18px, 7vw, 26px);
+  font-weight: 600;
+  text-align: center;
+  padding: 0;
+  box-shadow: var(--depth-rest);
+  transition:
+    border-color 150ms ease-out,
+    box-shadow 150ms ease-out;
+}
+
+.cell.filled {
+  border-color: var(--accent-hover);
+}
+
+.cell:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-color: var(--accent);
+}
