@@ -42,6 +42,21 @@ describe('SupabaseUserRepository', () => {
     await repo.save(user)
     expect(await repo.getById('12345')).toEqual(user)
   })
+
+  it('batch-fetches multiple users by id, skipping unknown ids', async () => {
+    const repo = new SupabaseUserRepository()
+    await repo.save(fixtureUser('11111', 'Ada'))
+    await repo.save(fixtureUser('22222', 'Grace'))
+    await repo.save(fixtureUser('33333', 'Not Requested'))
+
+    const users = await repo.getByIds(['11111', '22222', '99999'])
+    expect(users.map((u) => u.studentId).sort()).toEqual(['11111', '22222'])
+  })
+
+  it('returns an empty array for an empty id list without querying', async () => {
+    const repo = new SupabaseUserRepository()
+    expect(await repo.getByIds([])).toEqual([])
+  })
 })
 
 describe('SupabaseRobotRepository', () => {

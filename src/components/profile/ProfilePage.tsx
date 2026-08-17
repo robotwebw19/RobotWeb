@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useAuthStore } from '../../state/authStore'
 import { levelRepository } from '../../data'
+import { useLiveLevelResults } from '../../hooks/useLiveLevelResults'
 import { getStudentStats, type StudentStats } from '../leaderboard/leaderboardAggregation'
 import { Navbar } from '../layout/Navbar'
 import { useTranslation } from '../../i18n/useTranslation'
@@ -15,17 +16,12 @@ export function ProfilePage() {
   const { t, tLevelName } = useTranslation()
   const [stats, setStats] = useState<StudentStats>(EMPTY_STATS)
 
-  useEffect(() => {
-    if (!user) return
-    let cancelled = false
-    levelRepository.getAll().then(async (levels) => {
-      const loaded = await getStudentStats(user.studentId, levels)
-      if (!cancelled) setStats(loaded)
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [user])
+  useLiveLevelResults(
+    () => levelRepository.getAll().then((levels) => getStudentStats(user!.studentId, levels)),
+    setStats,
+    Boolean(user),
+    [user],
+  )
 
   if (!user) return null
 

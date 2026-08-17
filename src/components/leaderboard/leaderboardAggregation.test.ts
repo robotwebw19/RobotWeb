@@ -44,9 +44,20 @@ describe('getLevelLeaderboard', () => {
 
     const rows = await getLevelLeaderboard('l1')
     expect(rows).toEqual([
-      { studentId: '11111', displayName: 'Ada', bestTimeMs: 6000, stars: 3, completedAt: 't2' },
-      { studentId: '22222', displayName: 'Grace', bestTimeMs: 7000, stars: 2, completedAt: 't3' },
+      { studentId: '11111', displayName: 'Ada', classroom: '1', studentNumber: '1', bestTimeMs: 6000, stars: 3, completedAt: 't2' },
+      { studentId: '22222', displayName: 'Grace', classroom: '1', studentNumber: '1', bestTimeMs: 7000, stars: 2, completedAt: 't3' },
     ])
+  })
+
+  it('ranks by stars first, breaking ties by fastest time', async () => {
+    await userRepository.save(fixtureUser('11111', 'Ada'))
+    await userRepository.save(fixtureUser('22222', 'Grace'))
+    // Ada is faster but earns fewer stars — Grace's higher star count should still rank first.
+    await levelResultRepository.save({ studentId: '11111', levelId: 'l1', completionTimeMs: 4000, stars: 1, passed: true, submittedAt: 't1' })
+    await levelResultRepository.save({ studentId: '22222', levelId: 'l1', completionTimeMs: 9000, stars: 3, passed: true, submittedAt: 't2' })
+
+    const rows = await getLevelLeaderboard('l1')
+    expect(rows.map((r) => r.displayName)).toEqual(['Grace', 'Ada'])
   })
 
   it('falls back to a placeholder name if the user record is missing', async () => {
@@ -64,7 +75,9 @@ describe('getGlobalLeaderboard', () => {
     await levelResultRepository.save({ studentId: '11111', levelId: 'l2', completionTimeMs: 5000, stars: 2, passed: true, submittedAt: 't2' })
 
     const rows = await getGlobalLeaderboard(levels)
-    expect(rows).toEqual([{ studentId: '11111', displayName: 'Ada', totalStars: 5, levelsPassed: 2 }])
+    expect(rows).toEqual([
+      { studentId: '11111', displayName: 'Ada', classroom: '1', studentNumber: '1', totalStars: 5, levelsPassed: 2 },
+    ])
   })
 
   it('orders by total stars then levels passed', async () => {

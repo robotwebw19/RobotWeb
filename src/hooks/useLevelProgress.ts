@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Level } from '../types/domain'
 import { evaluateLevelState, type LevelOutcome } from '../sim/engine/LevelRuntime'
 import { useSimulationStore } from '../state/simulationStore'
+import { useLevelResultsStore } from '../state/levelResultsStore'
 import { levelResultRepository } from '../data'
 
 /**
@@ -17,6 +18,7 @@ import { levelResultRepository } from '../data'
 export function useLevelProgress(level: Level, studentId: string) {
   const simState = useSimulationStore((state) => state.simState)
   const setStatus = useSimulationStore((state) => state.setStatus)
+  const bumpResultsVersion = useLevelResultsStore((state) => state.bumpResultsVersion)
   const completedRef = useRef(false)
   const [lastOutcome, setLastOutcome] = useState<LevelOutcome | null>(null)
 
@@ -52,6 +54,7 @@ export function useLevelProgress(level: Level, studentId: string) {
           passed: true,
           submittedAt,
         })
+        .then(bumpResultsVersion)
         .catch((error) => console.error('Failed to save level result', error))
     } else {
       setStatus('failed')
@@ -66,7 +69,7 @@ export function useLevelProgress(level: Level, studentId: string) {
         })
         .catch((error) => console.error('Failed to save level result', error))
     }
-  }, [simState, level, studentId, setStatus])
+  }, [simState, level, studentId, setStatus, bumpResultsVersion])
 
   return { lastOutcome, resetProgress }
 }

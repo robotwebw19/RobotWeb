@@ -33,10 +33,16 @@ interface Filter {
   value: unknown
 }
 
+interface InFilter {
+  column: string
+  values: unknown[]
+}
+
 type Op = 'select' | 'upsert' | 'insert' | 'update' | 'delete'
 
 class FakeQuery implements PromiseLike<{ data: unknown; error: null }> {
   private filters: Filter[] = []
+  private inFilters: InFilter[] = []
   private orderBy: { column: string; ascending: boolean } | null = null
   private limitCount: number | null = null
   private wantSingle = false
@@ -60,6 +66,11 @@ class FakeQuery implements PromiseLike<{ data: unknown; error: null }> {
     return this
   }
 
+  in(column: string, values: unknown[]): this {
+    this.inFilters.push({ column, values })
+    return this
+  }
+
   order(column: string, opts?: { ascending?: boolean }): this {
     this.orderBy = { column, ascending: opts?.ascending ?? true }
     return this
@@ -76,7 +87,10 @@ class FakeQuery implements PromiseLike<{ data: unknown; error: null }> {
   }
 
   private matches(row: Row): boolean {
-    return this.filters.every((f) => row[f.column] === f.value)
+    return (
+      this.filters.every((f) => row[f.column] === f.value) &&
+      this.inFilters.every((f) => f.values.includes(row[f.column]))
+    )
   }
 
   private execute(): { data: unknown; error: null } {
@@ -136,6 +150,18 @@ class FakeQuery implements PromiseLike<{ data: unknown; error: null }> {
   }
 }
 
+/** No-op stand-in for a supabase-js realtime channel: tests run against an in-memory table with
+ * no live socket, so subscribeToChanges() call sites just get a channel that never fires. */
+class FakeChannel {
+  on(): this {
+    return this
+  }
+
+  subscribe(): this {
+    return this
+  }
+}
+
 export const fakeSupabase = {
   from(table: string) {
     return {
@@ -146,4 +172,8 @@ export const fakeSupabase = {
       delete: () => new FakeQuery(table, 'delete'),
     }
   },
+  channel(): FakeChannel {
+    return new FakeChannel()
+  },
+  removeChannel(): void {},
 }

@@ -1,3 +1,6 @@
+// Only the code editor screen needs the bundled Monaco engine (~4MB unminified); configuring it
+// here instead of at app startup keeps it out of every other route's initial bundle.
+import '../../monacoSetup'
 import Editor, { type OnMount } from '@monaco-editor/react'
 import { useEffect, useRef } from 'react'
 import type { editor as MonacoEditorNamespace } from 'monaco-editor'

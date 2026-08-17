@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { userRepository, levelRepository } from '../../data'
+import { useLiveLevelResults } from '../../hooks/useLiveLevelResults'
 import { getStudentStats, type StudentStats } from '../leaderboard/leaderboardAggregation'
 import { useTranslation } from '../../i18n/useTranslation'
 import type { Level, User } from '../../types/domain'
@@ -18,17 +19,15 @@ export function AdminStudentsTab() {
     levelRepository.getAll().then(setLevels)
   }, [])
 
-  useEffect(() => {
-    if (students.length === 0 || levels.length === 0) return
-    let cancelled = false
-    Promise.all(students.map((student) => getStudentStats(student.studentId, levels))).then((allStats) => {
-      if (cancelled) return
-      setStatsByStudentId(Object.fromEntries(students.map((student, index) => [student.studentId, allStats[index]])))
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [students, levels])
+  useLiveLevelResults(
+    () =>
+      Promise.all(students.map((student) => getStudentStats(student.studentId, levels))).then((allStats) =>
+        Object.fromEntries(students.map((student, index) => [student.studentId, allStats[index]])),
+      ),
+    setStatsByStudentId,
+    students.length > 0 && levels.length > 0,
+    [students, levels],
+  )
 
   async function handleDelete(studentId: string) {
     if (!window.confirm(t('admin.confirmDeleteStudent'))) return

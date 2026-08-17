@@ -43,6 +43,13 @@ export class SupabaseUserRepository implements IUserRepository {
     return (data ?? []).map(toDomain)
   }
 
+  async getByIds(studentIds: string[]): Promise<User[]> {
+    if (studentIds.length === 0) return []
+    const { data, error } = await supabase.from('users').select('*').in('student_id', studentIds)
+    if (error) throw error
+    return (data ?? []).map(toDomain)
+  }
+
   async save(user: User): Promise<void> {
     const { error } = await supabase.from('users').upsert({
       student_id: user.studentId,

@@ -43,7 +43,7 @@ export function LevelResultModal({ outcome, onRetry }: LevelResultModalProps) {
           <p className={styles.reason}>{t(FAIL_REASON_KEYS[outcome.reason])}</p>
         )}
         <button type="button" className={styles.retryButton} onClick={onRetry}>
-          {t('result.tryAgain')}
+          {passed ? t('result.done') : t('result.tryAgain')}
         </button>
       </div>
     </div>

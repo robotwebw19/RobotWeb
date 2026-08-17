@@ -1,3 +1,9 @@
+/* Header + 5 data rows tall — the rest scrolls inside this wrapper. */
+.scrollWrap {
+  max-height: 210px;
+  overflow-y: auto;
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -15,11 +21,18 @@
   color: var(--text-muted);
   font-weight: 500;
   font-size: 12px;
+  position: sticky;
+  top: 0;
+  background: var(--panel-bg);
 }
 
 .rank {
   width: 32px;
   color: var(--text-muted);
+}
+
+.medal {
+  font-size: 16px;
 }
 
 .empty {

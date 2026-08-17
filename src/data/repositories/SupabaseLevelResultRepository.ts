@@ -58,7 +58,7 @@ export class SupabaseLevelResultRepository implements ILevelResultRepository {
     const { error } = await supabase.from('level_results').insert({
       student_id: result.studentId,
       level_id: result.levelId,
-      completion_time_ms: result.completionTimeMs,
+      completion_time_ms: Math.round(result.completionTimeMs),
       stars: result.stars,
       passed: result.passed,
       submitted_at: result.submittedAt,
@@ -67,11 +67,20 @@ export class SupabaseLevelResultRepository implements ILevelResultRepository {
   }
 
   subscribeToChanges(onChange: () => void): () => void {
+    // Debounced: a burst of near-simultaneous writes (e.g. a class finishing a level at once)
+    // should trigger one refetch per subscriber, not one per row inserted.
+    let debounceTimer: ReturnType<typeof setTimeout> | undefined
+    const debouncedOnChange = () => {
+      clearTimeout(debounceTimer)
+      debounceTimer = setTimeout(onChange, 300)
+    }
+
     const channel = supabase
       .channel('level_results_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'level_results' }, onChange)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'level_results' }, debouncedOnChange)
       .subscribe()
     return () => {
+      clearTimeout(debounceTimer)
       supabase.removeChannel(channel)
     }
   }

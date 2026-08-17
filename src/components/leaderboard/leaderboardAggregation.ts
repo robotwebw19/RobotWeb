@@ -1,9 +1,42 @@
-import type { Level, LevelResult } from '../../types/domain'
+import type { Level, LevelResult, User } from '../../types/domain'
 import { levelResultRepository, userRepository } from '../../data'
+
+/** Batch-fetches students by id and returns them keyed by studentId — the shared user lookup
+ * behind both leaderboards, so each only pays for one round trip instead of N. */
+async function resolveStudents(studentIds: string[]): Promise<Map<string, User>> {
+  const students = await userRepository.getByIds(studentIds)
+  return new Map(students.map((student) => [student.studentId, student]))
+}
+
+/** The identity columns every leaderboard row shows, with a display fallback for a student
+ * record that's gone missing (e.g. deleted after earning the result). */
+function studentIdentity(student: User | undefined): Pick<User, 'displayName' | 'classroom' | 'studentNumber'> {
+  return {
+    displayName: student?.displayName ?? 'Unknown player',
+    classroom: student?.classroom ?? '',
+    studentNumber: student?.studentNumber ?? '',
+  }
+}
+
+/** Each level's fastest passed attempt, keyed by levelId — the per-student "best" reduction
+ * shared by the level board and the student stats view. */
+export function bestPassedPerLevel(results: LevelResult[]): Map<string, LevelResult> {
+  const best = new Map<string, LevelResult>()
+  for (const result of results) {
+    if (!result.passed) continue
+    const existing = best.get(result.levelId)
+    if (!existing || result.completionTimeMs < existing.completionTimeMs) {
+      best.set(result.levelId, result)
+    }
+  }
+  return best
+}
 
 export interface LevelLeaderboardRow {
   studentId: string
   displayName: string
+  classroom: string
+  studentNumber: string
   bestTimeMs: number
   stars: number
   completedAt: string
@@ -21,22 +54,25 @@ export async function getLevelLeaderboard(levelId: string): Promise<LevelLeaderb
     }
   }
 
-  const rows = await Promise.all(
-    Array.from(bestByStudent.values()).map(async (result) => ({
-      studentId: result.studentId,
-      displayName: (await userRepository.getById(result.studentId))?.displayName ?? 'Unknown player',
-      bestTimeMs: result.completionTimeMs,
-      stars: result.stars,
-      completedAt: result.submittedAt,
-    })),
-  )
+  const bestResults = Array.from(bestByStudent.values())
+  const studentById = await resolveStudents(bestResults.map((result) => result.studentId))
 
-  return rows.sort((a, b) => a.bestTimeMs - b.bestTimeMs)
+  const rows = bestResults.map((result) => ({
+    studentId: result.studentId,
+    ...studentIdentity(studentById.get(result.studentId)),
+    bestTimeMs: result.completionTimeMs,
+    stars: result.stars,
+    completedAt: result.submittedAt,
+  }))
+
+  return rows.sort((a, b) => b.stars - a.stars || a.bestTimeMs - b.bestTimeMs)
 }
 
 export interface GlobalLeaderboardRow {
   studentId: string
   displayName: string
+  classroom: string
+  studentNumber: string
   totalStars: number
   levelsPassed: number
 }
@@ -58,18 +94,19 @@ export async function getGlobalLeaderboard(levels: Level[]): Promise<GlobalLeade
     }
   }
 
-  const rows = await Promise.all(
-    Array.from(bestByStudentThenLevel.entries()).map(async ([studentId, levelResults]) => {
-      let totalStars = 0
-      for (const result of levelResults.values()) totalStars += result.stars
-      return {
-        studentId,
-        displayName: (await userRepository.getById(studentId))?.displayName ?? 'Unknown player',
-        totalStars,
-        levelsPassed: levelResults.size,
-      }
-    }),
-  )
+  const entries = Array.from(bestByStudentThenLevel.entries())
+  const studentById = await resolveStudents(entries.map(([studentId]) => studentId))
+
+  const rows = entries.map(([studentId, levelResults]) => {
+    let totalStars = 0
+    for (const result of levelResults.values()) totalStars += result.stars
+    return {
+      studentId,
+      ...studentIdentity(studentById.get(studentId)),
+      totalStars,
+      levelsPassed: levelResults.size,
+    }
+  })
 
   return rows.sort((a, b) => b.totalStars - a.totalStars || b.levelsPassed - a.levelsPassed)
 }
@@ -86,19 +123,18 @@ export interface StudentStats {
 }
 
 export async function getStudentStats(studentId: string, levels: Level[]): Promise<StudentStats> {
+  const bestByLevel = bestPassedPerLevel(await levelResultRepository.getForUser(studentId))
+
   let totalStars = 0
   let levelsPassed = 0
-
-  const perLevel = await Promise.all(
-    levels.map(async (level) => {
-      const best = await levelResultRepository.getBestForUserLevel(studentId, level.id)
-      if (best) {
-        totalStars += best.stars
-        levelsPassed += 1
-      }
-      return { level, best }
-    }),
-  )
+  const perLevel = levels.map((level) => {
+    const best = bestByLevel.get(level.id)
+    if (best) {
+      totalStars += best.stars
+      levelsPassed += 1
+    }
+    return { level, best }
+  })
 
   return { totalStars, levelsPassed, perLevel }
 }
