@@ -6,6 +6,19 @@ import { SupabaseUserCodeRepository } from './SupabaseUserCodeRepository'
 import { SupabaseLevelResultRepository } from './SupabaseLevelResultRepository'
 import type { Level, LevelResult, RobotConfig, User } from '../../types/domain'
 
+const fixtureUser = (studentId: string, displayName: string): User => ({
+  studentId,
+  displayName,
+  prefix: 'นาย',
+  firstName: displayName,
+  lastName: 'Test',
+  grade: 'ม.1',
+  classroom: '1',
+  studentNumber: '1',
+  robotConfig: { sensors: [], motors: [] },
+  createdAt: 't',
+})
+
 describe('SupabaseUserRepository', () => {
   it('returns undefined for an unknown studentId', async () => {
     expect(await new SupabaseUserRepository().getById('12345')).toBeUndefined()
@@ -13,8 +26,8 @@ describe('SupabaseUserRepository', () => {
 
   it('lists all saved users and omits deleted ones', async () => {
     const repo = new SupabaseUserRepository()
-    await repo.save({ studentId: '11111', displayName: 'Ada', robotConfig: { name: 'Bot', sensors: [], motors: [] }, createdAt: 't' })
-    await repo.save({ studentId: '22222', displayName: 'Grace', robotConfig: { name: 'Bot', sensors: [], motors: [] }, createdAt: 't' })
+    await repo.save(fixtureUser('11111', 'Ada'))
+    await repo.save(fixtureUser('22222', 'Grace'))
 
     expect((await repo.getAll()).map((u) => u.studentId).sort()).toEqual(['11111', '22222'])
 
@@ -25,12 +38,7 @@ describe('SupabaseUserRepository', () => {
 
   it('round-trips a saved user', async () => {
     const repo = new SupabaseUserRepository()
-    const user: User = {
-      studentId: '12345',
-      displayName: 'Ada',
-      robotConfig: { name: 'Bot', sensors: [], motors: [] },
-      createdAt: '2026-08-16T00:00:00.000Z',
-    }
+    const user: User = { ...fixtureUser('12345', 'Ada'), createdAt: '2026-08-16T00:00:00.000Z' }
     await repo.save(user)
     expect(await repo.getById('12345')).toEqual(user)
   })
@@ -39,11 +47,10 @@ describe('SupabaseUserRepository', () => {
 describe('SupabaseRobotRepository', () => {
   it('round-trips a saved robot config (backed by users.robot_config)', async () => {
     const userRepo = new SupabaseUserRepository()
-    await userRepo.save({ studentId: '12345', displayName: 'Ada', robotConfig: { name: 'Bot', sensors: [], motors: [] }, createdAt: 't' })
+    await userRepo.save(fixtureUser('12345', 'Ada'))
 
     const repo = new SupabaseRobotRepository()
     const config: RobotConfig = {
-      name: 'Bot',
       sensors: [{ id: 's1', type: 'ir', pin: 'A0', position: { x: 0, y: 10 } }],
       motors: [],
     }

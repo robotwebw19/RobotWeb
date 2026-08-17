@@ -14,18 +14,19 @@
   </head>
   <body>
     <!--
-      THESIS: Every number here is a real LED digit, not a themed label — this app IS a timing
-      instrument, so it should look like one, not a dashboard that happens to show numbers.
-      OWN-WORLD: matte near-black instrument bezel, silkscreen off-white labels, amber as the one
-      live accent, red/green reserved for running/pass outcomes; 7-segment cells (CSS-built, no
-      webfont) for elapsed time, best times, and star counts; ghost (unlit) cells always faintly
-      visible; numeric changes are instant segment swaps, never a smooth count-up.
-      STORY: a student reads the run timer and result at a glance, mid-lesson, the way they'd read
-      a stopwatch or a competition scoreboard, not a generic app screen.
-      FIRST VIEWPORT: the run screen — simulation canvas, code editor, and an instrument-panel HUD
-      whose elapsed/off-track readouts are real segment digits on a recessed dark glass strip.
-      FORM: "The Scoreboard" (fused challenger: signals-instruments-seven-segment-alarm-clock),
-      chosen over assigned grounded candidate 7 ("The Silkscreen") — seed key 444573ff.
+      THESIS: This app IS the circuit board the student is coding for — every panel reads as a
+      populated PCB island, not app chrome wrapped around a robotics product.
+      OWN-WORLD: Arduino-teal soldermask ground, copper/gold plating as the one interactive signal,
+      white silkscreen ink for text, plated mounting-hole corners on every card, a faint drilled
+      via-grid under a slow teal sweep; real through-hole LED colors (amber/red/green) for status,
+      unchanged from before — those are literal component colors, not part of the bezel that changed.
+      STORY: a student opens a workbench that visibly looks like the board they're programming, and
+      reads status the way they'd read populated LEDs and a soldered digit module, not a dashboard.
+      FIRST VIEWPORT: the run screen — a three-island board (level/config, simulation canvas as the
+      test bench, code+console) bordered in copper hairlines, its HUD a genuine 7-segment module.
+      FORM: "The Silkscreen" — grounded candidate 7, passed over for The Scoreboard at seed key
+      444573ff, reinstated at explicit user request (2026-08-17), built at Arduino.cc/KiCad
+      official-tool craft level rather than the rut's laziest reading.
       FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review,
       the verdict, and DESIGN.md.
     -->

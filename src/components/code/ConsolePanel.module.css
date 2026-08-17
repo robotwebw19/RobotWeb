@@ -11,7 +11,7 @@
 }
 
 .empty {
-  color: #888;
+  color: var(--text-muted);
   font-style: italic;
 }
 
@@ -21,5 +21,5 @@
 
 .errorLine {
   white-space: pre-wrap;
-  color: #f87171;
+  color: var(--danger);
 }

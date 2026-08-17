@@ -59,9 +59,7 @@ export function AdminStudentsTab() {
             <tr key={student.studentId}>
               <td>{student.studentId}</td>
               <td>{student.displayName}</td>
-              <td>
-                {student.robotConfig.name} ({student.robotConfig.sensors.length})
-              </td>
+              <td>{student.robotConfig.sensors.length}</td>
               <td>{stats.levelsPassed}</td>
               <td>{stats.totalStars}</td>
               <td>

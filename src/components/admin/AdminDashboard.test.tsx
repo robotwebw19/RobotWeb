@@ -46,7 +46,13 @@ describe('AdminStudentsTab', () => {
   const student: User = {
     studentId: '22222',
     displayName: 'Ada',
-    robotConfig: { name: 'Bot', sensors: [], motors: [] },
+    prefix: 'นางสาว',
+    firstName: 'Ada',
+    lastName: 'Test',
+    grade: 'ม.1',
+    classroom: '1',
+    studentNumber: '1',
+    robotConfig: { sensors: [], motors: [] },
     createdAt: 't',
   }
 

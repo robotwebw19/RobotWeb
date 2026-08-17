@@ -1,5 +1,6 @@
 import type { MotorConfig, SensorConfig, SensorType } from '../../types/domain'
 import { useTranslation } from '../../i18n/useTranslation'
+import { ROBOT_RADIUS_PX, ROBOT_WHEEL_BASE_PX } from '../../utils/constants'
 import styles from './SensorPlacementPreview.module.css'
 
 interface SensorPlacementPreviewProps {
@@ -12,11 +13,50 @@ const COLOR_BY_TYPE: Record<SensorType, string> = {
   ultrasonic: '#15aabf',
   color: '#f08c00',
 }
-const MOTOR_COLOR = '#495057'
 
 const SIZE = 200
 const CENTER = SIZE / 2
 const SCALE = 2
+
+// Mirrors RobotSprite's body/arrow/tread look AND its coordinate convention (canvas/RobotSprite.tsx,
+// sim/engine/RobotPhysics.ts: heading 0 points along +x, +y is screen-down/the robot's right) so the
+// configurator preview lines up with the same robot the student drives on a level. RobotSprite draws
+// wheels at a fixed body-relative slot (x=0, y=±ROBOT_WHEEL_BASE_PX/2) regardless of motor.position —
+// that field is a physics mount point, not the sprite's wheel position — so this preview does too.
+const BODY_SIZE = 64
+const PREVIEW_SCALE = BODY_SIZE / (ROBOT_RADIUS_PX * 1.3)
+const ARROW_LENGTH = BODY_SIZE * 0.7
+const WHEEL_SPAN = ROBOT_WHEEL_BASE_PX * PREVIEW_SCALE
+const WHEEL_LENGTH = BODY_SIZE * 0.55
+const WHEEL_THICKNESS = BODY_SIZE * 0.24
+const TREAD_COUNT = 4
+
+function Wheel({ cx, cy }: { cx: number; cy: number }) {
+  const spacing = WHEEL_LENGTH / TREAD_COUNT
+  const treadWidth = Math.max(WHEEL_THICKNESS * 0.32, 1.5)
+  return (
+    <g>
+      <rect
+        x={cx - WHEEL_LENGTH / 2}
+        y={cy - WHEEL_THICKNESS / 2}
+        width={WHEEL_LENGTH}
+        height={WHEEL_THICKNESS}
+        rx={WHEEL_THICKNESS / 3}
+        fill="#212529"
+      />
+      {Array.from({ length: TREAD_COUNT }, (_, i) => cx - WHEEL_LENGTH / 2 + spacing / 2 + i * spacing).map((tx, i) => (
+        <rect
+          key={i}
+          x={tx - treadWidth / 2}
+          y={cy - WHEEL_THICKNESS / 2}
+          width={treadWidth}
+          height={WHEEL_THICKNESS}
+          fill="#495057"
+        />
+      ))}
+    </g>
+  )
+}
 
 export function SensorPlacementPreview({ sensors, motors }: SensorPlacementPreviewProps) {
   const { t } = useTranslation()
@@ -29,27 +69,35 @@ export function SensorPlacementPreview({ sensors, motors }: SensorPlacementPrevi
       role="img"
       aria-label={t('sensors.placementPreview')}
     >
-      <rect x={CENTER - 30} y={CENTER - 40} width={60} height={80} rx={8} fill="#4c6ef5" />
+      {motors.map((motor) => (
+        <Wheel key={motor.id} cx={CENTER} cy={CENTER + (motor.side === 'left' ? -1 : 1) * (WHEEL_SPAN / 2)} />
+      ))}
+      <rect
+        x={CENTER - BODY_SIZE / 2}
+        y={CENTER - BODY_SIZE / 2}
+        width={BODY_SIZE}
+        height={BODY_SIZE}
+        rx={6}
+        fill="#4c6ef5"
+      />
+      <line
+        x1={CENTER}
+        y1={CENTER}
+        x2={CENTER + ARROW_LENGTH - 8}
+        y2={CENTER}
+        stroke="#ffd43b"
+        strokeWidth={3}
+        strokeLinecap="round"
+      />
       <polygon
-        points={`${CENTER},${CENTER - 50} ${CENTER - 8},${CENTER - 38} ${CENTER + 8},${CENTER - 38}`}
+        points={`${CENTER + ARROW_LENGTH},${CENTER} ${CENTER + ARROW_LENGTH - 8},${CENTER - 4} ${CENTER + ARROW_LENGTH - 8},${CENTER + 4}`}
         fill="#ffd43b"
       />
-      {motors.map((motor) => (
-        <rect
-          key={motor.id}
-          x={CENTER + motor.position.y * SCALE - 6}
-          y={CENTER - motor.position.x * SCALE - 4}
-          width={12}
-          height={8}
-          rx={2}
-          fill={MOTOR_COLOR}
-        />
-      ))}
       {sensors.map((sensor) => (
         <circle
           key={sensor.id}
-          cx={CENTER + sensor.position.y * SCALE}
-          cy={CENTER - sensor.position.x * SCALE}
+          cx={CENTER + sensor.position.x * SCALE}
+          cy={CENTER + sensor.position.y * SCALE}
           r={5}
           fill={COLOR_BY_TYPE[sensor.type]}
         />

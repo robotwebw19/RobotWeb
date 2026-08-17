@@ -1,10 +1,19 @@
 import { create } from 'zustand'
-import type { RobotConfig, User } from '../types/domain'
+import type { RobotConfig, StudentPrefix, User } from '../types/domain'
 import { userRepository, robotRepository } from '../data'
 import { readItem, writeItem, removeItem } from '../data/storage/localStorageClient'
 import { keys } from '../data/storage/keys'
 
 const ADMIN_USERNAME = 'superurrwnm'
+
+export interface OnboardingProfile {
+  prefix: StudentPrefix
+  firstName: string
+  lastName: string
+  grade: string
+  classroom: string
+  studentNumber: string
+}
 
 interface AuthState {
   user: User | null
@@ -15,7 +24,7 @@ interface AuthState {
   pendingStudentId: string | null
   login: (studentId: string) => Promise<'known' | 'new'>
   loginAsAdmin: (username: string) => boolean
-  completeOnboarding: (displayName: string, robotConfig: RobotConfig) => Promise<void>
+  completeOnboarding: (profile: OnboardingProfile, robotConfig: RobotConfig) => Promise<void>
   updateRobotConfig: (robotConfig: RobotConfig) => Promise<void>
   logout: () => void
 }
@@ -65,14 +74,20 @@ export const useAuthStore = create<AuthState>((set, get) => {
       return true
     },
 
-    completeOnboarding: async (displayName, robotConfig) => {
+    completeOnboarding: async (profile, robotConfig) => {
       const studentId = get().pendingStudentId
       if (!studentId) {
         throw new Error('completeOnboarding called with no pending studentId')
       }
       const user: User = {
         studentId,
-        displayName,
+        displayName: `${profile.firstName} ${profile.lastName}`.trim(),
+        prefix: profile.prefix,
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        grade: profile.grade,
+        classroom: profile.classroom,
+        studentNumber: profile.studentNumber,
         robotConfig,
         createdAt: new Date().toISOString(),
       }

@@ -1,32 +1,33 @@
 :root {
-  /* The Scoreboard: a matte instrument bezel, always dark — real LED/segment hardware doesn't
-     have a "light mode," its housing is dark plastic under any ambient light. Silkscreen ink
-     (--text*) reads on it; amber is the one live/interactive signal; red/green are reserved for
-     running/pass outcomes, same as a real scoreboard's lamp colors. */
-  --bg: #0d0c0a;
-  /* Bezel gray for the animated background sweep — warm-neutral, same family as --border,
-     stays dark enough that panels (--panel-bg, solid) always read as the foreground layer. */
-  --bg-alt: #2b2822;
-  --panel-bg: #17150f;
-  --panel-recessed: #0a0908;
-  --border: #322e26;
-  --text: #d8d4c9;
-  --text-h: #f5f2e8;
-  --text-muted: #8a8577;
-  --accent: #ffb020;
-  --accent-bg: rgba(255, 176, 32, 0.12);
-  --accent-hover: #ffc966;
-  /* Amber is a bright, high-luminance accent — white text on it fails contrast. Every accent-fill
-     surface (primary buttons) uses this near-black ink instead, same register as the panel bezel. */
+  /* The Silkscreen: the app chrome IS a populated PCB — Arduino-teal soldermask ground, copper/gold
+     plating as the one interactive signal, white silkscreen ink for text, real through-hole LED
+     colors (amber/red/green) for status — unchanged from before, those are literal component colors,
+     not part of the bezel material that just changed. Always dark: a soldermask board doesn't get a
+     light-mode variant either. */
+  --bg: #062327;
+  /* Deep-teal gradient endpoint for the animated background sweep — same family as --panel-bg, stays
+     dark enough that panels (solid fill) always read as the foreground layer. */
+  --bg-alt: #0a3236;
+  --panel-bg: #0b3236;
+  --panel-recessed: #041619;
+  --border: #1d484c;
+  --text: #e9f2ef;
+  --text-h: #ffffff;
+  --text-muted: #8fb0ac;
+  --accent: #c9922f;
+  --accent-bg: rgba(201, 146, 47, 0.16);
+  --accent-hover: #e0ac4c;
+  /* Copper plating is a bright, high-luminance accent — white text on it fails contrast. Every
+     accent-fill surface (primary buttons) uses this near-black ink instead. */
   --on-accent: #1a1204;
   --live: #ff3b30;
   --danger: #ff3b30;
   --success: #34d058;
   --warning: #ffb020;
-  --console-bg: #0a0908;
-  --console-text: #d8d4c9;
-  --segment-lit: #ff9d00;
-  --segment-ghost: rgba(216, 212, 201, 0.07);
+  --console-bg: #041619;
+  --console-text: #d7e8e4;
+  --segment-lit: #ffb020;
+  --segment-ghost: rgba(233, 242, 239, 0.08);
 
   /* Kanit is the one UI font, everywhere except code (see --mono) — it covers Thai and Latin in
      the same face, loaded via Google Fonts (index.html). System stacks ride as fallback so a
@@ -78,14 +79,14 @@ body,
 
 body {
   margin: 0;
-  /* Bezel breathes: a slow black-to-gray sweep behind the flat panel layer, on the page background
-     only — cards/panels stay solid --panel-bg on top, unaffected, per the Flat-By-Default Rule. */
+  /* Board breathes: a slow teal sweep behind the flat panel layer, on the page background only —
+     cards/panels stay solid --panel-bg on top, unaffected, per the Flat-By-Default Rule. */
   background: linear-gradient(160deg, var(--bg) 0%, var(--bg-alt) 50%, var(--bg) 100%);
   background-size: 220% 220%;
-  animation: bezelSweep 20s ease-in-out infinite;
+  animation: boardSweep 20s ease-in-out infinite;
 }
 
-@keyframes bezelSweep {
+@keyframes boardSweep {
   0%,
   100% {
     background-position: 0% 0%;

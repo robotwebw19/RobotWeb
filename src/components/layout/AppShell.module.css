@@ -8,7 +8,18 @@
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr) 420px;
+  grid-template-columns: 280px minmax(0, 1fr) 6px 420px;
+}
+
+.resizeHandle {
+  cursor: col-resize;
+  background: var(--border);
+  touch-action: none;
+}
+
+.resizeHandle:hover,
+.resizeHandle:active {
+  background: var(--accent);
 }
 
 .left,

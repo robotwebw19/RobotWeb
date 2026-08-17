@@ -23,7 +23,13 @@ const fixtureLevel = (id: string): Level => ({
 const fixtureUser = (studentId: string, displayName: string): User => ({
   studentId,
   displayName,
-  robotConfig: { name: 'Bot', sensors: [], motors: [] },
+  prefix: 'นาย',
+  firstName: displayName,
+  lastName: 'Test',
+  grade: 'ม.1',
+  classroom: '1',
+  studentNumber: '1',
+  robotConfig: { sensors: [], motors: [] },
   createdAt: '2026-08-16T00:00:00.000Z',
 })
 

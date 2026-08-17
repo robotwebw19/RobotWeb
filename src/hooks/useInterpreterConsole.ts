@@ -68,6 +68,27 @@ export function useInterpreterConsole() {
     setCodeError(null)
   }, [])
 
+  /** Syntax-only check for the "does this run?" button — parses without touching the live interpreter. */
+  const checkProgram = useCallback(
+    (sourceCode: string) => {
+      setConsoleLines([])
+      setCodeError(null)
+      try {
+        parseProgram(sourceCode)
+        appendLine(t('console.checkOk'), 'log')
+      } catch (error) {
+        if (error instanceof ParseError) {
+          setCodeError({ line: error.line, message: error.message })
+          appendLine(`${t('console.syntaxError', { line: error.line })}: ${error.message}`, 'error')
+        } else {
+          const message = error instanceof Error ? error.message : String(error)
+          appendLine(`${t('console.error')}: ${message}`, 'error')
+        }
+      }
+    },
+    [appendLine, t],
+  )
+
   const stepInterpreterBudgeted = useCallback(
     (currentElapsedMs: number) => {
       const interpreter = interpreterRef.current
@@ -99,6 +120,7 @@ export function useInterpreterConsole() {
     codeError,
     loadProgram,
     clearProgram,
+    checkProgram,
     stepInterpreterBudgeted,
     hasProgram: () => interpreterRef.current !== null,
   }

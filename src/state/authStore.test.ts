@@ -1,7 +1,11 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { useAuthStore } from './authStore'
+import { useAuthStore, type OnboardingProfile } from './authStore'
 import { readItem } from '../data/storage/localStorageClient'
 import { keys } from '../data/storage/keys'
+
+function profileFor(firstName: string): OnboardingProfile {
+  return { prefix: 'นาย', firstName, lastName: 'Lovelace', grade: 'ม.1', classroom: '1', studentNumber: '1' }
+}
 
 beforeEach(() => {
   localStorage.clear()
@@ -18,32 +22,32 @@ describe('authStore', () => {
 
   it('completeOnboarding saves the user + robot and clears pendingStudentId', async () => {
     await useAuthStore.getState().login('11111')
-    await useAuthStore.getState().completeOnboarding('Ada', { name: 'Bot', sensors: [], motors: [] })
+    await useAuthStore.getState().completeOnboarding(profileFor('Ada'), { sensors: [], motors: [] })
     const state = useAuthStore.getState()
-    expect(state.user?.displayName).toBe('Ada')
+    expect(state.user?.displayName).toBe('Ada Lovelace')
     expect(state.user?.studentId).toBe('11111')
     expect(state.pendingStudentId).toBeNull()
   })
 
   it('login with a returning studentId returns "known" and restores the saved user', async () => {
     await useAuthStore.getState().login('22222')
-    await useAuthStore.getState().completeOnboarding('Grace', { name: 'Bot', sensors: [], motors: [] })
+    await useAuthStore.getState().completeOnboarding(profileFor('Grace'), { sensors: [], motors: [] })
     useAuthStore.getState().logout()
 
     const result = await useAuthStore.getState().login('22222')
     expect(result).toBe('known')
-    expect(useAuthStore.getState().user?.displayName).toBe('Grace')
+    expect(useAuthStore.getState().user?.displayName).toBe('Grace Lovelace')
   })
 
   it('completeOnboarding throws when there is no pending studentId', async () => {
     await expect(
-      useAuthStore.getState().completeOnboarding('X', { name: 'Bot', sensors: [], motors: [] }),
+      useAuthStore.getState().completeOnboarding(profileFor('X'), { sensors: [], motors: [] }),
     ).rejects.toThrow()
   })
 
   it('logout clears the current user', async () => {
     await useAuthStore.getState().login('33333')
-    await useAuthStore.getState().completeOnboarding('Grace', { name: 'Bot', sensors: [], motors: [] })
+    await useAuthStore.getState().completeOnboarding(profileFor('Grace'), { sensors: [], motors: [] })
     useAuthStore.getState().logout()
     expect(useAuthStore.getState().user).toBeNull()
   })
@@ -64,9 +68,9 @@ describe('authStore', () => {
     expect(useAuthStore.getState().isAdmin).toBe(true)
 
     await useAuthStore.getState().login('44444')
-    await useAuthStore.getState().completeOnboarding('Lin', { name: 'Bot', sensors: [], motors: [] })
+    await useAuthStore.getState().completeOnboarding(profileFor('Lin'), { sensors: [], motors: [] })
     expect(useAuthStore.getState().isAdmin).toBe(false)
-    expect(useAuthStore.getState().user?.displayName).toBe('Lin')
+    expect(useAuthStore.getState().user?.displayName).toBe('Lin Lovelace')
   })
 
   it('persists the admin session flag to storage on login', () => {

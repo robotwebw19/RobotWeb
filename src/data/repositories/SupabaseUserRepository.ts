@@ -1,10 +1,16 @@
-import type { RobotConfig, User } from '../../types/domain'
+import type { RobotConfig, StudentPrefix, User } from '../../types/domain'
 import { supabase } from '../supabaseClient'
 import type { IUserRepository } from './IUserRepository'
 
 interface UserRow {
   student_id: string
   display_name: string
+  prefix: StudentPrefix
+  first_name: string
+  last_name: string
+  grade: string
+  classroom: string
+  student_number: string
   robot_config: RobotConfig
   created_at: string
 }
@@ -13,6 +19,12 @@ function toDomain(row: UserRow): User {
   return {
     studentId: row.student_id,
     displayName: row.display_name,
+    prefix: row.prefix,
+    firstName: row.first_name,
+    lastName: row.last_name,
+    grade: row.grade,
+    classroom: row.classroom,
+    studentNumber: row.student_number,
     robotConfig: row.robot_config,
     createdAt: row.created_at,
   }
@@ -35,6 +47,12 @@ export class SupabaseUserRepository implements IUserRepository {
     const { error } = await supabase.from('users').upsert({
       student_id: user.studentId,
       display_name: user.displayName,
+      prefix: user.prefix,
+      first_name: user.firstName,
+      last_name: user.lastName,
+      grade: user.grade,
+      classroom: user.classroom,
+      student_number: user.studentNumber,
       robot_config: user.robotConfig,
       created_at: user.createdAt,
     })

@@ -9,12 +9,25 @@
 }
 
 .logo {
+  display: inline-flex;
+  align-items: center;
   font-size: 16px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--accent);
   text-decoration: none;
+}
+
+/* A small plated pad before the wordmark — the board's own reference-designator mark. */
+.logo::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  margin-right: 7px;
+  background: var(--accent);
+  border-radius: 1px;
+  flex: none;
 }
 
 .links {

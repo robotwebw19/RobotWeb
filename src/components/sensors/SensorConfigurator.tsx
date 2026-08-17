@@ -32,7 +32,6 @@ const MOTOR_DESCRIPTION_KEY: TranslationKey = 'catalog.motor.description'
 
 export function SensorConfigurator({ initialConfig, onSave, saveLabel }: SensorConfiguratorProps) {
   const { t } = useTranslation()
-  const [robotName, setRobotName] = useState(initialConfig.name)
   const [sensors, setSensors] = useState<SensorConfig[]>(initialConfig.sensors)
   const [motors, setMotors] = useState<MotorConfig[]>(initialConfig.motors)
   const [irCount, setIrCount] = useState<number>(sensors.filter((s) => s.type === 'ir').length || 2)
@@ -65,19 +64,11 @@ export function SensorConfigurator({ initialConfig, onSave, saveLabel }: SensorC
 
   function handleSave() {
     if (!validation.valid) return
-    onSave({ name: robotName.trim() || t('sensors.robotNameDefault'), sensors, motors })
+    onSave({ sensors, motors })
   }
 
   return (
     <div className={styles.configurator}>
-      <input
-        className={styles.field}
-        value={robotName}
-        onChange={(event) => setRobotName(event.target.value)}
-        placeholder={t('sensors.robotNamePlaceholder')}
-        aria-label={t('sensors.robotNamePlaceholder')}
-      />
-
       <div className={styles.layout}>
         <div className={styles.catalog}>
           {sensorCatalog.map((entry) => {

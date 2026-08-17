@@ -54,7 +54,7 @@ export function MainAppPage() {
     }
   }, [level.id, studentId])
 
-  const { consoleLines, codeError, loadProgram, clearProgram, stepInterpreterBudgeted } = useInterpreterConsole()
+  const { consoleLines, codeError, loadProgram, clearProgram, checkProgram, stepInterpreterBudgeted } = useInterpreterConsole()
 
   const { run, pause, reset } = useSimulation({
     trackPath: level.trackPath,
@@ -80,6 +80,10 @@ export function MainAppPage() {
     resetProgress()
     reset()
     if (loadProgram(sourceCode, sensors)) run()
+  }
+
+  function handleCheckCode() {
+    checkProgram(sourceCode)
   }
 
   function handleReset() {
@@ -110,6 +114,7 @@ export function MainAppPage() {
           onSourceCodeChange={setSourceCode}
           consoleLines={consoleLines}
           codeError={codeError}
+          onCheckCode={handleCheckCode}
         />
       }
     />

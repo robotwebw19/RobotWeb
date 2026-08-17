@@ -38,14 +38,23 @@ export interface MotorConfig {
 }
 
 export interface RobotConfig {
-  name: string
   sensors: SensorConfig[]
   motors: MotorConfig[]
 }
 
+export type StudentPrefix = 'เด็กชาย' | 'เด็กหญิง' | 'นาย' | 'นางสาว'
+
 export interface User {
   studentId: string
+  /** Full name for display, derived from prefix + firstName + lastName at onboarding time. */
   displayName: string
+  prefix: StudentPrefix
+  firstName: string
+  lastName: string
+  /** e.g. "ม.1" .. "ม.6" */
+  grade: string
+  classroom: string
+  studentNumber: string
   robotConfig: RobotConfig
   createdAt: string
 }

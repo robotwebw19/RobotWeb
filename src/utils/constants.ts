@@ -10,7 +10,7 @@ export const IR_SENSE_RADIUS_PX = 20
 
 export const ULTRASONIC_MAX_RANGE_CM = 200
 
-export const MAX_OFF_TRACK_MS_BEFORE_FAIL = 3000
+export const MAX_OFF_TRACK_MS_BEFORE_FAIL = 1000
 
 export const IR_ROW_SPACING_PX = 12
 

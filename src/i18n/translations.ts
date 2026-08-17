@@ -26,6 +26,16 @@ export const translations = {
     th: 'รหัสนักเรียน {id} เป็นรหัสใหม่ — เลือกชื่อที่ใช้แสดง',
   },
   'onboarding.displayNamePlaceholder': { en: 'Display name', th: 'ชื่อที่ใช้แสดง' },
+  'onboarding.prefixLabel': { en: 'Prefix', th: 'คำนำหน้า' },
+  'onboarding.firstNameLabel': { en: 'First name', th: 'ชื่อ' },
+  'onboarding.firstNamePlaceholder': { en: 'First name', th: 'ชื่อจริง' },
+  'onboarding.lastNameLabel': { en: 'Last name', th: 'นามสกุล' },
+  'onboarding.lastNamePlaceholder': { en: 'Last name', th: 'นามสกุล' },
+  'onboarding.gradeLabel': { en: 'Grade', th: 'มัธยมศึกษาปีที่' },
+  'onboarding.classroomLabel': { en: 'Classroom', th: 'ห้อง' },
+  'onboarding.classroomPlaceholder': { en: 'e.g. 3', th: 'เช่น 3' },
+  'onboarding.numberLabel': { en: 'Number', th: 'เลขที่' },
+  'onboarding.numberPlaceholder': { en: 'e.g. 12', th: 'เช่น 12' },
   'onboarding.nextButton': { en: 'Next: build your robot', th: 'ถัดไป: สร้างหุ่นยนต์ของคุณ' },
   'onboarding.buildRobotTitle': { en: 'Build your robot', th: 'สร้างหุ่นยนต์ของคุณ' },
   'onboarding.buildRobotSubtitle': {
@@ -35,7 +45,6 @@ export const translations = {
   'onboarding.startPlaying': { en: 'Start playing', th: 'เริ่มเล่น' },
 
   // Sensor configurator
-  'sensors.robotNamePlaceholder': { en: 'Robot name', th: 'ชื่อหุ่นยนต์' },
   'sensors.applyRow': { en: 'Apply {count}-sensor row', th: 'ใช้แถวเซนเซอร์ {count} ตัว' },
   'sensors.digitalMode': { en: 'Digital (0/1)', th: 'ดิจิทัล (0/1)' },
   'sensors.analogMode': { en: 'Analog (0-1023)', th: 'อนาล็อก (0-1023)' },
@@ -48,7 +57,6 @@ export const translations = {
   'sensors.saveChanges': { en: 'Save changes', th: 'บันทึกการเปลี่ยนแปลง' },
   'sensors.pin': { en: 'Pin', th: 'พิน' },
   'sensors.placementPreview': { en: 'Sensor placement preview', th: 'ตัวอย่างตำแหน่งเซนเซอร์' },
-  'sensors.robotNameDefault': { en: 'My Robot', th: 'หุ่นยนต์ของฉัน' },
   'validation.duplicatePin': {
     en: 'Pin {pin} is assigned to more than one sensor.',
     th: 'พิน {pin} ถูกใช้ซ้ำโดยหลายเซนเซอร์',
@@ -126,6 +134,7 @@ export const translations = {
   'run.resume': { en: 'Resume', th: 'ทำต่อ' },
   'run.pause': { en: 'Pause', th: 'หยุดชั่วคราว' },
   'run.reset': { en: 'Reset', th: 'รีเซ็ต' },
+  'code.checkButton': { en: 'Check code', th: 'ตรวจสอบโค้ด' },
 
   // HUD
   'hud.status': { en: 'Status', th: 'สถานะ' },
@@ -144,6 +153,7 @@ export const translations = {
   'console.syntaxError': { en: 'Syntax error (line {line})', th: 'ข้อผิดพลาดทางไวยากรณ์ (บรรทัด {line})' },
   'console.runtimeError': { en: 'Runtime error (line {line})', th: 'ข้อผิดพลาดขณะทำงาน (บรรทัด {line})' },
   'console.error': { en: 'Error', th: 'ข้อผิดพลาด' },
+  'console.checkOk': { en: 'No syntax errors — code can run.', th: 'ไม่มีข้อผิดพลาด โค้ดสามารถรันได้' },
 
   // Level result modal
   'result.complete': { en: 'Level complete!', th: 'ผ่านด่านแล้ว!' },
@@ -172,7 +182,7 @@ export const translations = {
   'leaderboard.levelsPassed': { en: 'Levels passed', th: 'ด่านที่ผ่าน' },
 
   // Profile
-  'profile.robotSummary': { en: '{robotName} · {count} sensor(s)', th: '{robotName} · เซนเซอร์ {count} ตัว' },
+  'profile.robotSummary': { en: '{count} sensor(s)', th: 'เซนเซอร์ {count} ตัว' },
   'profile.levelsPassed': { en: 'Levels passed', th: 'ด่านที่ผ่าน' },
   'profile.totalStars': { en: 'Total stars', th: 'ดาวรวม' },
   'profile.level': { en: 'Level', th: 'ด่าน' },
