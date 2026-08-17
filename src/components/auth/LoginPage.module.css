@@ -65,6 +65,32 @@
   object-fit: contain;
 }
 
+/* The app's wordmark, not a generic page heading — same copper-on-dark treatment as the navbar
+   logo (DESIGN.md: "the navbar's pad mark and wordmark" is a named legitimate copper use), sized
+   for a hero moment on the single screen every student sees first. */
+.brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.brandName {
+  font-size: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+
+.brandTagline {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+/* The plain page heading used by the admin-mode form — unlike .brand, this isn't a wordmark. */
 .title {
   font-size: 20px;
   margin-bottom: 8px;

@@ -1,4 +1,6 @@
 .card {
+  position: relative;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -42,6 +44,26 @@
   box-shadow: var(--depth-raised);
   transform: perspective(var(--tilt-perspective)) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg))
     translateZ(6px);
+}
+
+/* A QC-passed sticker banded diagonally across the corner — the kind of inspection label a
+   real assembled board carries once it clears test, not a decorative corner flourish. */
+.passedRibbon {
+  position: absolute;
+  top: 16px;
+  right: -38px;
+  width: 140px;
+  padding: 4px 0;
+  background: var(--success);
+  color: var(--panel-recessed);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transform: rotate(45deg);
+  box-shadow: 0 1px 3px rgba(2, 12, 14, 0.4);
+  pointer-events: none;
 }
 
 .header {

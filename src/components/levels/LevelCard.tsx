@@ -32,9 +32,10 @@ export function LevelCard({ level, selected, best, onSelect }: LevelCardProps) {
       className={`${styles.card} ${selected ? styles.selected : ''}`}
       onClick={onSelect}
     >
+      {best && <span className={styles.passedRibbon}>{t('level.passed')}</span>}
       <div className={styles.header}>
         <span className={styles.name}>{tLevelName(level.id, level.name)}</span>
-        <span className={styles.difficulty}>{t(DIFFICULTY_KEYS[level.difficulty])}</span>
+        {!best && <span className={styles.difficulty}>{t(DIFFICULTY_KEYS[level.difficulty])}</span>}
       </div>
       <div className={styles.best}>
         {best ? (

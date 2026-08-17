@@ -10,7 +10,8 @@ export const translations = {
   'nav.admin': { en: 'Admin', th: 'แอดมิน' },
 
   // Login
-  'login.title': { en: 'URRWNM Line Tracking Robot', th: 'URRWNM Line Tracking Robot' },
+  'login.brand': { en: 'URRWNM', th: 'URRWNM' },
+  'login.brandTagline': { en: 'Line Tracking Robot', th: 'Line Tracking Robot' },
   'login.subtitle': { en: 'Enter your 5-digit student ID to continue', th: 'กรอกรหัสนักเรียน 5 หลักเพื่อดำเนินการต่อ' },
   'login.idLabel': { en: '5-digit student ID', th: 'รหัสนักเรียน 5 หลัก' },
   'login.continue': { en: 'Continue', th: 'ดำเนินการต่อ' },
@@ -97,6 +98,7 @@ export const translations = {
 
   // Level list/card
   'level.notCompleted': { en: 'Not completed yet', th: 'ยังไม่ผ่านด่านนี้' },
+  'level.passed': { en: 'Passed', th: 'ผ่านแล้ว' },
   'difficulty.beginner': { en: 'beginner', th: 'เริ่มต้น' },
   'difficulty.easy': { en: 'easy', th: 'ง่าย' },
   'difficulty.medium': { en: 'medium', th: 'ปานกลาง' },

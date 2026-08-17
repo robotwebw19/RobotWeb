@@ -84,7 +84,11 @@ export function LoginPage() {
     <div className={styles.page}>
       <form className={styles.card} onSubmit={handleStudentSubmit}>
         <img className={styles.avatar} src={loginAvatar} alt="" aria-hidden="true" />
-        <h1 className={styles.title}>{t('login.title')}</h1>
+        <h1 className={styles.brand}>
+          <span className={styles.brandName}>{t('login.brand')}</span>
+          {' '}
+          <span className={styles.brandTagline}>{t('login.brandTagline')}</span>
+        </h1>
         <p className={styles.subtitle}>{t('login.subtitle')}</p>
         <input
           className={styles.digits}
