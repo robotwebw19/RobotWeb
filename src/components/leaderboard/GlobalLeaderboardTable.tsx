@@ -1,6 +1,6 @@
 import type { GlobalLeaderboardRow } from './leaderboardAggregation'
 import { useTranslation } from '../../i18n/useTranslation'
-import { SevenSegmentDisplay } from '../common/SevenSegmentDisplay'
+import { SegmentDisplay } from '../common/SegmentDisplay'
 import { RankBadge } from './RankBadge'
 import styles from './LeaderboardTable.module.css'
 
@@ -36,10 +36,10 @@ export function GlobalLeaderboardTable({ rows }: GlobalLeaderboardTableProps) {
               <td>{row.classroom}</td>
               <td>{row.studentNumber}</td>
               <td>
-                <SevenSegmentDisplay value={String(row.totalStars).padStart(2, '0')} size={14} />
+                <SegmentDisplay value={String(row.totalStars).padStart(2, '0')} size={14} />
               </td>
               <td>
-                <SevenSegmentDisplay value={String(row.levelsPassed).padStart(2, '0')} size={14} />
+                <SegmentDisplay value={String(row.levelsPassed).padStart(2, '0')} size={14} />
               </td>
             </tr>
           ))}

@@ -19,6 +19,7 @@
   border: 1px solid var(--border);
   border-radius: 5px;
   background: var(--panel-bg);
+  box-shadow: var(--depth-rest);
   text-align: center;
 }
 
@@ -56,5 +57,6 @@
   border: 1px solid var(--border);
   border-radius: 5px;
   background: var(--panel-bg);
+  box-shadow: var(--depth-rest);
   overflow: hidden;
 }

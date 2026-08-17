@@ -29,6 +29,18 @@
   --segment-lit: #ffb020;
   --segment-ghost: rgba(233, 242, 239, 0.08);
 
+  /* Populated-component depth: the soldermask board itself stays flat (a board doesn't float),
+     but everything soldered TO it — cards, keys, the modal — has real height and casts a shadow
+     under one consistent light source from above. Shadow color is tinted from --panel-recessed
+     (the palette's own darkest teal) rather than neutral black, matching how --border is teal
+     rather than gray. Three steps: resting (a part sitting on the board), raised (lifted under
+     the cursor / actively selected), pressed (compressed into its socket). */
+  --depth-rest: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 2px 5px rgba(2, 12, 14, 0.45);
+  --depth-raised: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 10px 22px rgba(2, 12, 14, 0.55);
+  --depth-pressed: 0 1px 3px rgba(2, 12, 14, 0.5) inset;
+  --depth-modal: 0 28px 64px rgba(2, 12, 14, 0.7);
+  --tilt-perspective: 700px;
+
   /* Kanit is the one UI font, everywhere except code (see --mono) — it covers Thai and Latin in
      the same face, loaded via Google Fonts (index.html). System stacks ride as fallback so a
      blocked/slow classroom network degrades to a readable font, never blank/unstyled text. */

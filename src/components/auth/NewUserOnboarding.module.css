@@ -34,6 +34,7 @@
   padding: 32px;
   border: 1px solid var(--border);
   border-radius: 3px;
+  box-shadow: var(--depth-raised);
   animation: cardEnter 350ms cubic-bezier(0.16, 1, 0.3, 1) both;
   /* Four plated mounting holes at the card's corners — the board's own screw mounts. */
   background:
@@ -124,18 +125,21 @@
   color: var(--on-accent);
   font-weight: 600;
   cursor: pointer;
+  box-shadow: var(--depth-raised);
   transition:
     background 150ms ease-out,
+    box-shadow 120ms ease-out,
     transform 120ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .submit:hover:not(:disabled) {
   background: var(--accent-hover);
-  transform: scale(1.02);
+  transform: translateY(-1px) scale(1.02);
 }
 
 .submit:active:not(:disabled) {
-  transform: scale(0.98);
+  box-shadow: var(--depth-pressed);
+  transform: translateY(1px) scale(0.98);
   transition-duration: 60ms;
 }
 

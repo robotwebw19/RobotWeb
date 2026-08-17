@@ -96,7 +96,7 @@ This is the app's third visual identity, replacing "The Scoreboard" (a matte ins
 
 The app chrome IS the circuit board the student is coding for. Every panel reads as a populated PCB island: an Arduino-teal soldermask ground (`--bg`, `#062327`), copper/gold plating as the one interactive signal, white silkscreen ink for text, plated mounting-hole corners on auth cards and modals, and a slow teal sweep behind the flat panel layer standing in for the way light catches a real board's surface. Cards carry four literal screw-mount holes at their corners (`radial-gradient` layered rings, ~16px inset, 6px radius) — a device drawn from PCB manufacturing, not a decorative texture. An earlier pass tried a via-grid dot-pattern background as a stand-in for "PCB texture" on `body`; the project's own detector flagged it as a lazy generic-tech cliché and it was removed in favor of the more literal, motivated devices (mounting holes, copper hairlines) that actually exist on a populated board. **Don't reintroduce a decorative dot/grid-line texture as a substitute for PCB material — the mounting holes and copper hairlines carry that job.**
 
-Real through-hole LED colors — amber, red, green — are unchanged from The Scoreboard and are treated as literal component colors soldered to the board, not part of the bezel material that changed. The seven-segment digit module and star-pip LEDs likewise survive the redesign completely as-is: they were re-contextualized, not replaced, because a genuine soldered 7-segment display module is exactly the kind of part a real Arduino kit ships, so it reads as native to this world rather than a leftover from the last one. The simulation canvas (Konva-rendered track, robot, sensors) stays its own fixed, mode-independent palette, unrelated to the app chrome's tokens — that boundary is unchanged from every prior world and survives this one too. This is a classroom tool for Thai mid/high-school robotics students, run by a teacher, so legibility and instant state-reading still come first; the identity expresses through material (soldermask, copper, silkscreen ink), not through obscuring the task.
+Real through-hole LED colors — amber, red, green — are unchanged from The Scoreboard and are treated as literal component colors soldered to the board, not part of the bezel material that changed. Star-pip LEDs survive the redesign completely as-is. The timer/counter digit module was upgraded from a 7-segment cell to a 14-segment alphanumeric tube (`SegmentDisplay.tsx`) — still a literal soldered part, now the precision-instrument-grade module you'd find on a lab-bench frequency counter or multimeter rather than the plainest LED digit, and its extra segments buy real legibility: '1' draws as a diagonal stroke instead of a bare vertical bar, so it can no longer be mistaken for '7' at a glance. The simulation canvas (Konva-rendered track, robot, sensors) stays its own fixed, mode-independent palette, unrelated to the app chrome's tokens — that boundary is unchanged from every prior world and survives this one too. This is a classroom tool for Thai mid/high-school robotics students, run by a teacher, so legibility and instant state-reading still come first; the identity expresses through material (soldermask, copper, silkscreen ink), not through obscuring the task.
 
 **Key Characteristics:**
 - Deep-teal soldermask ground, always dark — a soldermask board doesn't get a light-mode variant either; `prefers-color-scheme: light` stays unhonored, same commitment as the prior world, now for a materially different reason.
@@ -104,8 +104,9 @@ Real through-hole LED colors — amber, red, green — are unchanged from The Sc
 - Amber, red, green stay reserved for LED status meaning (warning glow, live/fail, pass) — literal component colors, never used for an interactive affordance.
 - Plated mounting-hole corners on auth cards and the Result Modal — a literal PCB screw-mount detail, drawn via layered `radial-gradient`s, not applied to every surface (see Shapes and Do's and Don'ts for where it does and doesn't apply).
 - A small square copper "pad" chip (7×7px, 1px radius) precedes the navbar wordmark — a reference-designator mark, deliberately near-square and smaller than the app's own 2/3/4/5px radius scale; a new micro-step for this one device, not a mistake.
-- Every timed/counted value still renders as real 7-segment digits, unchanged in mechanism from before — see Named Rules under Typography.
-- Flat by default, with the same single motivated exception as before: the segment-display "glass" is recessed behind an inset shadow, because that's what a real display window looks like set into a housing.
+- Every timed/counted value renders as real segment digits — now a 14-segment alphanumeric tube instead of a plain 7-segment cell, see Named Rules under Typography.
+- The board itself is flat, but everything soldered to it now has real height: cards tilt toward the cursor, buttons compress when pressed, the modal is the most elevated surface in the app — see the Populated-Component Depth Rule under Elevation & Depth. The segment-display "glass" keeps its own, different exception: recessed behind an inset shadow, because a display window is cut into its housing rather than sitting proud of it.
+- The one motivated exception to the Instant-Segment Rule: on the result modal's reveal only, newly-lit segments strike in like a real tube igniting — see the Instant-Segment Rule under Elevation & Depth.
 
 ## Colors
 
@@ -148,7 +149,7 @@ Robot Blue (`#4c6ef5`), Heading Yellow (`#ffd43b`), IR Pink (`#e64980`), Ultraso
 **Body/Heading Font:** `Kanit, system-ui, 'Segoe UI', Roboto, sans-serif` — one face for both Latin and Thai UI text (Kanit covers both scripts), used everywhere including `h1`/`h2`/`h3`. Unchanged by this redesign; no font swap was made.
 **Body/Heading Font (Thai/`lang=th`):** `'Kanit', 'Leelawadee UI', 'Noto Sans Thai', Tahoma, system-ui, sans-serif` — same family, Thai-capable fallbacks appended; see the Lang-Follows-Language Rule below.
 **Code/Mono Font:** `ui-monospace, Consolas, 'Leelawadee UI', 'Noto Sans Thai', monospace`
-**Numeral system:** 7-segment cells (`SevenSegmentDisplay`), not a font at all — CSS `clip-path` shapes, so it costs no network request and stays crisp at any size.
+**Numeral system:** 14-segment alphanumeric cells (`SegmentDisplay`), not a font at all — SVG `polygon` bars, so it costs no network request and stays crisp at any size.
 
 **Character:** Kanit for everything read as prose — headings included; monospace is not a costume for a "technical-feeling" title. Mono stays reserved for what it was always for: code, console, IDs, and short data-style labels (level/team names, HUD field labels, the navbar wordmark). Segment cells render anything that's a number the product is timing or counting.
 
@@ -172,13 +173,22 @@ Unchanged in structure by the redesign: the three-column app shell (`AppShell`) 
 
 ## Elevation & Depth
 
-**Flat by default, with one motivated exception.** No ambient shadow on cards, buttons, panels, or the modal — depth is border and fill contrast. The one exception, the only `box-shadow` in the shipped stylesheet: `SevenSegmentDisplay`'s housing (`--panel-recessed`) carries `box-shadow: inset 0 2px 6px rgba(0,0,0,0.6)` — a recessed-glass cue, because a real segment display sits behind a dark window in its housing, not flush with it. A specific, singular device tied to one component, not a general license for shadows.
+**Populated-component depth, superseding the old Flat-By-Default Rule.** The board itself still stays flat — the soldermask ground (`--bg`) and the sweep it carries never cast or receive a shadow. But everything soldered *to* the board now has real, motivated height: cards, keys, panels, and the modal read as physical parts sitting slightly proud of the surface, under one consistent light source from above, exactly the way a populated PCB photographed at an angle shows real shadows from its mounted components even though the board underneath is flat. Three depth tokens carry this, each tinted from `--panel-recessed` (the palette's own darkest teal) rather than neutral black — matching how `--border` is teal-tinted rather than gray:
+- **`--depth-rest`** — a part sitting on the board at idle: secondary buttons, display cards (sensor catalog, profile stats, the leaderboard/profile table wrapper).
+- **`--depth-raised`** — a part actively lifted: a card under the cursor or the pointer-tracked tilt (see below), a selected level card, primary buttons (Run key, submit buttons, Result Modal's action button), the auth cards' resting state (they're the most standalone/removable surfaces, so they sit highest even before interaction).
+- **`--depth-pressed`** — a part compressed into its socket: any button's `:active` state, an inset shadow instead of a cast one.
+- **`--depth-modal`** — the Result Modal only, the single most-elevated surface in the app.
 
-The page background carries a slow diagonal teal sweep (`boardSweep`, 20s ease-in-out, `linear-gradient(160deg, --bg, --bg-alt, --bg)` at 220% background-size) behind the flat panel layer — panels stay solid `--panel-bg` on top, unaffected by the sweep, per the Flat-By-Default Rule. Motion elsewhere stays the vocabulary established before this redesign — scale + `cubic-bezier(0.16, 1, 0.3, 1)`, 60–350ms, for buttons/cards/modal chrome — with numeric content still never tweening: a `SevenSegmentDisplay` value change is an instant segment swap, no morph, no count-up.
+**Pointer-tracked tilt.** `LevelCard` — the one place a "pick this up and look at it" gesture is honest, since it's the primary clickable choice on the level-select screen — tilts toward the cursor via `useTilt` (`src/hooks/useTilt.ts`), which drives `--tilt-x`/`--tilt-y` custom properties consumed by the card's own `transform: perspective(...) rotateX(...) rotateY(...)`. No-ops under `prefers-reduced-motion` or `(hover: none)`. Not applied to non-interactive display cards (sensor catalog rows, profile stats) — those get resting depth only, since they have no click affordance to honor with a "look closer" gesture.
+
+**Button press physicality.** A button's idle state is `--depth-raised` (primary) or `--depth-rest` (secondary), hover lifts it further (`translateY(-1px)` + `--depth-raised`), and `:active` compresses it into `--depth-pressed` with `translateY(1px)` and a tighter scale — a literal key press, not just a scale tween. Underline-style tabs (`LeftPanel`) are the deliberate exception: they're a flush selection indicator, not a pushbutton, and stay flat per their own documented pattern under Navigation.
+
+The page background still carries its slow diagonal teal sweep (`boardSweep`, 20s ease-in-out, `linear-gradient(160deg, --bg, --bg-alt, --bg)` at 220% background-size) behind the depth layer — panels stay solid `--panel-bg` on top, unaffected by the sweep. Motion elsewhere stays the vocabulary established before this redesign — scale + `cubic-bezier(0.16, 1, 0.3, 1)`, 60–350ms, for buttons/cards/modal chrome — with numeric content still never tweening: a `SegmentDisplay` value change is an instant segment swap, no morph, no count-up.
 
 ### Named Rules
-**The Flat-By-Default Rule.** Surfaces sit flush with their background at rest — shadows are reserved for the one recessed-glass exception above, nowhere else. The board sweep lives on `body` only, never on a panel surface.
-**The Instant-Segment Rule.** Numeric readouts (`SevenSegmentDisplay`) never animate their own value change — no easing, no count-up. Everything else may still use the shared motion vocabulary.
+**The Populated-Component Depth Rule** (supersedes the old Flat-By-Default Rule). The board (`--bg`, the sweep) never casts or receives a shadow — it's the flat ground everything else sits on. Every mounted part uses one of the four `--depth-*` tokens above, never a bespoke shadow value, and every shadow is tinted from `--panel-recessed`, never neutral black. `SegmentDisplay`'s recessed-glass inset shadow is unrelated and unchanged — a display window is cut *into* its housing, the opposite device from a raised part.
+**The One Light Source Rule.** Every shadow falls as if lit from directly above: cast shadows point down (or, for a part beside another part rather than above it — the AppShell's left/right islands — outward toward the surface they're throwing shadow onto). Never mix light directions on the same screen.
+**The Instant-Segment Rule.** Numeric readouts (`SegmentDisplay`) never tween or count up between values — a value change is always an instant segment swap. The one exception: with `animateChanges` set (used only by the Result Modal's time, a single reveal moment, never a readout that ticks continuously), newly-lit segments strike in over 220ms — an ignition flicker on the segments themselves, not a morph of the number — because that's the one physically real behavior a tube has that a plain LED module doesn't. Everything else may still use the shared motion vocabulary.
 **The One Motion Vocabulary Rule.** Tactile chrome (buttons, cards, modal, tabs) reuses one set of values: scale, `cubic-bezier(0.16, 1, 0.3, 1)`, 60–350ms, `--accent-hover` for the pressed state.
 
 ## Shapes
@@ -202,8 +212,8 @@ Segment-display housing and star/status pips use proportional/circular radii tie
 - **Secondary/Ghost** (other run controls, nav actions, admin actions, level-card/tab selection): `--panel-bg` fill, `1px solid var(--border)`, `--text-h` text, uppercase mono-weight label. Hover swaps the border to `--accent` — no background fill. `:active` compresses to `scale(0.94–0.98)`; same focus outline as primary.
 - **Disabled:** `opacity: 0.4–0.5`, `cursor: not-allowed`.
 
-### Seven-Segment Display (signature component — the board's soldered timer module)
-`src/components/common/SevenSegmentDisplay.tsx` — a CSS `clip-path` digit cell inside a recessed housing (`--panel-recessed` + the system's only `box-shadow`). Every cell shows its ghost ring even when unlit. `size` scales the cell proportionally (12–14px on level cards/leaderboards, 18px on the HUD, 24px on profile stats, 26px on the Result Modal). Color defaults to `--segment-lit`; override per-instance via the `--segment-lit` custom property to recolor for context (green for a pass, red for an accumulating off-track warning). Used for every timed/counted value app-wide. Kept fully unchanged through this redesign — a real Arduino kit genuinely ships a 7-segment module, so this device re-contextualizes as a literally soldered part of the board rather than a leftover instrument-bezel motif.
+### Segment Display (signature component — the board's soldered timer module)
+`src/components/common/SegmentDisplay.tsx` — a 14-segment alphanumeric digit cell (SVG `polygon` bars, not CSS `clip-path`) inside a recessed housing (`--panel-recessed` + the system's only `box-shadow`). Every cell shows its ghost ring even when unlit. `size` scales the cell proportionally (12–14px on level cards/leaderboards, 18px on the HUD, 24px on profile stats, 26px on the Result Modal). Color defaults to `--segment-lit`; override per-instance via the `--segment-lit` custom property to recolor for context (green for a pass, red for an accumulating off-track warning). Digits use the classic outer ring plus split middle bar, with one deliberate diagonal: '1' draws via the upper-right diagonal segment instead of a plain vertical stroke, so it reads unmistakably apart from '7'. An optional `animateChanges` prop makes newly-lit segments strike in like a tube igniting — see the Instant-Segment Rule; only the Result Modal's time uses it. Used for every timed/counted value app-wide.
 
 ### Star Pips (signature component)
 `src/components/common/StarPips.tsx` — `lit`/`total` lit-or-ghost LED pip circles (`--success` when lit, `--segment-ghost` when not), flat fill only, no glow, no inset. Used on level cards, the Result Modal, and the level leaderboard table. Kept unchanged through this redesign.
@@ -212,13 +222,13 @@ Segment-display housing and star/status pips use proportional/circular radii tie
 - **Corner Style:** 4px for the level-select card, 5px for display cards (sensor catalog, profile stats).
 - **Background:** `--panel-bg`, `1px solid var(--border)`.
 - **Selected state:** border switches to `--accent`, background washes to `--accent-bg` — the one selection idiom system-wide, unchanged by this redesign.
-- **Level card:** difficulty renders as a small bordered tag (2px radius, uppercase, `--text-muted`); a completed run shows 3 star-pips plus a small `SevenSegmentDisplay` best time; an incomplete level shows plain "not completed" text rather than a fake `00.0`.
+- **Level card:** difficulty renders as a small bordered tag (2px radius, uppercase, `--text-muted`); a completed run shows 3 star-pips plus a small `SegmentDisplay` best time; an incomplete level shows plain "not completed" text rather than a fake `00.0`.
 
 ### Result Modal ("board flash")
-Dark scrim (`rgba(0,0,0,0.7)`), 3px-radius panel with the plated mounting-hole treatment (see Shapes) on `--panel-bg`, `1px solid var(--border)`. Title renders in the standard heading style, `--success`/`--danger` colored. On a pass: 3 star-pips + a labeled `SevenSegmentDisplay` (26px, recolored green via `--segment-lit: var(--success)`). On a fail: the specific reason (off-track/collision/timeout) in muted meta text. The `Try Again` button (4px radius, `1px solid var(--accent-hover)`) pops in as the resolving beat after pips/time settle.
+Dark scrim (`rgba(0,0,0,0.7)`), 3px-radius panel with the plated mounting-hole treatment (see Shapes) on `--panel-bg`, `1px solid var(--border)`. Title renders in the standard heading style, `--success`/`--danger` colored. On a pass: 3 star-pips + a labeled `SegmentDisplay` (26px, recolored green via `--segment-lit: var(--success)`, `animateChanges` set — the app's one reveal-moment ignite). On a fail: the specific reason (off-track/collision/timeout) in muted meta text. The `Try Again`/`Done` button (4px radius, `1px solid var(--accent-hover)`) pops in as the resolving beat after pips/time settle.
 
 ### HUD (instrument strip)
-`SimHud` — a `--panel-bg` strip along the run screen with a copper hairline top border. Status shows a blinking red live-dot while running plus success/danger-colored status text on pass/fail. Elapsed and off-track each render as a labeled `SevenSegmentDisplay` (18px); the off-track readout recolors to `--danger` once it starts accumulating.
+`SimHud` — a `--panel-bg` strip along the run screen with a copper hairline top border. Status shows a blinking red live-dot while running plus success/danger-colored status text on pass/fail. Elapsed and off-track each render as a labeled `SegmentDisplay` (18px, instant — no `animateChanges`, since these tick continuously while running); the off-track readout recolors to `--danger` once it starts accumulating.
 
 ### Navigation
 - **Navbar:** `--panel-bg` bar, `1px solid var(--border)` bottom edge, uppercase copper-colored wordmark (16px) preceded by a small square copper pad mark (`.logo::before`, 7×7px, 1px radius — see Shapes). 14px muted links darkening to `--text-h` on hover.
@@ -232,22 +242,24 @@ Dark scrim (`rgba(0,0,0,0.7)`), 3px-radius panel with the plated mounting-hole t
 ## Do's and Don'ts
 
 ### Do:
-- **Do** render every timed/counted value through `SevenSegmentDisplay` — never plain text for a number the product is timing.
-- **Do** keep numeric value changes instant, no easing (the Instant-Segment Rule).
+- **Do** render every timed/counted value through `SegmentDisplay` — never plain text for a number the product is timing.
+- **Do** keep numeric value changes an instant segment swap, no easing or morph — `animateChanges` only strikes in newly-lit segments, and only reserve it for a single reveal moment, never a continuously-ticking readout (the Instant-Segment Rule).
 - **Do** keep Copper Plate to one focal element per screen (the One Signal Rule), and keep it distinct from Warning Amber (the Copper-vs-Amber Rule).
 - **Do** use `--on-accent` for any text placed on a copper fill — never white.
 - **Do** reserve the plated mounting-hole corner treatment for standalone/removable-feeling surfaces (auth cards, the Result Modal) — use copper hairline borders for the run screen's soldered-in-place islands instead.
 - **Do** scale radius with a surface's size on the confirmed 2/3/4/5px steps, plus the 1px micro-step reserved for the navbar pad mark only.
 - **Do** keep the simulation canvas's palette self-contained and independent of the app chrome's tokens.
 - **Do** keep `document.documentElement.lang` in sync with `useLanguageStore` (the Lang-Follows-Language Rule).
+- **Do** use one of the four `--depth-*` tokens for any shadow on a mounted part (card, button, panel, modal), never a one-off shadow value, and keep the light source consistent (the Populated-Component Depth Rule, the One Light Source Rule).
 
 ### Don't:
 - **Don't** add a `prefers-color-scheme: light` branch back (the No-Light-Mode Rule) — a soldermask board is dark by identity, not by omission.
-- **Don't** add `box-shadow` anywhere except the segment-display recessed-glass exception.
+- **Don't** put a shadow on the board itself (`body`, `--bg`, the sweep) — only mounted parts get depth, the ground stays flat.
+- **Don't** add pointer-tracked tilt to a non-interactive display card (sensor catalog rows, profile stats) — it implies a click affordance that isn't there.
 - **Don't** use Copper Plate for a status/warning meaning, or Warning Amber for an interactive affordance (the Copper-vs-Amber Rule).
 - **Don't** put white text on a copper fill — use `--on-accent`.
 - **Don't** add a decorative dot/grid-line "via" texture as a stand-in for PCB texture — this was tried during the build, flagged by the project's own defect detector as a generic tech cliché, and removed. Mounting holes and copper hairlines carry that job literally; a texture overlay doesn't.
 - **Don't** use monospace decoratively on prose or headings.
 - **Don't** let the simulation canvas's sensor/robot colors bleed into app-chrome UI, or vice versa.
-- **Don't** animate a `SevenSegmentDisplay` value with a tween/count-up — it must jump.
+- **Don't** animate a `SegmentDisplay` value with a tween/count-up — it must jump; and don't set `animateChanges` on a readout that updates continuously (the HUD's elapsed/off-track clocks) — the ignite is a reveal-moment device, not ambient decoration.
 - **Don't** apply Latin type-ramp assumptions (line-height, tracking) to Thai copy unexamined.

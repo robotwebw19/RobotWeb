@@ -1,7 +1,7 @@
 import type { LevelOutcome } from '../../sim/engine/LevelRuntime'
 import { useTranslation } from '../../i18n/useTranslation'
 import type { TranslationKey } from '../../i18n/translations'
-import { SevenSegmentDisplay } from '../common/SevenSegmentDisplay'
+import { SegmentDisplay } from '../common/SegmentDisplay'
 import { StarPips } from '../common/StarPips'
 import styles from './LevelResultModal.module.css'
 
@@ -32,10 +32,11 @@ export function LevelResultModal({ outcome, onRetry }: LevelResultModalProps) {
             <StarPips lit={outcome.stars} size={14} className={styles.pips} />
             <div className={styles.time}>
               <span className={styles.timeLabel}>{t('result.timeLabel')}</span>
-              <SevenSegmentDisplay
-                value={(outcome.completionTimeMs / 1000).toFixed(1).padStart(4, '0')}
+              <SegmentDisplay
+                value={(outcome.completionTimeMs / 1000).toFixed(2).padStart(5, '0')}
                 size={26}
                 className={styles.timeSegmentGreen}
+                animateChanges
               />
             </div>
           </>

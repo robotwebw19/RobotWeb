@@ -10,6 +10,7 @@
   border-radius: 5px;
   padding: 6px 10px;
   background: var(--panel-bg);
+  box-shadow: var(--depth-rest);
   cursor: default;
 }
 

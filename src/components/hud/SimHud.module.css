@@ -18,6 +18,9 @@
   background: var(--panel-bg);
   font-size: 13px;
   color: var(--text);
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 -3px 10px rgba(2, 12, 14, 0.3);
 }
 
 .label {

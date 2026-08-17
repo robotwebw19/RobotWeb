@@ -5,7 +5,7 @@ import { useLiveLevelResults } from '../../hooks/useLiveLevelResults'
 import { getStudentStats, type StudentStats } from '../leaderboard/leaderboardAggregation'
 import { Navbar } from '../layout/Navbar'
 import { useTranslation } from '../../i18n/useTranslation'
-import { SevenSegmentDisplay } from '../common/SevenSegmentDisplay'
+import { SegmentDisplay } from '../common/SegmentDisplay'
 import { StarPips } from '../common/StarPips'
 import styles from './ProfilePage.module.css'
 
@@ -36,11 +36,11 @@ export function ProfilePage() {
 
         <div className={styles.stats}>
           <div className={styles.stat}>
-            <SevenSegmentDisplay value={String(stats.levelsPassed).padStart(2, '0')} size={24} />
+            <SegmentDisplay value={String(stats.levelsPassed).padStart(2, '0')} size={24} />
             <div className={styles.statLabel}>{t('profile.levelsPassed')}</div>
           </div>
           <div className={styles.stat}>
-            <SevenSegmentDisplay value={String(stats.totalStars).padStart(2, '0')} size={24} />
+            <SegmentDisplay value={String(stats.totalStars).padStart(2, '0')} size={24} />
             <div className={styles.statLabel}>{t('profile.totalStars')}</div>
           </div>
         </div>
@@ -59,7 +59,7 @@ export function ProfilePage() {
                 <tr key={level.id}>
                   <td>{tLevelName(level.id, level.name)}</td>
                   <td>
-                    {best ? <SevenSegmentDisplay value={(best.completionTimeMs / 1000).toFixed(1).padStart(4, '0')} size={13} /> : '—'}
+                    {best ? <SegmentDisplay value={(best.completionTimeMs / 1000).toFixed(2).padStart(5, '0')} size={13} /> : '—'}
                   </td>
                   <td>{best ? <StarPips lit={best.stars} /> : '—'}</td>
                 </tr>

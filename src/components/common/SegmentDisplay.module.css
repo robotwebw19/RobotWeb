@@ -8,70 +8,38 @@
 }
 
 .digit {
-  position: relative;
   display: inline-block;
   width: calc(var(--seg-size) * 0.56);
   height: var(--seg-size);
   margin: 0 calc(var(--seg-size) * 0.06);
+  overflow: visible;
 }
 
 .seg {
-  position: absolute;
-  background: var(--segment-ghost);
+  fill: var(--segment-ghost);
 }
 
 .seg.on {
-  background: var(--segment-lit);
+  fill: var(--segment-lit);
 }
 
-.seg-a,
-.seg-d,
-.seg-g {
-  left: calc(var(--seg-size) * 0.12);
-  width: calc(var(--seg-size) * 0.32);
-  height: calc(var(--seg-size) * 0.11);
-  clip-path: polygon(15% 0, 85% 0, 100% 50%, 85% 100%, 15% 100%, 0 50%);
+.seg.ignite {
+  animation: segmentIgnite 220ms ease-out;
 }
 
-.seg-a {
-  top: 0;
-}
-
-.seg-g {
-  top: calc(50% - var(--seg-size) * 0.055);
-}
-
-.seg-d {
-  bottom: 0;
-}
-
-.seg-f,
-.seg-b,
-.seg-e,
-.seg-c {
-  width: calc(var(--seg-size) * 0.11);
-  height: calc(50% - var(--seg-size) * 0.07);
-  clip-path: polygon(0 15%, 50% 0, 100% 15%, 100% 85%, 50% 100%, 0 85%);
-}
-
-.seg-f {
-  left: 0;
-  top: calc(var(--seg-size) * 0.06);
-}
-
-.seg-b {
-  right: 0;
-  top: calc(var(--seg-size) * 0.06);
-}
-
-.seg-e {
-  left: 0;
-  bottom: calc(var(--seg-size) * 0.06);
-}
-
-.seg-c {
-  right: 0;
-  bottom: calc(var(--seg-size) * 0.06);
+@keyframes segmentIgnite {
+  0% {
+    opacity: 0.15;
+    filter: brightness(2.4);
+  }
+  35% {
+    opacity: 1;
+    filter: brightness(2.4);
+  }
+  100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
 }
 
 .punct {

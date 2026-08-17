@@ -2,7 +2,7 @@ import { useSimulationStore } from '../../state/simulationStore'
 import type { SimStatus } from '../../sim/engine/SimState'
 import { useTranslation } from '../../i18n/useTranslation'
 import type { TranslationKey } from '../../i18n/translations'
-import { SevenSegmentDisplay } from '../common/SevenSegmentDisplay'
+import { SegmentDisplay } from '../common/SegmentDisplay'
 import styles from './SimHud.module.css'
 
 const STATUS_KEYS: Record<SimStatus, TranslationKey> = {
@@ -13,9 +13,9 @@ const STATUS_KEYS: Record<SimStatus, TranslationKey> = {
   failed: 'status.failed',
 }
 
-/** Fixed-width "SS.s" so the digit count — and the readout's width — never jumps mid-run. */
+/** Fixed-width "SS.ss" so the digit count — and the readout's width — never jumps mid-run. */
 function formatReadout(ms: number): string {
-  return (ms / 1000).toFixed(1).padStart(4, '0')
+  return (ms / 1000).toFixed(2).padStart(5, '0')
 }
 
 export function SimHud() {
@@ -37,11 +37,11 @@ export function SimHud() {
       </div>
       <div className={styles.readout}>
         <span className={styles.label}>{t('hud.elapsed')}</span>
-        <SevenSegmentDisplay value={formatReadout(simState.elapsedMs)} size={18} />
+        <SegmentDisplay value={formatReadout(simState.elapsedMs)} size={18} />
       </div>
       <div className={styles.readout}>
         <span className={styles.label}>{t('hud.offTrack')}</span>
-        <SevenSegmentDisplay
+        <SegmentDisplay
           value={formatReadout(simState.offTrackMs)}
           size={18}
           className={simState.offTrackMs > 0 ? styles.offTrackLit : undefined}

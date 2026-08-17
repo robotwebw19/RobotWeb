@@ -1,6 +1,6 @@
 import type { LevelLeaderboardRow } from './leaderboardAggregation'
 import { useTranslation } from '../../i18n/useTranslation'
-import { SevenSegmentDisplay } from '../common/SevenSegmentDisplay'
+import { SegmentDisplay } from '../common/SegmentDisplay'
 import { StarPips } from '../common/StarPips'
 import { RankBadge } from './RankBadge'
 import styles from './LeaderboardTable.module.css'
@@ -38,7 +38,7 @@ export function LevelLeaderboardTable({ rows }: LevelLeaderboardTableProps) {
               <td>{row.classroom}</td>
               <td>{row.studentNumber}</td>
               <td>
-                <SevenSegmentDisplay value={(row.bestTimeMs / 1000).toFixed(1).padStart(4, '0')} size={14} />
+                <SegmentDisplay value={(row.bestTimeMs / 1000).toFixed(2).padStart(5, '0')} size={14} />
               </td>
               <td>
                 <StarPips lit={row.stars} />

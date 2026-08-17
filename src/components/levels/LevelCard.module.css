@@ -9,18 +9,25 @@
   background: var(--panel-bg);
   text-align: left;
   cursor: pointer;
+  box-shadow: var(--depth-rest);
+  transform: perspective(var(--tilt-perspective)) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
   transition:
     border-color 150ms ease-out,
     background-color 150ms ease-out,
-    transform 120ms cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow 150ms ease-out,
+    transform 150ms ease-out;
 }
 
 .card:hover {
   border-color: var(--accent);
+  box-shadow: var(--depth-raised);
+  transform: perspective(var(--tilt-perspective)) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg))
+    translateZ(10px);
 }
 
 .card:active {
-  transform: scale(0.98);
+  box-shadow: var(--depth-pressed);
+  transform: perspective(var(--tilt-perspective)) rotateX(0deg) rotateY(0deg) translateZ(-2px) scale(0.99);
   transition-duration: 60ms;
 }
 
@@ -32,6 +39,9 @@
 .selected {
   border-color: var(--accent);
   background: var(--accent-bg);
+  box-shadow: var(--depth-raised);
+  transform: perspective(var(--tilt-perspective)) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg))
+    translateZ(6px);
 }
 
 .header {
