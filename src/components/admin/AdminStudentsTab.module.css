@@ -1,7 +1,18 @@
+.tableWrap {
+  height: calc(100vh - 132px);
+  min-height: 320px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--panel-bg);
+  box-shadow: var(--depth-rest);
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
+  white-space: nowrap;
 }
 
 .table th,
@@ -12,34 +23,206 @@
 }
 
 .table th {
+  position: sticky;
+  top: 0;
+  background: var(--panel-bg);
   color: var(--text-muted);
   font-weight: 500;
   font-size: 12px;
+  z-index: 2;
+  padding: 0;
 }
 
-.deleteButton {
-  padding: 4px 10px;
-  border-radius: 3px;
-  border: 1px solid var(--danger);
+.sortButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
   background: none;
-  color: var(--danger);
-  font-size: 12px;
+  color: inherit;
+  font: inherit;
+  text-align: left;
   cursor: pointer;
+  transition: color 150ms ease-out;
+}
+
+.sortButton:hover {
+  color: var(--text-h);
+}
+
+.sortButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.sortIcon {
+  flex: 0 0 auto;
+  width: 13px;
+  height: 13px;
+  transition: transform 150ms ease-out;
+}
+
+.table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.stripedRow {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.actionsCell {
+  position: sticky;
+  right: 0;
+  background-color: var(--panel-bg);
+  box-shadow: -1px 0 0 var(--border);
+}
+
+th.actionsCell {
+  z-index: 3;
+}
+
+/* The sticky action column needs an opaque background of its own (a translucent tint alone
+   would let horizontally-scrolled cells show through), so row-state tints layer over a solid
+   panel-bg base via background-image instead of replacing background-color outright. */
+.stripedRow .actionsCell {
+  background-image: linear-gradient(rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.035));
+}
+
+tr:hover .actionsCell {
+  background-image: linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05));
+}
+
+.editingRow .actionsCell {
+  background-image: linear-gradient(var(--accent-bg), var(--accent-bg));
+}
+
+.editingRow {
+  background: var(--accent-bg);
+}
+
+.idChip {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: var(--panel-recessed);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+.levelsPassed {
+  font-weight: 700;
+  color: var(--text-h);
+}
+
+/* Green, not amber — matches StarPips' lit-star color (--success), not the LED "warning" hue. */
+.starValue {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--success);
+  font-weight: 700;
+}
+
+.starValue svg {
+  width: 12px;
+  height: 12px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.iconButton,
+.iconButtonDanger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg);
+  color: var(--text-muted);
+  cursor: pointer;
+  box-shadow: var(--depth-rest);
   transition:
+    border-color 150ms ease-out,
+    color 150ms ease-out,
     background-color 150ms ease-out,
+    box-shadow 100ms ease-out,
     transform 120ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.deleteButton:hover {
-  background: rgba(255, 59, 48, 0.12);
+.iconButton svg,
+.iconButtonDanger svg {
+  width: 15px;
+  height: 15px;
 }
 
-.deleteButton:active {
-  transform: scale(0.96);
+.iconButton:hover {
+  border-color: var(--accent);
+  color: var(--text-h);
+  box-shadow: var(--depth-raised);
+  transform: translateY(-1px);
+}
+
+.iconButtonDanger:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: rgba(255, 59, 48, 0.12);
+  box-shadow: var(--depth-raised);
+  transform: translateY(-1px);
+}
+
+.iconButton:active,
+.iconButtonDanger:active {
+  box-shadow: var(--depth-pressed);
+  transform: translateY(1px) scale(0.94);
   transition-duration: 60ms;
 }
 
-.deleteButton:focus-visible {
+.iconButton:focus-visible,
+.iconButtonDanger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.editInput,
+.editSelect {
+  width: 100px;
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.editInputNarrow {
+  width: 56px;
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.editInput:focus-visible,
+.editSelect:focus-visible,
+.editInputNarrow:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }

@@ -2,15 +2,13 @@ import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { useAuthStore, type OnboardingProfile } from '../../state/authStore'
 import type { RobotConfig, StudentPrefix } from '../../types/domain'
+import { PREFIX_OPTIONS, GRADE_OPTIONS } from '../../types/studentOptions'
 import { defaultRobotConfig } from '../../robot/defaultRobot'
 import { SensorConfigurator } from '../sensors/SensorConfigurator'
 import { useTranslation } from '../../i18n/useTranslation'
 import styles from './NewUserOnboarding.module.css'
 
 type Step = 'name' | 'robot'
-
-const PREFIX_OPTIONS: StudentPrefix[] = ['เด็กชาย', 'เด็กหญิง', 'นาย', 'นางสาว']
-const GRADE_OPTIONS = ['ม.1', 'ม.2', 'ม.3', 'ม.4', 'ม.5', 'ม.6']
 
 const EMPTY_PROFILE: OnboardingProfile = {
   prefix: 'เด็กชาย',

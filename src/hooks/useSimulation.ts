@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import type { ColorZone, Obstacle, SensorConfig, StartPosition, Vector2 } from '../types/domain'
 import { TrackModel } from '../sim/engine/TrackModel'
 import { SimulationLoop } from '../sim/engine/SimulationLoop'
+import { sampleAllSensors } from '../sim/engine/SensorSampling'
+import type { Pose } from '../sim/engine/RobotPhysics'
 import { useSimulationStore } from '../state/simulationStore'
 import { ROBOT_RADIUS_PX, ROBOT_WHEEL_BASE_PX } from '../utils/constants'
 
@@ -35,6 +37,7 @@ export function useSimulation({
 }: UseSimulationParams) {
   const setStatus = useSimulationStore((state) => state.setStatus)
   const resetToPose = useSimulationStore((state) => state.resetToPose)
+  const applyPatch = useSimulationStore((state) => state.applyPatch)
 
   const track = useMemo(() => new TrackModel(trackPath), [trackPath])
   const loopRef = useRef<SimulationLoop | null>(null)
@@ -42,6 +45,20 @@ export function useSimulation({
 
   const onBeforePhysicsTickRef = useRef(onBeforePhysicsTick)
   onBeforePhysicsTickRef.current = onBeforePhysicsTick
+
+  /**
+   * A fresh SimState starts with empty sensorReadings (see createInitialSimState) — without this,
+   * the first interpreter pump of a run sees every sensor as 0 before physics has sampled the
+   * real pose, which is indistinguishable from an off-track reading and can corrupt any stateful
+   * logic (e.g. color-inversion flip detection) that trusts tick-one sensor values.
+   */
+  const resetSimToStart = useCallback(() => {
+    const startPose: Pose = { x: startX, y: startY, headingDeg: startHeadingDeg }
+    resetToPose(startPose)
+    applyPatch({
+      sensorReadings: sampleAllSensors(startPose, sensors, track, obstacles, colorZones, lineInversionBoundaryY),
+    })
+  }, [track, obstacles, colorZones, sensors, startX, startY, startHeadingDeg, lineInversionBoundaryY, resetToPose, applyPatch])
 
   useEffect(() => {
     const loop = new SimulationLoop(
@@ -62,19 +79,19 @@ export function useSimulation({
       },
     )
     loopRef.current = loop
-    resetToPose({ x: startX, y: startY, headingDeg: startHeadingDeg })
+    resetSimToStart()
     loop.start()
 
     return () => {
       loop.stop()
       loopRef.current = null
     }
-  }, [track, obstacles, colorZones, sensors, startX, startY, startHeadingDeg, lineInversionBoundaryY, resetToPose])
+  }, [track, obstacles, colorZones, sensors, lineInversionBoundaryY, resetSimToStart])
 
   return {
     run: () => setStatus('running'),
     pause: () => setStatus('paused'),
-    reset: () => resetToPose({ x: startX, y: startY, headingDeg: startHeadingDeg }),
+    reset: resetSimToStart,
     step: () => loopRef.current?.stepOnce(),
   }
 }

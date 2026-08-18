@@ -7,7 +7,8 @@ export const translations = {
   'nav.profile': { en: 'Profile', th: 'โปรไฟล์' },
   'nav.logout': { en: 'Log out', th: 'ออกจากระบบ' },
   'nav.notSignedIn': { en: 'Not signed in', th: 'ยังไม่ได้เข้าสู่ระบบ' },
-  'nav.admin': { en: 'Admin', th: 'แอดมิน' },
+  'nav.adminStudents': { en: 'Manage students', th: 'จัดการนักเรียน' },
+  'nav.adminSolutions': { en: 'Solutions', th: 'เฉลย' },
 
   // Login
   'login.brand': { en: 'URRWNM Line Tracking Robot', th: 'URRWNM Line Tracking Robot' },
@@ -198,8 +199,6 @@ export const translations = {
 
   // Admin
   'admin.title': { en: 'Admin Dashboard', th: 'แผงควบคุมแอดมิน' },
-  'admin.tabLevels': { en: 'Levels & Solutions', th: 'ด่านและเฉลย' },
-  'admin.tabStudents': { en: 'Students', th: 'นักเรียน' },
   'admin.solutionCode': { en: 'Solution code', th: 'โค้ดเฉลย' },
   'admin.requiredEquipment': { en: 'Required equipment', th: 'อุปกรณ์ที่ต้องใช้' },
   'admin.noEquipment': { en: 'No equipment list for this level.', th: 'ด่านนี้ยังไม่มีรายการอุปกรณ์' },
@@ -214,9 +213,13 @@ export const translations = {
     th: 'ลบบัญชีนักเรียนคนนี้หรือไม่? ไม่สามารถย้อนกลับได้',
   },
   'admin.studentId': { en: 'Student ID', th: 'รหัสนักเรียน' },
-  'admin.displayName': { en: 'Name', th: 'ชื่อ' },
-  'admin.robot': { en: 'Robot', th: 'หุ่นยนต์' },
+  'admin.actions': { en: 'Actions', th: 'จัดการ' },
+  'admin.editStudent': { en: 'Edit student', th: 'แก้ไขนักเรียน' },
+  'admin.saveStudent': { en: 'Save', th: 'บันทึก' },
+  'admin.cancelEdit': { en: 'Cancel', th: 'ยกเลิก' },
   'admin.noStudents': { en: 'No students have signed in yet.', th: 'ยังไม่มีนักเรียนเข้าสู่ระบบ' },
+  'admin.manageStudents': { en: 'Manage students →', th: 'จัดการนักเรียน →' },
+  'admin.copyCode': { en: 'Copy code', th: 'ก็อปปี้โค้ด' },
 
   // Seed level names (user-created levels fall back to their own stored name — see getLevelName)
   'level.level-01-straight.name': { en: '1. Straight Line', th: '1. เส้นตรง' },

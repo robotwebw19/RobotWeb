@@ -1,13 +1,13 @@
 import { Navbar } from '../layout/Navbar'
-import { AdminLevelsTab } from './AdminLevelsTab'
+import { AdminStudentsTab } from './AdminStudentsTab'
 import styles from './AdminDashboard.module.css'
 
-export function AdminDashboard() {
+export function AdminStudentsPage() {
   return (
     <div>
       <Navbar />
       <div className={styles.page}>
-        <AdminLevelsTab />
+        <AdminStudentsTab />
       </div>
     </div>
   )

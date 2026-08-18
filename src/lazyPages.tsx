@@ -16,3 +16,6 @@ export const ProfilePage = lazy(() =>
 export const AdminDashboard = lazy(() =>
   import('./components/admin/AdminDashboard').then((m) => ({ default: m.AdminDashboard })),
 )
+export const AdminStudentsPage = lazy(() =>
+  import('./components/admin/AdminStudentsPage').then((m) => ({ default: m.AdminStudentsPage })),
+)

@@ -23,7 +23,22 @@ export function Navbar() {
       <nav className={styles.links}>
         {isAdmin && (
           <>
-            <Link to="/admin">{t('nav.admin')}</Link>
+            <Link to="/admin/students" className={styles.iconLink} title={t('nav.adminStudents')} aria-label={t('nav.adminStudents')}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="9" cy="8" r="3.2" />
+                <path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6" />
+                <circle cx="17" cy="9" r="2.4" />
+                <path d="M15 20c.2-2.8 2-4.6 4.5-4.6" />
+              </svg>
+            </Link>
+            <Link to="/admin" className={styles.iconLink} title={t('nav.adminSolutions')} aria-label={t('nav.adminSolutions')}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="8" cy="15" r="4" />
+                <path d="M11 12l9-9" />
+                <path d="M17 6l3 3" />
+                <path d="M14 9l2 2" />
+              </svg>
+            </Link>
             <button className={styles.logoutButton} type="button" onClick={handleLogout}>
               {t('nav.logout')}
             </button>

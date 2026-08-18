@@ -50,11 +50,11 @@ export const level05ColorZone: Level = {
   ],
   obstacles: [],
   colorZones: [],
-  startPosition: { x: 400, y: 90, headingDeg: 0 },
+  startPosition: { x: 240, y: 250, headingDeg: 275 },
   finishZone: { x: 400, y: 410, radius: 24 },
   lineInversionBoundaryY: 250,
-  timeLimitMs: 22_000,
-  parConditions: { threeStarTimeMs: 8000, twoStarTimeMs: 13_000, maxOffTrackEventsForThreeStars: 1 },
+  timeLimitMs: 33_000,
+  parConditions: { threeStarTimeMs: 12_000, twoStarTimeMs: 19_500, maxOffTrackEventsForThreeStars: 1 },
   requiredEquipment: TWO_IR_AND_MOTORS,
   solutionCode: `int baseSpeed = 150; // ความเร็วพื้นฐานของมอเตอร์ทั้งสองข้าง
 int turnBoost = 100; // ค่าลดความเร็วมอเตอร์ฝั่งที่ต้องเลี้ยวเข้าหาเส้น

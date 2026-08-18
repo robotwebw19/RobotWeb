@@ -4,7 +4,7 @@ import { LoginPage } from './components/auth/LoginPage'
 import { NewUserOnboarding } from './components/auth/NewUserOnboarding'
 import { RequireAuth } from './components/auth/RequireAuth'
 import { RequireAdmin } from './components/auth/RequireAdmin'
-import { MainAppPage, LeaderboardPage, ProfilePage, AdminDashboard } from './lazyPages'
+import { MainAppPage, LeaderboardPage, ProfilePage, AdminDashboard, AdminStudentsPage } from './lazyPages'
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -45,6 +45,16 @@ export const router = createBrowserRouter([
       <RequireAdmin>
         <Suspense fallback={null}>
           <AdminDashboard />
+        </Suspense>
+      </RequireAdmin>
+    ),
+  },
+  {
+    path: '/admin/students',
+    element: (
+      <RequireAdmin>
+        <Suspense fallback={null}>
+          <AdminStudentsPage />
         </Suspense>
       </RequireAdmin>
     ),

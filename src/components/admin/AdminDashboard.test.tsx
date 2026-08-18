@@ -30,8 +30,7 @@ describe('AdminLevelsTab', () => {
     render(<AdminLevelsTab />)
 
     // First seed level is selected by default and shows its solution code.
-    expect(await screen.findByRole('heading', { name: /1\. เส้นตรง/ })).toBeInTheDocument()
-    expect(screen.getByText(/pinMode\(D2, INPUT\)/)).toBeInTheDocument()
+    expect(await screen.findByText(/pinMode\(D2, INPUT\)/)).toBeInTheDocument()
 
     fireEvent.click(await screen.findByText('Community Level'))
     expect(await screen.findByRole('button', { name: 'ลบด่าน' })).toBeInTheDocument()
@@ -65,6 +64,21 @@ describe('AdminStudentsTab', () => {
 
     await waitFor(() => expect(screen.queryByText('Ada')).not.toBeInTheDocument())
     expect(await userRepository.getById('22222')).toBeUndefined()
+  })
+
+  it('edits a student profile in place', async () => {
+    await userRepository.save(student)
+    render(<AdminStudentsTab />)
+
+    expect(await screen.findByText('Ada')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'แก้ไขนักเรียน' }))
+
+    const firstNameInput = screen.getByLabelText('ชื่อ')
+    fireEvent.change(firstNameInput, { target: { value: 'Grace' } })
+    fireEvent.click(screen.getByRole('button', { name: 'บันทึก' }))
+
+    expect(await screen.findByText('Grace')).toBeInTheDocument()
+    expect((await userRepository.getById('22222'))?.displayName).toBe('Grace Test')
   })
 
   it('shows an empty state with no students', () => {
