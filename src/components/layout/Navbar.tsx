@@ -48,8 +48,21 @@ export function Navbar() {
         )}
         {!isAdmin && user && (
           <>
-            <Link to="/leaderboard">{t('nav.leaderboard')}</Link>
-            <Link to="/profile">{t('nav.profile')}</Link>
+            <Link to="/leaderboard" className={styles.iconLink} title={t('nav.leaderboard')} aria-label={t('nav.leaderboard')}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M8 21h8" />
+                <path d="M12 17v4" />
+                <path d="M7 4h10v5a5 5 0 0 1-10 0V4Z" />
+                <path d="M7 5H4a1 1 0 0 0-1 1v1a4 4 0 0 0 4 4" />
+                <path d="M17 5h3a1 1 0 0 1 1 1v1a4 4 0 0 1-4 4" />
+              </svg>
+            </Link>
+            <Link to="/profile" className={styles.iconLink} title={t('nav.profile')} aria-label={t('nav.profile')}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+              </svg>
+            </Link>
             <span className={styles.status}>{user.displayName}</span>
             <button className={styles.logoutButton} type="button" onClick={handleLogout}>
               {t('nav.logout')}

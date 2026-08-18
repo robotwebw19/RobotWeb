@@ -31,7 +31,7 @@ export function ProfilePage() {
       <div className={styles.page}>
         <div className={styles.header}>
           <h1>{user.displayName}</h1>
-          <p>{t('profile.robotSummary', { count: user.robotConfig.sensors.length })}</p>
+          <p>{t('profile.gradeAndNumber', { grade: user.grade, number: user.studentNumber })}</p>
         </div>
 
         <div className={styles.stats}>

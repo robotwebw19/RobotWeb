@@ -1,6 +1,17 @@
 type Entry = Record<'en' | 'th', string>
 
 export const translations = {
+  // Route error boundary
+  'error.title': { en: 'Something went wrong', th: 'เกิดข้อผิดพลาดที่ไม่คาดคิด' },
+  'error.subtitle': { en: 'This page hit an unexpected error. Try reloading it.', th: 'หน้านี้เกิดข้อผิดพลาด ลองโหลดหน้าใหม่อีกครั้ง' },
+  'error.staleTitle': { en: 'This page needs a refresh', th: 'หน้านี้ต้องโหลดใหม่' },
+  'error.staleSubtitle': {
+    en: 'The app was updated to a newer version while this tab was open. Reload to get the latest one.',
+    th: 'เว็บอัปเดตเป็นเวอร์ชันใหม่ระหว่างที่เปิดหน้านี้ค้างไว้ กดโหลดหน้าใหม่เพื่อใช้เวอร์ชันล่าสุด',
+  },
+  'error.reload': { en: 'Reload page', th: 'โหลดหน้าใหม่' },
+  'error.backHome': { en: '← Back to home', th: '← กลับหน้าหลัก' },
+
   // Navbar
   'nav.brand': { en: 'URRWNM Line Tracking Robot', th: 'URRWNM Line Tracking Robot' },
   'nav.leaderboard': { en: 'Leaderboard', th: 'กระดานผู้นำ' },
@@ -191,7 +202,7 @@ export const translations = {
   'leaderboard.levelsPassed': { en: 'Levels passed', th: 'ด่านที่ผ่าน' },
 
   // Profile
-  'profile.robotSummary': { en: '{count} sensor(s)', th: 'เซนเซอร์ {count} ตัว' },
+  'profile.gradeAndNumber': { en: 'Grade {grade} · No. {number}', th: 'ชั้น {grade} เลขที่ {number}' },
   'profile.levelsPassed': { en: 'Levels passed', th: 'ด่านที่ผ่าน' },
   'profile.totalStars': { en: 'Total stars', th: 'ดาวรวม' },
   'profile.level': { en: 'Level', th: 'ด่าน' },
