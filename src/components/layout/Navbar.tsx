@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../state/authStore'
 import { useTranslation } from '../../i18n/useTranslation'
+import logoMark from '../auth/login-avatar.png'
 import styles from './Navbar.module.css'
 
 export function Navbar() {
@@ -18,6 +19,7 @@ export function Navbar() {
   return (
     <header className={styles.navbar}>
       <Link to={isAdmin ? '/admin' : '/'} className={styles.logo}>
+        <img src={logoMark} alt="" className={styles.logoMark} />
         {t('nav.brand')}
       </Link>
       <nav className={styles.links}>
