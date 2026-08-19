@@ -18,14 +18,21 @@ function studentIdentity(student: User | undefined): Pick<User, 'displayName' | 
   }
 }
 
-/** Each level's fastest passed attempt, keyed by levelId — the per-student "best" reduction
- * shared by the level board and the student stats view. */
+/** True if `candidate` beats `existing` as a student's "best" result for a level: highest
+ * star count wins (that's the score that counts), fastest time breaks a tie. */
+function isBetterResult(candidate: LevelResult, existing: LevelResult | undefined): boolean {
+  if (!existing) return true
+  if (candidate.stars !== existing.stars) return candidate.stars > existing.stars
+  return candidate.completionTimeMs < existing.completionTimeMs
+}
+
+/** Each level's highest-scoring passed attempt, keyed by levelId — the per-student "best"
+ * reduction shared by the level board and the student stats view. */
 export function bestPassedPerLevel(results: LevelResult[]): Map<string, LevelResult> {
   const best = new Map<string, LevelResult>()
   for (const result of results) {
     if (!result.passed) continue
-    const existing = best.get(result.levelId)
-    if (!existing || result.completionTimeMs < existing.completionTimeMs) {
+    if (isBetterResult(result, best.get(result.levelId))) {
       best.set(result.levelId, result)
     }
   }
@@ -48,8 +55,7 @@ export async function getLevelLeaderboard(levelId: string): Promise<LevelLeaderb
   const bestByStudent = new Map<string, LevelResult>()
   for (const result of results) {
     if (!result.passed) continue
-    const existing = bestByStudent.get(result.studentId)
-    if (!existing || result.completionTimeMs < existing.completionTimeMs) {
+    if (isBetterResult(result, bestByStudent.get(result.studentId))) {
       bestByStudent.set(result.studentId, result)
     }
   }
@@ -86,8 +92,7 @@ export async function getGlobalLeaderboard(levels: Level[]): Promise<GlobalLeade
     for (const result of results) {
       if (!result.passed) continue
       const studentLevels = bestByStudentThenLevel.get(result.studentId) ?? new Map<string, LevelResult>()
-      const existing = studentLevels.get(result.levelId)
-      if (!existing || result.completionTimeMs < existing.completionTimeMs) {
+      if (isBetterResult(result, studentLevels.get(result.levelId))) {
         studentLevels.set(result.levelId, result)
       }
       bestByStudentThenLevel.set(result.studentId, studentLevels)

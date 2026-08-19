@@ -104,4 +104,16 @@ describe('getStudentStats', () => {
     expect(stats.perLevel[0].best?.stars).toBe(3)
     expect(stats.perLevel[1].best).toBeUndefined()
   })
+
+  it('keeps the highest-star attempt as best even when a later run was faster but scored fewer stars', async () => {
+    const levels = [fixtureLevel('l1')]
+    // Off-track events, not just time, affect stars — so a faster run can still score lower.
+    await levelResultRepository.save({ studentId: '11111', levelId: 'l1', completionTimeMs: 6000, stars: 3, passed: true, submittedAt: 't1' })
+    await levelResultRepository.save({ studentId: '11111', levelId: 'l1', completionTimeMs: 4000, stars: 1, passed: true, submittedAt: 't2' })
+
+    const stats = await getStudentStats('11111', levels)
+    expect(stats.perLevel[0].best?.stars).toBe(3)
+    expect(stats.perLevel[0].best?.completionTimeMs).toBe(6000)
+    expect(stats.totalStars).toBe(3)
+  })
 })
