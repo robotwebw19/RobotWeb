@@ -44,8 +44,8 @@ describe('getLevelLeaderboard', () => {
 
     const rows = await getLevelLeaderboard('l1')
     expect(rows).toEqual([
-      { studentId: '11111', displayName: 'Ada', classroom: '1', studentNumber: '1', bestTimeMs: 6000, stars: 3, completedAt: 't2' },
-      { studentId: '22222', displayName: 'Grace', classroom: '1', studentNumber: '1', bestTimeMs: 7000, stars: 2, completedAt: 't3' },
+      { studentId: '11111', displayName: 'Ada', grade: 'ม.1', classroom: '1', studentNumber: '1', bestTimeMs: 6000, stars: 3, completedAt: 't2' },
+      { studentId: '22222', displayName: 'Grace', grade: 'ม.1', classroom: '1', studentNumber: '1', bestTimeMs: 7000, stars: 2, completedAt: 't3' },
     ])
   })
 
@@ -76,7 +76,7 @@ describe('getGlobalLeaderboard', () => {
 
     const rows = await getGlobalLeaderboard(levels)
     expect(rows).toEqual([
-      { studentId: '11111', displayName: 'Ada', classroom: '1', studentNumber: '1', totalStars: 5, levelsPassed: 2 },
+      { studentId: '11111', displayName: 'Ada', grade: 'ม.1', classroom: '1', studentNumber: '1', totalStars: 5, levelsPassed: 2 },
     ])
   })
 

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { userRepository, levelRepository } from '../../data'
 import { useLiveLevelResults } from '../../hooks/useLiveLevelResults'
 import { getStudentStats, type StudentStats } from '../leaderboard/leaderboardAggregation'
+import { FilterTabs } from '../common/FilterTabs'
 import { useTranslation } from '../../i18n/useTranslation'
 import type { TranslationKey } from '../../i18n/translations'
 import { PREFIX_OPTIONS, GRADE_OPTIONS } from '../../types/studentOptions'
@@ -125,6 +126,8 @@ export function AdminStudentsTab() {
   const [draft, setDraft] = useState<EditDraft | null>(null)
   const [sortKey, setSortKey] = useState<SortKey | null>(null)
   const [sortDir, setSortDir] = useState<SortDir>('asc')
+  const [selectedGrade, setSelectedGrade] = useState('')
+  const [selectedClassroom, setSelectedClassroom] = useState('')
 
   useEffect(() => {
     userRepository.getAll().then(setStudents)
@@ -141,16 +144,46 @@ export function AdminStudentsTab() {
     [students, levels],
   )
 
+  const grades = useMemo(
+    () =>
+      Array.from(new Set(students.map((student) => student.grade).filter(Boolean))).sort((a, b) =>
+        a.localeCompare(b, 'th', { numeric: true }),
+      ),
+    [students],
+  )
+
+  const classrooms = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          students
+            .filter((student) => !selectedGrade || student.grade === selectedGrade)
+            .map((student) => student.classroom)
+            .filter(Boolean),
+        ),
+      ).sort((a, b) => a.localeCompare(b, 'th', { numeric: true })),
+    [students, selectedGrade],
+  )
+
+  function changeGrade(grade: string) {
+    setSelectedGrade(grade)
+    setSelectedClassroom('')
+  }
+
   const sortedStudents = useMemo(() => {
-    if (!sortKey) return students
-    const sorted = [...students].sort((a, b) => {
+    const scoped = students.filter(
+      (student) => (!selectedGrade || student.grade === selectedGrade) && (!selectedClassroom || student.classroom === selectedClassroom),
+    )
+    if (!sortKey) return scoped
+    const sorted = [...scoped].sort((a, b) => {
       const av = sortValue(a, statsByStudentId[a.studentId] ?? EMPTY_STATS, sortKey)
       const bv = sortValue(b, statsByStudentId[b.studentId] ?? EMPTY_STATS, sortKey)
-      const cmp = typeof av === 'number' && typeof bv === 'number' ? av - bv : String(av).localeCompare(String(bv), 'th')
+      const cmp =
+        typeof av === 'number' && typeof bv === 'number' ? av - bv : String(av).localeCompare(String(bv), 'th', { numeric: true })
       return sortDir === 'asc' ? cmp : -cmp
     })
     return sorted
-  }, [students, statsByStudentId, sortKey, sortDir])
+  }, [students, statsByStudentId, sortKey, sortDir, selectedGrade, selectedClassroom])
 
   function toggleSort(key: SortKey) {
     if (sortKey === key) {
@@ -210,8 +243,18 @@ export function AdminStudentsTab() {
   ]
 
   return (
-    <div className={styles.tableWrap}>
-      <table className={styles.table}>
+    <div>
+      <div className={styles.filterRow}>
+        <FilterTabs options={grades} value={selectedGrade} onChange={changeGrade} allLabel={t('common.allGrades')} />
+        <FilterTabs
+          options={classrooms}
+          value={selectedClassroom}
+          onChange={setSelectedClassroom}
+          allLabel={t('common.allClassrooms')}
+        />
+      </div>
+      <div className={styles.tableWrap}>
+        <table className={styles.table}>
         <thead>
           <tr>
             {headerColumns.map((column) => (
@@ -374,6 +417,7 @@ export function AdminStudentsTab() {
           })}
         </tbody>
       </table>
+      </div>
     </div>
   )
 }

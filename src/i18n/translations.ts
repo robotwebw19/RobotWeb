@@ -45,6 +45,8 @@ export const translations = {
   'onboarding.lastNamePlaceholder': { en: 'Last name', th: 'นามสกุล' },
   'onboarding.gradeLabel': { en: 'Grade', th: 'มัธยมศึกษาปีที่' },
   'onboarding.classroomLabel': { en: 'Classroom', th: 'ห้อง' },
+  'common.allClassrooms': { en: 'All classrooms', th: 'ทุกห้อง' },
+  'common.allGrades': { en: 'All grades', th: 'ทุกชั้น' },
   'onboarding.classroomPlaceholder': { en: 'e.g. 3', th: 'เช่น 3' },
   'onboarding.numberLabel': { en: 'Number', th: 'เลขที่' },
   'onboarding.numberPlaceholder': { en: 'e.g. 12', th: 'เช่น 12' },
@@ -200,6 +202,7 @@ export const translations = {
   'leaderboard.date': { en: 'Date', th: 'วันที่' },
   'leaderboard.totalStars': { en: 'Total stars', th: 'ดาวรวม' },
   'leaderboard.levelsPassed': { en: 'Levels passed', th: 'ด่านที่ผ่าน' },
+  'leaderboard.newScoreToast': { en: 'A new score just came in!', th: 'มีคะแนนใหม่ส่งเข้ามา!' },
 
   // Profile
   'profile.gradeAndNumber': { en: 'Grade {grade} · No. {number}', th: 'ชั้น {grade} เลขที่ {number}' },

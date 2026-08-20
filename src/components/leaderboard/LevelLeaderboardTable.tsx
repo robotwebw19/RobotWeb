@@ -2,6 +2,8 @@ import type { LevelLeaderboardRow } from './leaderboardAggregation'
 import { useTranslation } from '../../i18n/useTranslation'
 import { SegmentDisplay } from '../common/SegmentDisplay'
 import { StarPips } from '../common/StarPips'
+import { SortableHeader } from '../common/SortableHeader'
+import { useSortableRows } from '../../hooks/useSortableRows'
 import { RankBadge } from './RankBadge'
 import styles from './LeaderboardTable.module.css'
 
@@ -9,8 +11,15 @@ interface LevelLeaderboardTableProps {
   rows: LevelLeaderboardRow[]
 }
 
+type SortKey = 'displayName' | 'classroom' | 'studentNumber' | 'bestTimeMs' | 'stars' | 'completedAt'
+
+function sortValue(row: LevelLeaderboardRow, key: SortKey): string | number {
+  return row[key]
+}
+
 export function LevelLeaderboardTable({ rows }: LevelLeaderboardTableProps) {
   const { t } = useTranslation()
+  const { sortedRows, sortKey, sortDir, toggleSort } = useSortableRows(rows, sortValue)
 
   if (rows.length === 0) {
     return <p className={styles.empty}>{t('leaderboard.levelEmpty')}</p>
@@ -22,16 +31,22 @@ export function LevelLeaderboardTable({ rows }: LevelLeaderboardTableProps) {
         <thead>
           <tr>
             <th className={styles.rank}>{t('leaderboard.rank')}</th>
-            <th>{t('leaderboard.player')}</th>
-            <th>{t('leaderboard.classroom')}</th>
-            <th>{t('leaderboard.studentNumber')}</th>
-            <th>{t('leaderboard.time')}</th>
-            <th>{t('leaderboard.stars')}</th>
-            <th>{t('leaderboard.date')}</th>
+            <SortableHeader label={t('leaderboard.player')} sortKey="displayName" activeKey={sortKey} dir={sortDir} onSort={toggleSort} />
+            <SortableHeader label={t('leaderboard.classroom')} sortKey="classroom" activeKey={sortKey} dir={sortDir} onSort={toggleSort} />
+            <SortableHeader
+              label={t('leaderboard.studentNumber')}
+              sortKey="studentNumber"
+              activeKey={sortKey}
+              dir={sortDir}
+              onSort={toggleSort}
+            />
+            <SortableHeader label={t('leaderboard.time')} sortKey="bestTimeMs" activeKey={sortKey} dir={sortDir} onSort={toggleSort} />
+            <SortableHeader label={t('leaderboard.stars')} sortKey="stars" activeKey={sortKey} dir={sortDir} onSort={toggleSort} />
+            <SortableHeader label={t('leaderboard.date')} sortKey="completedAt" activeKey={sortKey} dir={sortDir} onSort={toggleSort} />
           </tr>
         </thead>
         <tbody>
-          {rows.map((row, index) => (
+          {sortedRows.map((row, index) => (
             <tr key={row.studentId}>
               <RankBadge rank={index + 1} />
               <td>{row.displayName}</td>

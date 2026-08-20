@@ -10,9 +10,10 @@ async function resolveStudents(studentIds: string[]): Promise<Map<string, User>>
 
 /** The identity columns every leaderboard row shows, with a display fallback for a student
  * record that's gone missing (e.g. deleted after earning the result). */
-function studentIdentity(student: User | undefined): Pick<User, 'displayName' | 'classroom' | 'studentNumber'> {
+function studentIdentity(student: User | undefined): Pick<User, 'displayName' | 'grade' | 'classroom' | 'studentNumber'> {
   return {
     displayName: student?.displayName ?? 'Unknown player',
+    grade: student?.grade ?? '',
     classroom: student?.classroom ?? '',
     studentNumber: student?.studentNumber ?? '',
   }
@@ -42,6 +43,7 @@ export function bestPassedPerLevel(results: LevelResult[]): Map<string, LevelRes
 export interface LevelLeaderboardRow {
   studentId: string
   displayName: string
+  grade: string
   classroom: string
   studentNumber: string
   bestTimeMs: number
@@ -77,6 +79,7 @@ export async function getLevelLeaderboard(levelId: string): Promise<LevelLeaderb
 export interface GlobalLeaderboardRow {
   studentId: string
   displayName: string
+  grade: string
   classroom: string
   studentNumber: string
   totalStars: number
