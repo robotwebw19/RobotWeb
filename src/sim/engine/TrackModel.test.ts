@@ -1,5 +1,32 @@
 import { describe, expect, it } from 'vitest'
+import type { Vector2 } from '../../types/domain'
+import { distanceToSegment } from '../math/geometry'
 import { TrackModel } from './TrackModel'
+
+/** Deterministic PRNG (mulberry32) so the spatial-index cross-check below is reproducible. */
+function mulberry32(seed: number): () => number {
+  let state = seed
+  return () => {
+    state |= 0
+    state = (state + 0x6d2b79f5) | 0
+    let t = Math.imul(state ^ (state >>> 15), 1 | state)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+/** Ground truth for distanceToNearestPoint: a plain O(segments) linear scan, independent of
+ * TrackModel's spatial grid — what the grid's expanding-ring search must always match exactly. */
+function bruteForceDistance(point: Vector2, polylines: Vector2[][]): number {
+  let min = Infinity
+  for (const polyline of polylines) {
+    for (let i = 0; i < polyline.length - 1; i++) {
+      const d = distanceToSegment(point, polyline[i], polyline[i + 1])
+      if (d < min) min = d
+    }
+  }
+  return min
+}
 
 describe('TrackModel', () => {
   it('measures distance to the nearest point on a straight segment', () => {
@@ -38,5 +65,38 @@ describe('TrackModel', () => {
     ])
     expect(track.isOnTrack({ x: 50, y: 5 }, 8)).toBe(true)
     expect(track.isOnTrack({ x: 50, y: 10 }, 8)).toBe(false)
+  })
+
+  it('matches a brute-force linear scan for a large, gappy, multi-polyline track', () => {
+    // Simulates a hand-drawn level: several disjoint zig-zag polylines scattered across an
+    // area much bigger than one grid cell, so the query points below exercise the spatial
+    // grid's expanding-ring search (multiple rings, empty cells, points far outside every
+    // segment's bounding box) rather than only ever landing in a single occupied cell.
+    const random = mulberry32(42)
+    const polylines: Vector2[][] = []
+    for (let p = 0; p < 12; p++) {
+      const polyline: Vector2[] = []
+      let x = random() * 2000
+      let y = random() * 2000
+      polyline.push({ x, y })
+      for (let i = 0; i < 20; i++) {
+        x += (random() - 0.5) * 150
+        y += (random() - 0.5) * 150
+        polyline.push({ x, y })
+      }
+      polylines.push(polyline)
+    }
+    const track = new TrackModel(polylines)
+
+    for (let i = 0; i < 300; i++) {
+      const point = { x: random() * 2400 - 200, y: random() * 2400 - 200 }
+      expect(track.distanceToNearestPoint(point)).toBeCloseTo(bruteForceDistance(point, polylines), 6)
+    }
+  })
+
+  it('returns Infinity for an empty track', () => {
+    const track = new TrackModel([])
+    expect(track.distanceToNearestPoint({ x: 0, y: 0 })).toBe(Infinity)
+    expect(track.isOnTrack({ x: 0, y: 0 })).toBe(false)
   })
 })
