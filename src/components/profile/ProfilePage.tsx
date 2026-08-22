@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useAuthStore } from '../../state/authStore'
 import { levelRepository } from '../../data'
-import { useLiveLevelResults } from '../../hooks/useLiveLevelResults'
+import { useOwnLevelResults } from '../../hooks/useLiveLevelResults'
 import { getStudentStats, type StudentStats } from '../leaderboard/leaderboardAggregation'
 import { Navbar } from '../layout/Navbar'
 import { useTranslation } from '../../i18n/useTranslation'
@@ -16,7 +16,9 @@ export function ProfilePage() {
   const { t, tLevelName } = useTranslation()
   const [stats, setStats] = useState<StudentStats>(EMPTY_STATS)
 
-  useLiveLevelResults(
+  // This is the logged-in student's own stats — nobody else's save affects it, and this page
+  // always fetches fresh on mount, so no realtime subscription is needed (see useOwnLevelResults).
+  useOwnLevelResults(
     () => levelRepository.getAll().then((levels) => getStudentStats(user!.studentId, levels)),
     setStats,
     Boolean(user),

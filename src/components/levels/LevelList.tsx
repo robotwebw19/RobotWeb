@@ -3,7 +3,7 @@ import { levelRepository, levelResultRepository } from '../../data'
 import { useAuthStore } from '../../state/authStore'
 import { useLevelSelectionStore } from '../../state/levelSelectionStore'
 import { useLevelResultsStore } from '../../state/levelResultsStore'
-import { useLiveLevelResults } from '../../hooks/useLiveLevelResults'
+import { useOwnLevelResults } from '../../hooks/useLiveLevelResults'
 import type { Level, LevelResult } from '../../types/domain'
 import { bestPassedPerLevel } from '../leaderboard/leaderboardAggregation'
 import { LevelCard } from './LevelCard'
@@ -26,9 +26,9 @@ export function LevelList() {
     if (!studentId || !hasLevels) setBestByLevelId({})
   }, [studentId, hasLevels])
 
-  // Realtime: passing (or re-passing) a level anywhere refreshes each level card's best
-  // time/stars live, so the board updates on its own right after a run completes.
-  useLiveLevelResults(
+  // This is the student's own list — only their own saves change it, and useLevelProgress
+  // already bumps resultsVersion right after a save lands, so no realtime subscription needed.
+  useOwnLevelResults(
     () =>
       levelResultRepository.getForUser(studentId).then((results) => {
         const bestByLevel = bestPassedPerLevel(results)
