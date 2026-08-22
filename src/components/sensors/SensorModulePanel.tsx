@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useTranslation, type TFunction } from '../../i18n/useTranslation'
 import type { TranslationKey } from '../../i18n/translations'
 import styles from './SensorModulePanel.module.css'
@@ -35,12 +36,18 @@ function buildLegend(parts: SensorModulePart[], t: TFunction) {
 
 /** Shown on hover over a sensor catalog card: the real module photo with every part marked,
  * mirroring RobotPinoutPanel's hotspot-on-photo pattern for the robot itself. Shared by every
- * sensor module panel (IR, ultrasonic, ...) — only the photo and part list differ. */
+ * sensor module panel (IR, ultrasonic, ...) — only the photo and part list differ.
+ *
+ * Ported to `document.body`: the catalog card lives inside AppShell's `.left` column, which sets
+ * its own `position: relative` + `z-index` and so establishes a stacking context — no z-index on
+ * this panel, however high, can then paint above sibling columns (`.center`/`.right`) stacked in
+ * front of `.left`. A portal escapes that ancestor's stacking context entirely, the same fix a
+ * modal or toast library uses for exactly this "always on top of everything" requirement. */
 export function SensorModulePanel({ titleKey, image, imageAlt, imageWidth, imageHeight, dotRadius, parts }: SensorModulePanelProps) {
   const { t } = useTranslation()
   const legend = buildLegend(parts, t)
 
-  return (
+  return createPortal(
     <div className={styles.panel}>
       <p className={styles.title}>{t(titleKey)}</p>
       <div className={styles.boardWrap}>
@@ -62,6 +69,7 @@ export function SensorModulePanel({ titleKey, image, imageAlt, imageWidth, image
           </li>
         ))}
       </ul>
-    </div>
+    </div>,
+    document.body,
   )
 }
