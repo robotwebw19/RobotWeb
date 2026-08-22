@@ -42,22 +42,3 @@
   min-height: 0;
   overflow-y: auto;
 }
-
-/* Switching the Levels/Equipment tab swaps this whole subtree in one React conditional — with
-   no transition it just snaps, which reads as a layout glitch rather than a deliberate switch.
-   A short fade+rise on the freshly-mounted child gives the swap continuity without making
-   students wait (same timing/easing as LevelList's own item-entrance animation). */
-.content > * {
-  animation: tabContentEnter 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes tabContentEnter {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
