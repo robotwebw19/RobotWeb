@@ -1,0 +1,83 @@
+/* Fixed dead-center of the viewport — always in the same predictable, fully-visible spot no
+ * matter where the IR card sits in the catalog grid or how the page is scrolled. */
+.panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  max-width: calc(100vw - 32px);
+  padding: 10px 12px;
+  border-radius: 4px;
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  box-shadow: var(--depth-raised);
+  pointer-events: none;
+  z-index: 20;
+}
+
+.title {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-h);
+}
+
+.boardWrap {
+  position: relative;
+  width: 100%;
+}
+
+.boardImage {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 3px;
+}
+
+.pinOverlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.legend {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.legend li {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.swatch {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  align-self: center;
+}
+
+.partName {
+  flex: none;
+  color: var(--text);
+}
+
+.partRole {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-muted);
+}

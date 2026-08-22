@@ -8,6 +8,9 @@ import { validateRobotConfig } from '../../robot/robotConfigValidation'
 import { useTranslation } from '../../i18n/useTranslation'
 import type { TranslationKey } from '../../i18n/translations'
 import { EquipmentCard } from './EquipmentCard'
+import { IrModulePanel } from './IrModulePanel'
+import { UltrasonicModulePanel } from './UltrasonicModulePanel'
+import { MotorModulePanel } from './MotorModulePanel'
 import { SensorPlacementPreview } from './SensorPlacementPreview'
 import styles from './SensorConfigurator.module.css'
 
@@ -40,6 +43,9 @@ export function SensorConfigurator({ initialConfig, onSave, saveLabel }: SensorC
   const { t } = useTranslation()
   const [sensors, setSensors] = useState<SensorConfig[]>(initialConfig.sensors)
   const [motors, setMotors] = useState<MotorConfig[]>(initialConfig.motors)
+  const [irCardHovered, setIrCardHovered] = useState(false)
+  const [ultrasonicCardHovered, setUltrasonicCardHovered] = useState(false)
+  const [motorCardHovered, setMotorCardHovered] = useState(false)
 
   const nonIrSensors = useMemo(() => sensors.filter((s) => s.type !== 'ir'), [sensors])
   const irMounted = sensors.some((s) => s.type === 'ir')
@@ -76,19 +82,51 @@ export function SensorConfigurator({ initialConfig, onSave, saveLabel }: SensorC
           {sensorCatalog.map((entry) => {
             if (entry.type === 'ir') {
               return (
-                <EquipmentCard
+                <div
                   key="ir"
-                  label={t(CATALOG_LABEL_KEYS.ir)}
-                  description={t(CATALOG_DESCRIPTION_KEYS.ir)}
-                  meta={`${entry.weightGrams}g`}
-                  mounted={irMounted}
-                  onToggle={handleToggleIrRow}
-                />
+                  onMouseEnter={() => setIrCardHovered(true)}
+                  onMouseLeave={() => setIrCardHovered(false)}
+                  onFocus={() => setIrCardHovered(true)}
+                  onBlur={() => setIrCardHovered(false)}
+                >
+                  <EquipmentCard
+                    label={t(CATALOG_LABEL_KEYS.ir)}
+                    description={t(CATALOG_DESCRIPTION_KEYS.ir)}
+                    meta={`${entry.weightGrams}g`}
+                    mounted={irMounted}
+                    onToggle={handleToggleIrRow}
+                    suppressNativeTooltip
+                  />
+                  {irCardHovered && <IrModulePanel />}
+                </div>
               )
             }
 
             const sensorType = entry.type
             const mounted = sensors.some((s) => s.type === sensorType)
+
+            if (sensorType === 'ultrasonic') {
+              return (
+                <div
+                  key={sensorType}
+                  onMouseEnter={() => setUltrasonicCardHovered(true)}
+                  onMouseLeave={() => setUltrasonicCardHovered(false)}
+                  onFocus={() => setUltrasonicCardHovered(true)}
+                  onBlur={() => setUltrasonicCardHovered(false)}
+                >
+                  <EquipmentCard
+                    label={t(CATALOG_LABEL_KEYS.ultrasonic)}
+                    description={t(CATALOG_DESCRIPTION_KEYS.ultrasonic)}
+                    meta={`${entry.weightGrams}g`}
+                    mounted={mounted}
+                    onToggle={() => handleToggleSingle(sensorType)}
+                    suppressNativeTooltip
+                  />
+                  {ultrasonicCardHovered && <UltrasonicModulePanel />}
+                </div>
+              )
+            }
+
             return (
               <EquipmentCard
                 key={sensorType}
@@ -104,14 +142,22 @@ export function SensorConfigurator({ initialConfig, onSave, saveLabel }: SensorC
           {motorCatalog.map((entry) => {
             const mounted = motors.some((m) => m.side === entry.side)
             return (
-              <EquipmentCard
+              <div
                 key={entry.side}
-                label={t(MOTOR_LABEL_KEYS[entry.side])}
-                description={t(MOTOR_DESCRIPTION_KEY)}
-                meta={`${entry.weightGrams}g · ${entry.in1Pin}/${entry.in2Pin}/${entry.enablePin}`}
-                mounted={mounted}
-                onToggle={() => handleToggleMotor(entry.side)}
-              />
+                onMouseEnter={() => setMotorCardHovered(true)}
+                onMouseLeave={() => setMotorCardHovered(false)}
+                onFocus={() => setMotorCardHovered(true)}
+                onBlur={() => setMotorCardHovered(false)}
+              >
+                <EquipmentCard
+                  label={t(MOTOR_LABEL_KEYS[entry.side])}
+                  description={t(MOTOR_DESCRIPTION_KEY)}
+                  meta={`${entry.weightGrams}g · ${entry.in1Pin}/${entry.in2Pin}/${entry.enablePin}`}
+                  mounted={mounted}
+                  onToggle={() => handleToggleMotor(entry.side)}
+                  suppressNativeTooltip
+                />
+              </div>
             )
           })}
         </div>
@@ -119,6 +165,8 @@ export function SensorConfigurator({ initialConfig, onSave, saveLabel }: SensorC
         <div className={styles.side}>
           <SensorPlacementPreview sensors={sensors} motors={motors} />
         </div>
+
+        {motorCardHovered && <MotorModulePanel />}
       </div>
 
       {validation.errors.length > 0 && (
