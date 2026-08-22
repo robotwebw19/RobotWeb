@@ -5,3 +5,10 @@
   min-height: 0;
 }
 
+/* Matches Monaco's vs-dark background so there's no color flash while the editor chunk loads. */
+.editorFallback {
+  flex: 1;
+  min-height: 0;
+  background: #1e1e1e;
+}
+
