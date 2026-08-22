@@ -14,13 +14,6 @@ export const ULTRASONIC_MAX_RANGE_CM = 200
  * student's own code measures, and back. */
 export const SPEED_OF_SOUND_CM_PER_US = 0.0343
 
-/** TCS230-style color read: the channel matching the surface's true color pulses fast (a short
- * pulseIn() duration — strong signal); the other two channels pulse slow. Real hardware values
- * vary with lighting/calibration; these are representative round numbers for a two-threshold
- * classroom read, the same way real TCS230 tutorials tell students to calibrate their own. */
-export const COLOR_CHANNEL_STRONG_PULSE_US = 50
-export const COLOR_CHANNEL_WEAK_PULSE_US = 600
-
 export const MAX_OFF_TRACK_MS_BEFORE_FAIL = 1000
 
 export const IR_ROW_SPACING_PX = 12
@@ -46,3 +39,7 @@ export const EDITOR_DISPLAY_WIDTH_PX = 248
 export const EDITOR_DISPLAY_HEIGHT_PX = Math.round(
   (EDITOR_DISPLAY_WIDTH_PX / EDITOR_CANVAS_WIDTH_PX) * EDITOR_CANVAS_HEIGHT_PX,
 )
+
+/** Classroom value(s) kept out of every roster/leaderboard listing site-wide — a standing test
+ * classroom, not a real one, so it should never surface in a teacher-facing view. */
+export const HIDDEN_CLASSROOMS: ReadonlySet<string> = new Set(['55'])

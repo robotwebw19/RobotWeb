@@ -122,9 +122,11 @@ export function NewUserOnboarding() {
                 <input
                   className={styles.field}
                   type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   maxLength={10}
                   value={profile.classroom}
-                  onChange={(event) => updateProfile('classroom', event.target.value)}
+                  onChange={(event) => updateProfile('classroom', event.target.value.replace(/\D/g, ''))}
                   placeholder={t('onboarding.classroomPlaceholder')}
                   aria-label={t('onboarding.classroomLabel')}
                 />
@@ -134,9 +136,11 @@ export function NewUserOnboarding() {
                 <input
                   className={styles.field}
                   type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   maxLength={4}
                   value={profile.studentNumber}
-                  onChange={(event) => updateProfile('studentNumber', event.target.value)}
+                  onChange={(event) => updateProfile('studentNumber', event.target.value.replace(/\D/g, ''))}
                   placeholder={t('onboarding.numberPlaceholder')}
                   aria-label={t('onboarding.numberLabel')}
                 />
@@ -151,7 +155,6 @@ export function NewUserOnboarding() {
         {step === 'robot' && (
           <div className={styles.step}>
             <h1 className={styles.title}>{t('onboarding.buildRobotTitle')}</h1>
-            <p className={styles.subtitle}>{t('onboarding.buildRobotSubtitle')}</p>
             <SensorConfigurator
               initialConfig={defaultRobotConfig}
               onSave={handleFinish}

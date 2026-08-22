@@ -7,6 +7,7 @@ import { useTranslation } from '../../i18n/useTranslation'
 import type { TranslationKey } from '../../i18n/translations'
 import { PREFIX_OPTIONS, GRADE_OPTIONS } from '../../types/studentOptions'
 import type { Level, StudentPrefix, User } from '../../types/domain'
+import { HIDDEN_CLASSROOMS } from '../../utils/constants'
 import styles from './AdminStudentsTab.module.css'
 
 const EMPTY_STATS: StudentStats = { totalStars: 0, levelsPassed: 0, perLevel: [] }
@@ -130,7 +131,7 @@ export function AdminStudentsTab() {
   const [selectedClassroom, setSelectedClassroom] = useState('')
 
   useEffect(() => {
-    userRepository.getAll().then(setStudents)
+    userRepository.getAll().then((loaded) => setStudents(loaded.filter((student) => !HIDDEN_CLASSROOMS.has(student.classroom))))
     levelRepository.getAll().then(setLevels)
   }, [])
 
@@ -216,14 +217,14 @@ export function AdminStudentsTab() {
       ...draft,
       displayName: `${draft.firstName} ${draft.lastName}`.trim(),
     })
-    setStudents(await userRepository.getAll())
+    setStudents((await userRepository.getAll()).filter((student) => !HIDDEN_CLASSROOMS.has(student.classroom)))
     cancelEdit()
   }
 
   async function handleDelete(studentId: string) {
     if (!window.confirm(t('admin.confirmDeleteStudent'))) return
     await userRepository.delete(studentId)
-    setStudents(await userRepository.getAll())
+    setStudents((await userRepository.getAll()).filter((student) => !HIDDEN_CLASSROOMS.has(student.classroom)))
   }
 
   if (students.length === 0) {

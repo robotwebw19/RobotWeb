@@ -14,12 +14,20 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: var(--bg);
+}
+
+/* Sized in JS to exactly scale*width x scale*height, so this border always hugs the rendered
+ * track pixel-for-pixel — no leftover letterboxed strip inside the frame, ever. */
+.canvasFrame {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: #f8f8f7;
 }
 
 .canvasScaled {
-  flex: none;
-  transform-origin: center center;
+  transform-origin: top left;
 }
 
 .hint {

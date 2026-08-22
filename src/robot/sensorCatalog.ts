@@ -9,7 +9,7 @@ export interface SensorCatalogEntry {
 }
 
 // Display label/description text lives in i18n/translations.ts (catalog.<type>.label/description)
-// so the catalog stays language-agnostic — see components/sensors/SensorCatalogCard.tsx.
+// so the catalog stays language-agnostic — see components/sensors/EquipmentCard.tsx.
 export const sensorCatalog: SensorCatalogEntry[] = [
   {
     type: 'ir',
@@ -25,12 +25,6 @@ export const sensorCatalog: SensorCatalogEntry[] = [
     weightGrams: 12,
     availablePins: DIGITAL_PINS.slice(0, 6),
   },
-  {
-    type: 'color',
-    priceCredits: 200,
-    weightGrams: 8,
-    availablePins: DIGITAL_PINS.slice(6, 12),
-  },
 ]
 
 export function getCatalogEntry(type: SensorType): SensorCatalogEntry {
@@ -38,5 +32,3 @@ export function getCatalogEntry(type: SensorType): SensorCatalogEntry {
   if (!entry) throw new Error(`No catalog entry for sensor type "${type}"`)
   return entry
 }
-
-export const IR_COUNT_OPTIONS = [2, 3, 5, 8] as const

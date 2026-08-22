@@ -1,5 +1,6 @@
 import * as monaco from 'monaco-editor'
 import { loader } from '@monaco-editor/react'
+import { registerArduinoCompletions } from './monacoArduinoCompletions'
 
 // Bundle Monaco from the local npm package instead of @monaco-editor/react's
 // default CDN loader, for offline/classroom reliability.
@@ -11,3 +12,7 @@ import { loader } from '@monaco-editor/react'
 // its default worker code on the main thread with a one-time console notice,
 // which is fine at this scale.
 loader.config({ monaco })
+
+// Autocomplete for pinMode/digitalRead/HIGH/D2/etc. is a static list, not derived from Monaco's
+// (unused) language services, so it only needs registering once per app load.
+registerArduinoCompletions()

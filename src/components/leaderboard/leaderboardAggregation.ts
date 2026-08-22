@@ -1,5 +1,6 @@
 import type { Level, LevelResult, User } from '../../types/domain'
 import { levelResultRepository, userRepository } from '../../data'
+import { HIDDEN_CLASSROOMS } from '../../utils/constants'
 
 /** Batch-fetches students by id and returns them keyed by studentId — the shared user lookup
  * behind both leaderboards, so each only pays for one round trip instead of N. */
@@ -10,9 +11,12 @@ async function resolveStudents(studentIds: string[]): Promise<Map<string, User>>
 
 /** The identity columns every leaderboard row shows, with a display fallback for a student
  * record that's gone missing (e.g. deleted after earning the result). */
-function studentIdentity(student: User | undefined): Pick<User, 'displayName' | 'grade' | 'classroom' | 'studentNumber'> {
+function studentIdentity(
+  student: User | undefined,
+): Pick<User, 'displayName' | 'firstName' | 'grade' | 'classroom' | 'studentNumber'> {
   return {
     displayName: student?.displayName ?? 'Unknown player',
+    firstName: student?.firstName ?? '',
     grade: student?.grade ?? '',
     classroom: student?.classroom ?? '',
     studentNumber: student?.studentNumber ?? '',
@@ -43,6 +47,7 @@ export function bestPassedPerLevel(results: LevelResult[]): Map<string, LevelRes
 export interface LevelLeaderboardRow {
   studentId: string
   displayName: string
+  firstName: string
   grade: string
   classroom: string
   studentNumber: string
@@ -73,7 +78,9 @@ export async function getLevelLeaderboard(levelId: string): Promise<LevelLeaderb
     completedAt: result.submittedAt,
   }))
 
-  return rows.sort((a, b) => b.stars - a.stars || a.bestTimeMs - b.bestTimeMs)
+  return rows
+    .filter((row) => !HIDDEN_CLASSROOMS.has(row.classroom))
+    .sort((a, b) => b.stars - a.stars || a.bestTimeMs - b.bestTimeMs)
 }
 
 export interface GlobalLeaderboardRow {
@@ -116,7 +123,9 @@ export async function getGlobalLeaderboard(levels: Level[]): Promise<GlobalLeade
     }
   })
 
-  return rows.sort((a, b) => b.totalStars - a.totalStars || b.levelsPassed - a.levelsPassed)
+  return rows
+    .filter((row) => !HIDDEN_CLASSROOMS.has(row.classroom))
+    .sort((a, b) => b.totalStars - a.totalStars || b.levelsPassed - a.levelsPassed)
 }
 
 export interface StudentLevelStat {

@@ -5,13 +5,12 @@ import styles from './RunControls.module.css'
 
 interface RunControlsProps {
   onRun: () => void
-  onPause: () => void
   onReset: () => void
 }
 
 const SPEEDS: SimSpeed[] = [0.5, 1, 2, 4]
 
-export function RunControls({ onRun, onPause, onReset }: RunControlsProps) {
+export function RunControls({ onRun, onReset }: RunControlsProps) {
   const status = useSimulationStore((state) => state.simState.status)
   const speed = useSimulationStore((state) => state.speed)
   const setSpeed = useSimulationStore((state) => state.setSpeed)
@@ -21,9 +20,6 @@ export function RunControls({ onRun, onPause, onReset }: RunControlsProps) {
     <div className={styles.controls}>
       <button type="button" className={styles.runKey} onClick={onRun} disabled={status === 'running'}>
         {status === 'paused' ? t('run.resume') : t('run.run')}
-      </button>
-      <button type="button" onClick={onPause} disabled={status !== 'running'}>
-        {t('run.pause')}
       </button>
       <button type="button" onClick={onReset}>
         {t('run.reset')}

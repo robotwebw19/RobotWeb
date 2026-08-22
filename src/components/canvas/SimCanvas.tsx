@@ -23,6 +23,8 @@ interface SimCanvasProps {
   leftMotorSpeed?: number
   rightMotorSpeed?: number
   sensorReadings?: Record<string, SensorReading>
+  /** Drives the RobotPinoutPanel hover card — see CenterPanel.tsx. */
+  onRobotHoverChange?: (hovering: boolean) => void
 }
 
 /**
@@ -43,11 +45,12 @@ export function SimCanvas({
   leftMotorSpeed,
   rightMotorSpeed,
   sensorReadings,
+  onRobotHoverChange,
 }: SimCanvasProps) {
   return (
     <Stage width={width} height={height}>
       <Layer>
-        <Rect x={0} y={0} width={width} height={height} fill="#f7f7f5" />
+        <Rect x={0} y={0} width={width} height={height} fill="#f8f8f7" />
         {lineInversionBoundaryY !== undefined && (
           <Rect x={0} y={lineInversionBoundaryY} width={width} height={height - lineInversionBoundaryY} fill="#212529" />
         )}
@@ -55,7 +58,12 @@ export function SimCanvas({
         <FinishZoneLayer finishZone={finishZone} />
         <TrackLayer trackPath={trackPath} inversionBoundaryY={lineInversionBoundaryY} />
         <ObstacleLayer obstacles={obstacles} />
-        <RobotSprite pose={pose} leftMotorSpeed={leftMotorSpeed} rightMotorSpeed={rightMotorSpeed} />
+        <RobotSprite
+          pose={pose}
+          leftMotorSpeed={leftMotorSpeed}
+          rightMotorSpeed={rightMotorSpeed}
+          onHoverChange={onRobotHoverChange}
+        />
         <SensorOverlay pose={pose} sensors={sensors} sensorReadings={sensorReadings} />
       </Layer>
     </Stage>

@@ -22,9 +22,9 @@ describe('buildIrRow', () => {
 
 describe('addSingleSensor', () => {
   it('adds a sensor of the given type with the next free pin', () => {
-    const result = addSingleSensor('color', [])
+    const result = addSingleSensor('ultrasonic', [])
     expect(result).toHaveLength(1)
-    expect(result[0].type).toBe('color')
+    expect(result[0].type).toBe('ultrasonic')
   })
 
   it('caps at one sensor per type', () => {
@@ -32,17 +32,6 @@ describe('addSingleSensor', () => {
     const second = addSingleSensor('ultrasonic', first)
     expect(second).toBe(first)
     expect(second).toHaveLength(1)
-  })
-
-  it('is a no-op when every pin in that type\'s range is already used by other sensors', () => {
-    const colorPinsTaken: SensorConfig[] = ['D8', 'D9', 'D10', 'D11', 'D12', 'D13'].map((pin) => ({
-      id: pin,
-      type: 'ir',
-      pin,
-      position: { x: 0, y: 0 },
-    }))
-    const result = addSingleSensor('color', colorPinsTaken)
-    expect(result).toBe(colorPinsTaken)
   })
 
   describe('ultrasonic (needs two pins — Trig and Echo, like a real HC-SR04)', () => {
@@ -69,34 +58,11 @@ describe('addSingleSensor', () => {
       // Ultrasonic's pool is D2-D7 (6 pins) — take all but one.
       const almostAllTaken: SensorConfig[] = ['D2', 'D3', 'D4', 'D5', 'D6'].map((pin) => ({
         id: pin,
-        type: 'color',
-        pin,
-        position: { x: 0, y: 0 },
-      }))
-      const result = addSingleSensor('ultrasonic', almostAllTaken)
-      expect(result).toBe(almostAllTaken)
-    })
-  })
-
-  describe('color (needs five pins — OUT, S0, S1, S2, S3, like a real TCS230)', () => {
-    it('wires five distinct pins: pin (OUT) plus s0Pin-s3Pin', () => {
-      const result = addSingleSensor('color', [])
-      expect(result).toHaveLength(1)
-      const [sensor] = result
-      const pins = [sensor.pin, sensor.s0Pin, sensor.s1Pin, sensor.s2Pin, sensor.s3Pin]
-      expect(pins.every((pin) => pin !== undefined)).toBe(true)
-      expect(new Set(pins).size).toBe(5)
-    })
-
-    it('is a no-op when fewer than five free pins remain', () => {
-      // Color's pool is D8-D13 (6 pins) — take all but four, leaving only 4 free.
-      const almostAllTaken: SensorConfig[] = ['D8', 'D9'].map((pin) => ({
-        id: pin,
         type: 'ir',
         pin,
         position: { x: 0, y: 0 },
       }))
-      const result = addSingleSensor('color', almostAllTaken)
+      const result = addSingleSensor('ultrasonic', almostAllTaken)
       expect(result).toBe(almostAllTaken)
     })
   })

@@ -2,6 +2,8 @@ import { translations, type TranslationKey } from './translations'
 
 const LANGUAGE = 'th' as const
 
+export type TFunction = (key: TranslationKey, vars?: Record<string, string | number>) => string
+
 /** The site is Thai-only — no language toggle. `language` stays here so callers reading it don't need to change. */
 export function useTranslation() {
   function t(key: TranslationKey, vars?: Record<string, string | number>): string {

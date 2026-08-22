@@ -6,7 +6,6 @@ import { LevelLeaderboardTable } from './LevelLeaderboardTable'
 import { GlobalLeaderboardTable } from './GlobalLeaderboardTable'
 import { Navbar } from '../layout/Navbar'
 import { FilterTabs } from '../common/FilterTabs'
-import { Toast } from '../common/Toast'
 import { useTranslation } from '../../i18n/useTranslation'
 import styles from './LeaderboardPage.module.css'
 
@@ -24,7 +23,6 @@ export function LeaderboardPage() {
   const [selectedGrade, setSelectedGrade] = useState('')
   const [selectedClassroom, setSelectedClassroom] = useState('')
   const [view, setView] = useState<LeaderboardView>('level')
-  const [toast, setToast] = useState<{ key: number; message: string } | null>(null)
   const { t, tLevelName } = useTranslation()
 
   const allRows = [...levelRows, ...globalRows]
@@ -60,15 +58,12 @@ export function LeaderboardPage() {
   }, [selectedLevelId])
 
   // Realtime: any student passing (or re-passing) any level anywhere refreshes both tables live,
-  // so the leaderboard updates on its own mid-lesson without a manual refresh. A toast surfaces
-  // each event too, since a silent table reorder is easy to miss during a live class.
+  // so the leaderboard updates on its own mid-lesson without a manual refresh.
   useEffect(() => {
     return levelResultRepository.subscribeToChanges(() => {
       if (levels.length > 0) getGlobalLeaderboard(levels).then(setGlobalRows)
       if (selectedLevelId) getLevelLeaderboard(selectedLevelId).then(setLevelRows)
-      setToast((current) => ({ key: (current?.key ?? 0) + 1, message: t('leaderboard.newScoreToast') }))
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [levels, selectedLevelId])
 
   return (
@@ -150,7 +145,6 @@ export function LeaderboardPage() {
           </div>
         )}
       </div>
-      {toast && <Toast key={toast.key} message={toast.message} onDismiss={() => setToast(null)} />}
     </div>
   )
 }

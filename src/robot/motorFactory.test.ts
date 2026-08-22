@@ -5,7 +5,7 @@ describe('addMotor', () => {
   it('adds the requested side with its fixed pins', () => {
     const motors = addMotor('left', [])
     expect(motors).toHaveLength(1)
-    expect(motors[0]).toMatchObject({ side: 'left', in1Pin: 'IN1', in2Pin: 'IN2', enablePin: 'ENA' })
+    expect(motors[0]).toMatchObject({ side: 'left', in1Pin: 'D10', in2Pin: 'D11', enablePin: 'A0' })
   })
 
   it('caps at one motor per side', () => {
@@ -16,7 +16,7 @@ describe('addMotor', () => {
 
   it('allows both sides simultaneously with distinct pins', () => {
     const motors = addMotor('right', addMotor('left', []))
-    expect(motors.flatMap((m) => [m.in1Pin, m.in2Pin, m.enablePin]).sort()).toEqual(['ENA', 'ENB', 'IN1', 'IN2', 'IN3', 'IN4'])
+    expect(motors.flatMap((m) => [m.in1Pin, m.in2Pin, m.enablePin]).sort()).toEqual(['A0', 'A1', 'D10', 'D11', 'D12', 'D13'])
   })
 })
 

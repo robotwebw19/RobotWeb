@@ -20,6 +20,7 @@ export const translations = {
   'nav.notSignedIn': { en: 'Not signed in', th: 'ยังไม่ได้เข้าสู่ระบบ' },
   'nav.adminStudents': { en: 'Manage students', th: 'จัดการนักเรียน' },
   'nav.adminSolutions': { en: 'Solutions', th: 'เฉลย' },
+  'nav.adminRaceTrack': { en: 'Race track', th: 'สนามแข่ง' },
 
   // Login
   'login.brand': { en: 'URRWNM Line Tracking Robot', th: 'URRWNM Line Tracking Robot' },
@@ -52,32 +53,15 @@ export const translations = {
   'onboarding.numberPlaceholder': { en: 'e.g. 12', th: 'เช่น 12' },
   'onboarding.nextButton': { en: 'Next: build your robot', th: 'ถัดไป: สร้างหุ่นยนต์ของคุณ' },
   'onboarding.buildRobotTitle': { en: 'Build your robot', th: 'สร้างหุ่นยนต์ของคุณ' },
-  'onboarding.buildRobotSubtitle': {
-    en: 'Choose sensors and pin placements before your first run.',
-    th: 'เลือกเซนเซอร์และตำแหน่งพินก่อนรันครั้งแรก',
-  },
   'onboarding.startPlaying': { en: 'Start playing', th: 'เริ่มเล่น' },
 
   // Sensor configurator
-  'sensors.applyRow': { en: 'Apply {count}-sensor row', th: 'ใช้แถวเซนเซอร์ {count} ตัว' },
-  'sensors.mounted': { en: 'Mounted', th: 'ติดตั้งแล้ว' },
-  'sensors.add': { en: 'Add', th: 'เพิ่ม' },
-  'sensors.noneMounted': { en: 'No sensors mounted yet.', th: 'ยังไม่ได้ติดตั้งเซนเซอร์' },
-  'sensors.remove': { en: 'Remove', th: 'ลบ' },
   'sensors.saveRobot': { en: 'Save robot', th: 'บันทึกหุ่นยนต์' },
   'sensors.saveChanges': { en: 'Save changes', th: 'บันทึกการเปลี่ยนแปลง' },
-  'sensors.pin': { en: 'Pin', th: 'พิน' },
-  'sensors.trigPin': { en: 'Trig', th: 'ขาส่ง (Trig)' },
-  'sensors.echoPin': { en: 'Echo', th: 'ขารับ (Echo)' },
-  'sensors.outPin': { en: 'OUT', th: 'ขาสัญญาณออก (OUT)' },
-  'sensors.s0Pin': { en: 'S0', th: 'S0' },
-  'sensors.s1Pin': { en: 'S1', th: 'S1' },
-  'sensors.s2Pin': { en: 'S2', th: 'S2' },
-  'sensors.s3Pin': { en: 'S3', th: 'S3' },
-  'sensors.placementPreview': { en: 'Sensor placement preview', th: 'ตัวอย่างตำแหน่งเซนเซอร์' },
+  'sensors.placementPreview': { en: 'Equipment placement preview', th: 'ตัวอย่างตำแหน่งอุปกรณ์' },
   'validation.duplicatePin': {
-    en: 'Pin {pin} is assigned to more than one sensor.',
-    th: 'พิน {pin} ถูกใช้ซ้ำโดยหลายเซนเซอร์',
+    en: 'Pin {pin} is assigned to more than one piece of equipment.',
+    th: 'พิน {pin} ถูกใช้ซ้ำโดยหลายอุปกรณ์',
   },
   'validation.noSensors': { en: 'Add at least one sensor before saving.', th: 'เพิ่มเซนเซอร์อย่างน้อย 1 ตัวก่อนบันทึก' },
   'validation.missingMotors': {
@@ -96,11 +80,6 @@ export const translations = {
     en: 'Measures distance to the nearest obstacle ahead, in cm. Wired like a real HC-SR04: a Trig pin you pulse, an Echo pin you read with pulseIn().',
     th: 'วัดระยะห่างจากสิ่งกีดขวางที่ใกล้ที่สุดด้านหน้า หน่วยเซนติเมตร ต่อสายเหมือน HC-SR04 จริง: ขา Trig ที่ส่งพัลส์ กับขา Echo ที่อ่านด้วย pulseIn()',
   },
-  'catalog.color.label': { en: 'Color', th: 'ตรวจจับสี' },
-  'catalog.color.description': {
-    en: 'Reads the color of the floor beneath the robot. Wired like a real TCS230: S0-S3 select which color filter is active, OUT is read with pulseIn().',
-    th: 'อ่านค่าสีของพื้นใต้ตัวหุ่นยนต์ ต่อสายเหมือน TCS230 จริง: S0-S3 เลือกฟิลเตอร์สีที่ใช้งาน ส่วน OUT อ่านด้วย pulseIn()',
-  },
   'catalog.motor.left.label': { en: 'Left Motor', th: 'มอเตอร์ซ้าย' },
   'catalog.motor.right.label': { en: 'Right Motor', th: 'มอเตอร์ขวา' },
   'catalog.motor.description': {
@@ -108,9 +87,18 @@ export const translations = {
     th: 'ขับเคลื่อนล้อหนึ่งข้าง ต้องมีมอเตอร์ทั้งสองข้างจึงจะขับหุ่นยนต์ได้',
   },
 
+  // Robot pinout hover panel
+  'pinout.title': { en: 'Equipment wiring details', th: 'รายละเอียดการต่ออุปกรณ์' },
+  'pinout.digitalHeader': { en: 'Digital pins', th: 'ขาดิจิทัล' },
+  'pinout.analogHeader': { en: 'Analog pins', th: 'ขาแอนะล็อก' },
+  'pinout.direction1': { en: 'forward', th: 'เดินหน้า' },
+  'pinout.direction2': { en: 'backward', th: 'ถอยหลัง' },
+  'pinout.speed': { en: 'speed (PWM)', th: 'ความเร็ว (PWM)' },
+  'pinout.signal': { en: 'signal', th: 'สัญญาณ' },
+
   // Left panel tabs
   'leftPanel.levels': { en: 'Levels', th: 'ด่าน' },
-  'leftPanel.sensors': { en: 'Sensors', th: 'เซนเซอร์' },
+  'leftPanel.sensors': { en: 'Equipment', th: 'อุปกรณ์' },
   'leftPanel.editor': { en: 'Level Editor', th: 'สร้างด่าน' },
 
   // Level list/card
@@ -151,9 +139,7 @@ export const translations = {
   },
   'run.run': { en: 'Run', th: 'รัน' },
   'run.resume': { en: 'Resume', th: 'ทำต่อ' },
-  'run.pause': { en: 'Pause', th: 'หยุดชั่วคราว' },
   'run.reset': { en: 'Reset', th: 'รีเซ็ต' },
-  'code.checkButton': { en: 'Check code', th: 'ตรวจสอบโค้ด' },
 
   // HUD
   'hud.status': { en: 'Status', th: 'สถานะ' },
@@ -172,7 +158,6 @@ export const translations = {
   'console.syntaxError': { en: 'Syntax error (line {line})', th: 'ข้อผิดพลาดทางไวยากรณ์ (บรรทัด {line})' },
   'console.runtimeError': { en: 'Runtime error (line {line})', th: 'ข้อผิดพลาดขณะทำงาน (บรรทัด {line})' },
   'console.error': { en: 'Error', th: 'ข้อผิดพลาด' },
-  'console.checkOk': { en: 'No syntax errors — code can run.', th: 'ไม่มีข้อผิดพลาด โค้ดสามารถรันได้' },
 
   // Level result modal
   'result.complete': { en: 'Level complete!', th: 'ผ่านด่านแล้ว!' },
@@ -202,7 +187,6 @@ export const translations = {
   'leaderboard.date': { en: 'Date', th: 'วันที่' },
   'leaderboard.totalStars': { en: 'Total stars', th: 'ดาวรวม' },
   'leaderboard.levelsPassed': { en: 'Levels passed', th: 'ด่านที่ผ่าน' },
-  'leaderboard.newScoreToast': { en: 'A new score just came in!', th: 'มีคะแนนใหม่ส่งเข้ามา!' },
 
   // Profile
   'profile.gradeAndNumber': { en: 'Grade {grade} · No. {number}', th: 'ชั้น {grade} เลขที่ {number}' },
@@ -234,12 +218,20 @@ export const translations = {
   'admin.noStudents': { en: 'No students have signed in yet.', th: 'ยังไม่มีนักเรียนเข้าสู่ระบบ' },
   'admin.manageStudents': { en: 'Manage students →', th: 'จัดการนักเรียน →' },
   'admin.copyCode': { en: 'Copy code', th: 'ก็อปปี้โค้ด' },
+  'admin.raceTrackLiveCount': { en: '{count} robot(s) running now', th: 'กำลังวิ่งอยู่ {count} คน' },
+  'admin.raceTrackScores': { en: 'Level scores', th: 'คะแนนประจำด่าน' },
+  'admin.raceTrackResetAll': { en: 'Reset all scores', th: 'รีเซ็ตคะแนนทั้งหมด' },
+  'admin.raceTrackPassToast': { en: '{firstName} #{studentNumber} passed!', th: '{firstName} #{studentNumber} ผ่านด่านแล้ว!' },
+  'admin.confirmResetAllScores': {
+    en: 'Reset every score for this level? This cannot be undone.',
+    th: 'รีเซ็ตคะแนนทั้งหมดของด่านนี้หรือไม่? ไม่สามารถย้อนกลับได้',
+  },
 
   // Seed level names (user-created levels fall back to their own stored name — see getLevelName)
   'level.level-01-straight.name': { en: '1. Straight Line', th: '1. เส้นตรง' },
-  'level.level-02-curve.name': { en: '2. Curved Line', th: '2. เส้นโค้ง' },
-  'level.level-03-multi-junction.name': { en: '3. Multi-Way Junction', th: '3. ทางแยกหลายทาง' },
-  'level.level-04-gapped-line.name': { en: '4. Gapped Line', th: '4. เส้นขาดช่วง' },
+  'level.level-02-curve.name': { en: '2. Gapped Line', th: '2. เส้นขาดช่วง' },
+  'level.level-03-multi-junction.name': { en: '3. Curved Line', th: '3. เส้นโค้ง' },
+  'level.level-04-gapped-line.name': { en: '4. Multi-Way Junction', th: '4. ทางแยกหลายทาง' },
   'level.level-05-color-zone.name': { en: '5. Inverted Circle', th: '5. วงกลมสลับสี' },
 
   // Common

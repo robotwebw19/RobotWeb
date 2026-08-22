@@ -92,7 +92,7 @@ export class ExecutionContext {
     this.analogPinStates.set(pin, value)
   }
 
-  /** Defaults to 0 — an ENA/ENB PWM pin a student hasn't written yet reads as 0 (motor off). */
+  /** Defaults to 0 — a motor enable (PWM) pin a student hasn't written yet reads as 0 (motor off). */
   getAnalogPinState(pin: string): number {
     return this.analogPinStates.get(pin) ?? 0
   }

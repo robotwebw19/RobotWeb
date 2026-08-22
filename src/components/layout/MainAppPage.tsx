@@ -4,6 +4,7 @@ import { useAuthStore } from '../../state/authStore'
 import { useLevelSelectionStore } from '../../state/levelSelectionStore'
 import { useSimulationStore } from '../../state/simulationStore'
 import { useSimulation } from '../../hooks/useSimulation'
+import { useRaceTrackBroadcast } from '../../hooks/useRaceTrackBroadcast'
 import { useInterpreterConsole } from '../../hooks/useInterpreterConsole'
 import { useLevelProgress } from '../../hooks/useLevelProgress'
 import { loadSavedCode, saveCode } from '../code/codeStorage'
@@ -55,12 +56,11 @@ export function MainAppPage() {
     }
   }, [level.id, studentId])
 
-  const { consoleLines, codeError, loadProgram, clearProgram, checkProgram, stepInterpreterBudgeted } = useInterpreterConsole()
+  const { consoleLines, codeError, loadProgram, clearProgram, stepInterpreterBudgeted } = useInterpreterConsole()
 
-  const { run, pause, reset } = useSimulation({
+  const { run, reset } = useSimulation({
     trackPath: level.trackPath,
     obstacles: level.obstacles,
-    colorZones: level.colorZones,
     sensors,
     startPosition: level.startPosition,
     lineInversionBoundaryY: level.lineInversionBoundaryY,
@@ -68,8 +68,16 @@ export function MainAppPage() {
   })
 
   const { lastOutcome, resetProgress } = useLevelProgress(level, studentId)
+  useRaceTrackBroadcast(level.id, user)
 
-  function handleRun() {
+  // Passing a level parks the robot back at the start (animated, see useSimulation's
+  // animateResetToStart) without waiting for Retry/Done — a failed run stays put where it
+  // stopped, since seeing exactly where it went off-track/collided is useful feedback.
+  useEffect(() => {
+    if (lastOutcome?.kind === 'passed') reset()
+  }, [lastOutcome, reset])
+
+  async function handleRun() {
     // Resuming from a pause continues in place — only a fresh run (from idle/passed/failed)
     // reloads the code and resets the robot to the start position.
     if (useSimulationStore.getState().simState.status === 'paused') {
@@ -80,12 +88,8 @@ export function MainAppPage() {
       saveCode(studentId, level.id, sourceCode).catch((error) => console.error('Failed to save code', error))
     }
     resetProgress()
-    reset()
+    await reset()
     if (loadProgram(sourceCode, sensors, motors)) run()
-  }
-
-  function handleCheckCode() {
-    checkProgram(sourceCode)
   }
 
   function handleReset() {
@@ -105,9 +109,9 @@ export function MainAppPage() {
           finishZone={level.finishZone}
           lineInversionBoundaryY={level.lineInversionBoundaryY}
           sensors={sensors}
+          motors={motors}
           resultOutcome={lastOutcome}
           onRun={handleRun}
-          onPause={pause}
           onReset={handleReset}
         />
       }
@@ -117,7 +121,6 @@ export function MainAppPage() {
           onSourceCodeChange={setSourceCode}
           consoleLines={consoleLines}
           codeError={codeError}
-          onCheckCode={handleCheckCode}
         />
       }
     />

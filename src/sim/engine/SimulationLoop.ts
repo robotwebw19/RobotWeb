@@ -1,4 +1,4 @@
-import type { ColorZone, Obstacle, SensorConfig } from '../../types/domain'
+import type { Obstacle, SensorConfig } from '../../types/domain'
 import type { SimSpeed } from './SimulationClock'
 import type { SimState } from './SimState'
 import type { TrackModel } from './TrackModel'
@@ -9,7 +9,6 @@ import { findCollidingObstacle } from './CollisionDetection'
 export interface SimulationLoopDeps {
   track: TrackModel
   obstacles: Obstacle[]
-  colorZones: ColorZone[]
   sensors: SensorConfig[]
   robotRadiusPx: number
   wheelBasePx: number
@@ -95,7 +94,6 @@ export class SimulationLoop {
       this.deps.sensors,
       this.deps.track,
       this.deps.obstacles,
-      this.deps.colorZones,
       this.deps.lineInversionBoundaryY,
     )
     const collided = findCollidingObstacle(nextPose, this.deps.robotRadiusPx, this.deps.obstacles) !== null

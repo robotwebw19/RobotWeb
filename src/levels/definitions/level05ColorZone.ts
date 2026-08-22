@@ -66,42 +66,42 @@ int rightSpeed = 0; // ความเร็วที่ต้องการข
 void setup() {
   pinMode(D2, INPUT); // ตั้งขา D2 (เซนเซอร์ซ้าย) เป็นอินพุต
   pinMode(D3, INPUT); // ตั้งขา D3 (เซนเซอร์ขวา) เป็นอินพุต
-  pinMode(IN1, OUTPUT); // ขาเลือกทิศมอเตอร์ซ้าย (L298N)
-  pinMode(IN2, OUTPUT);
-  pinMode(ENA, OUTPUT); // ขา PWM ความเร็วมอเตอร์ซ้าย
-  pinMode(IN3, OUTPUT); // ขาเลือกทิศมอเตอร์ขวา
-  pinMode(IN4, OUTPUT);
-  pinMode(ENB, OUTPUT); // ขา PWM ความเร็วมอเตอร์ขวา
+  pinMode(D10, OUTPUT); // ขาเลือกทิศมอเตอร์ซ้าย (L298N)
+  pinMode(D11, OUTPUT);
+  pinMode(A0, OUTPUT); // ขา PWM ความเร็วมอเตอร์ซ้าย
+  pinMode(D12, OUTPUT); // ขาเลือกทิศมอเตอร์ขวา
+  pinMode(D13, OUTPUT);
+  pinMode(A1, OUTPUT); // ขา PWM ความเร็วมอเตอร์ขวา
 }
 
-// สั่งขา IN1/IN2/ENA และ IN3/IN4/ENB จริงตาม leftSpeed/rightSpeed ที่ตั้งไว้
+// สั่งขา D10/D11/A0 และ D12/D13/A1 จริงตาม leftSpeed/rightSpeed ที่ตั้งไว้
 void applyMotorSpeeds() {
   if (leftSpeed > 0) {
-    digitalWrite(IN1, HIGH);
-    digitalWrite(IN2, LOW);
-    analogWrite(ENA, leftSpeed);
+    digitalWrite(D10, HIGH);
+    digitalWrite(D11, LOW);
+    analogWrite(A0, leftSpeed);
   } else if (leftSpeed < 0) {
-    digitalWrite(IN1, LOW);
-    digitalWrite(IN2, HIGH);
-    analogWrite(ENA, -leftSpeed);
+    digitalWrite(D10, LOW);
+    digitalWrite(D11, HIGH);
+    analogWrite(A0, -leftSpeed);
   } else {
-    digitalWrite(IN1, LOW);
-    digitalWrite(IN2, LOW);
-    analogWrite(ENA, 0);
+    digitalWrite(D10, LOW);
+    digitalWrite(D11, LOW);
+    analogWrite(A0, 0);
   }
 
   if (rightSpeed > 0) {
-    digitalWrite(IN3, HIGH);
-    digitalWrite(IN4, LOW);
-    analogWrite(ENB, rightSpeed);
+    digitalWrite(D12, HIGH);
+    digitalWrite(D13, LOW);
+    analogWrite(A1, rightSpeed);
   } else if (rightSpeed < 0) {
-    digitalWrite(IN3, LOW);
-    digitalWrite(IN4, HIGH);
-    analogWrite(ENB, -rightSpeed);
+    digitalWrite(D12, LOW);
+    digitalWrite(D13, HIGH);
+    analogWrite(A1, -rightSpeed);
   } else {
-    digitalWrite(IN3, LOW);
-    digitalWrite(IN4, LOW);
-    analogWrite(ENB, 0);
+    digitalWrite(D12, LOW);
+    digitalWrite(D13, LOW);
+    analogWrite(A1, 0);
   }
 }
 

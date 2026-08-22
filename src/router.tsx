@@ -5,7 +5,7 @@ import { NewUserOnboarding } from './components/auth/NewUserOnboarding'
 import { RequireAuth } from './components/auth/RequireAuth'
 import { RequireAdmin } from './components/auth/RequireAdmin'
 import { RouteErrorBoundary } from './components/layout/RouteErrorBoundary'
-import { MainAppPage, LeaderboardPage, ProfilePage, AdminDashboard, AdminStudentsPage } from './lazyPages'
+import { MainAppPage, LeaderboardPage, ProfilePage, AdminDashboard, AdminStudentsPage, AdminRaceTrackPage } from './lazyPages'
 
 export const router = createBrowserRouter([
   {
@@ -60,6 +60,16 @@ export const router = createBrowserRouter([
           <RequireAdmin>
             <Suspense fallback={null}>
               <AdminStudentsPage />
+            </Suspense>
+          </RequireAdmin>
+        ),
+      },
+      {
+        path: '/admin/race-track',
+        element: (
+          <RequireAdmin>
+            <Suspense fallback={null}>
+              <AdminRaceTrackPage />
             </Suspense>
           </RequireAdmin>
         ),

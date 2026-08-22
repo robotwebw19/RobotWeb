@@ -11,7 +11,6 @@ interface SensorPlacementPreviewProps {
 const COLOR_BY_TYPE: Record<SensorType, string> = {
   ir: '#e64980',
   ultrasonic: '#15aabf',
-  color: '#f08c00',
 }
 
 const SIZE = 200
@@ -54,6 +53,14 @@ function Wheel({ cx, cy }: { cx: number; cy: number }) {
           fill="#495057"
         />
       ))}
+      <rect
+        x={cx - WHEEL_LENGTH / 2}
+        y={cy - WHEEL_THICKNESS / 2}
+        width={WHEEL_LENGTH}
+        height={WHEEL_THICKNESS}
+        rx={WHEEL_THICKNESS / 3}
+        fill="url(#wheelLight)"
+      />
     </g>
   )
 }
@@ -69,6 +76,28 @@ export function SensorPlacementPreview({ sensors, motors }: SensorPlacementPrevi
       role="img"
       aria-label={t('sensors.placementPreview')}
     >
+      <defs>
+        {/* Ground contact shadow — pure black fading to transparent, not a new palette hue. */}
+        <radialGradient id="groundShadow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#000000" stopOpacity={0.4} />
+          <stop offset="100%" stopColor="#000000" stopOpacity={0} />
+        </radialGradient>
+        {/* Overlaid on the body's flat #4c6ef5 fill (unchanged from RobotSprite/DESIGN.md's
+            robot-body token) — a white/black wash, not a second body color, to read as a light
+            source from the top-left without introducing a new hue. */}
+        <linearGradient id="bodyLight" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity={0.4} />
+          <stop offset="55%" stopColor="#ffffff" stopOpacity={0} />
+          <stop offset="100%" stopColor="#000000" stopOpacity={0.22} />
+        </linearGradient>
+        {/* Same wash, vertical, over the wheels' flat tread colors. */}
+        <linearGradient id="wheelLight" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity={0.25} />
+          <stop offset="50%" stopColor="#ffffff" stopOpacity={0} />
+          <stop offset="100%" stopColor="#000000" stopOpacity={0.3} />
+        </linearGradient>
+      </defs>
+      <ellipse cx={CENTER} cy={CENTER} rx={BODY_SIZE * 0.78} ry={WHEEL_SPAN / 2 + 10} fill="url(#groundShadow)" />
       {motors.map((motor) => (
         <Wheel key={motor.id} cx={CENTER} cy={CENTER + (motor.side === 'left' ? -1 : 1) * (WHEEL_SPAN / 2)} />
       ))}
@@ -79,6 +108,14 @@ export function SensorPlacementPreview({ sensors, motors }: SensorPlacementPrevi
         height={BODY_SIZE}
         rx={6}
         fill="#4c6ef5"
+      />
+      <rect
+        x={CENTER - BODY_SIZE / 2}
+        y={CENTER - BODY_SIZE / 2}
+        width={BODY_SIZE}
+        height={BODY_SIZE}
+        rx={6}
+        fill="url(#bodyLight)"
       />
       <line
         x1={CENTER}

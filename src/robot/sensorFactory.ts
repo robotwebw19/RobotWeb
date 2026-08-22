@@ -30,9 +30,9 @@ export function buildIrRow(count: number, nonIrSensors: SensorConfig[]): SensorC
 }
 
 /**
- * Adds a single ultrasonic/color sensor, capped at one of each type, using the next free pin(s).
+ * Adds a single sensor of the given type, capped at one of each type, using the next free pin(s).
  * Ultrasonic needs two — Trig (`pin`) and Echo (`echoPin`) — a real HC-SR04's two-wire interface.
- * Color needs five — OUT (`pin`) plus a real TCS230's S0-S3 select pins.
+ * Every other type just needs one.
  */
 export function addSingleSensor(type: SensorType, sensors: SensorConfig[]): SensorConfig[] {
   if (sensors.some((sensor) => sensor.type === type)) return sensors
@@ -44,12 +44,6 @@ export function addSingleSensor(type: SensorType, sensors: SensorConfig[]): Sens
     if (candidates.length < 2) return sensors
     const [pin, echoPin] = candidates
     return [...sensors, { id: nanoid(), type, pin, echoPin, position: { x: 45, y: 0 } }]
-  }
-
-  if (type === 'color') {
-    if (candidates.length < 5) return sensors
-    const [pin, s0Pin, s1Pin, s2Pin, s3Pin] = candidates
-    return [...sensors, { id: nanoid(), type, pin, s0Pin, s1Pin, s2Pin, s3Pin, position: { x: 45, y: 0 } }]
   }
 
   const pin = candidates[0]

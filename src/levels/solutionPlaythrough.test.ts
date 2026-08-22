@@ -29,19 +29,8 @@ function sensorsFromEquipment(equipment: RequiredEquipmentItem[]): SensorConfig[
         position: { x: 40, y: irOffsets[irIndex] ?? 0 },
       })
       irIndex++
-    } else if (item.type === 'ultrasonic') {
-      sensors.push({ id: item.pin, type: 'ultrasonic', pin: item.pin, echoPin: item.echoPin, position: { x: 45, y: 0 } })
     } else {
-      sensors.push({
-        id: item.pin,
-        type: 'color',
-        pin: item.pin,
-        s0Pin: item.s0Pin,
-        s1Pin: item.s1Pin,
-        s2Pin: item.s2Pin,
-        s3Pin: item.s3Pin,
-        position: { x: 45, y: 0 },
-      })
+      sensors.push({ id: item.pin, type: 'ultrasonic', pin: item.pin, echoPin: item.echoPin, position: { x: 45, y: 0 } })
     }
   }
   return sensors
@@ -88,7 +77,6 @@ function playLevel(level: Level, dtMs = 16, testBudgetMs = 45_000): PlaythroughR
     sensors,
     track,
     level.obstacles,
-    level.colorZones,
     level.lineInversionBoundaryY,
   )
 
@@ -120,7 +108,7 @@ function playLevel(level: Level, dtMs = 16, testBudgetMs = 45_000): PlaythroughR
     }
 
     pose = stepPose(pose, leftSpeed, rightSpeed, ROBOT_WHEEL_BASE_PX, dtMs / 1000)
-    readings = sampleAllSensors(pose, sensors, track, level.obstacles, level.colorZones, level.lineInversionBoundaryY)
+    readings = sampleAllSensors(pose, sensors, track, level.obstacles, level.lineInversionBoundaryY)
     elapsedMs = nextElapsedMs
 
     if (findCollidingObstacle(pose, ROBOT_RADIUS_PX, level.obstacles) !== null) {

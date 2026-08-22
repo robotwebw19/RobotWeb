@@ -5,8 +5,8 @@ import { ArduinoRuntimeAPI, type ArduinoRuntimeDeps } from './ArduinoRuntimeAPI'
 import type { MotorConfig, SensorConfig } from '../../types/domain'
 import { RuntimeError } from './errors'
 
-const leftMotor: MotorConfig = { id: 'm1', side: 'left', in1Pin: 'IN1', in2Pin: 'IN2', enablePin: 'ENA', position: { x: 0, y: 0 } }
-const rightMotor: MotorConfig = { id: 'm2', side: 'right', in1Pin: 'IN3', in2Pin: 'IN4', enablePin: 'ENB', position: { x: 0, y: 0 } }
+const leftMotor: MotorConfig = { id: 'm1', side: 'left', in1Pin: 'D10', in2Pin: 'D11', enablePin: 'A0', position: { x: 0, y: 0 } }
+const rightMotor: MotorConfig = { id: 'm2', side: 'right', in1Pin: 'D12', in2Pin: 'D13', enablePin: 'A1', position: { x: 0, y: 0 } }
 
 function build(source: string, overrides: Partial<ArduinoRuntimeDeps> = {}) {
   const serialOutput: string[] = []
@@ -53,22 +53,22 @@ describe('Interpreter — setup/loop lifecycle', () => {
 })
 
 describe('Interpreter — motor commands (real L298N pins, read via getMotorSpeeds)', () => {
-  it('reads IN1/IN2 direction and the ENA/ENB PWM magnitude into a signed px/s speed per side', () => {
+  it('reads D10/D11 direction and the A0/A1 PWM magnitude into a signed px/s speed per side', () => {
     const { interpreter } = build(
       `
         void setup() {
-          pinMode(IN1, OUTPUT);
-          pinMode(IN2, OUTPUT);
-          pinMode(ENA, OUTPUT);
-          pinMode(IN3, OUTPUT);
-          pinMode(IN4, OUTPUT);
-          pinMode(ENB, OUTPUT);
-          digitalWrite(IN1, HIGH);
-          digitalWrite(IN2, LOW);
-          analogWrite(ENA, 100);
-          digitalWrite(IN3, LOW);
-          digitalWrite(IN4, HIGH);
-          analogWrite(ENB, 100);
+          pinMode(D10, OUTPUT);
+          pinMode(D11, OUTPUT);
+          pinMode(A0, OUTPUT);
+          pinMode(D12, OUTPUT);
+          pinMode(D13, OUTPUT);
+          pinMode(A1, OUTPUT);
+          digitalWrite(D10, HIGH);
+          digitalWrite(D11, LOW);
+          analogWrite(A0, 100);
+          digitalWrite(D12, LOW);
+          digitalWrite(D13, HIGH);
+          analogWrite(A1, 100);
         }
         void loop() {}
       `,
@@ -82,8 +82,8 @@ describe('Interpreter — motor commands (real L298N pins, read via getMotorSpee
     const { interpreter } = build(
       `
         void setup() {
-          pinMode(ENA, OUTPUT);
-          analogWrite(ENA, 200); // PWM alone shouldn't move the wheel without a direction set
+          pinMode(A0, OUTPUT);
+          analogWrite(A0, 200); // PWM alone shouldn't move the wheel without a direction set
         }
         void loop() {}
       `,
@@ -100,27 +100,27 @@ describe('Interpreter — motor commands (real L298N pins, read via getMotorSpee
         int rightSpeed = 0;
 
         void setup() {
-          pinMode(IN1, OUTPUT);
-          pinMode(IN2, OUTPUT);
-          pinMode(ENA, OUTPUT);
-          pinMode(IN3, OUTPUT);
-          pinMode(IN4, OUTPUT);
-          pinMode(ENB, OUTPUT);
+          pinMode(D10, OUTPUT);
+          pinMode(D11, OUTPUT);
+          pinMode(A0, OUTPUT);
+          pinMode(D12, OUTPUT);
+          pinMode(D13, OUTPUT);
+          pinMode(A1, OUTPUT);
         }
 
         void applyMotorSpeeds() {
           if (leftSpeed > 0) {
-            digitalWrite(IN1, HIGH);
-            digitalWrite(IN2, LOW);
-            analogWrite(ENA, leftSpeed);
+            digitalWrite(D10, HIGH);
+            digitalWrite(D11, LOW);
+            analogWrite(A0, leftSpeed);
           } else {
-            digitalWrite(IN1, LOW);
-            digitalWrite(IN2, LOW);
-            analogWrite(ENA, 0);
+            digitalWrite(D10, LOW);
+            digitalWrite(D11, LOW);
+            analogWrite(A0, 0);
           }
-          digitalWrite(IN3, LOW);
-          digitalWrite(IN4, LOW);
-          analogWrite(ENB, 0);
+          digitalWrite(D12, LOW);
+          digitalWrite(D13, LOW);
+          analogWrite(A1, 0);
         }
 
         void loop() {
@@ -149,16 +149,16 @@ describe('Interpreter — delay()', () => {
     const { interpreter, advanceElapsed } = build(
       `
         void setup() {
-          pinMode(IN1, OUTPUT);
-          pinMode(IN2, OUTPUT);
-          pinMode(ENA, OUTPUT);
-          digitalWrite(IN1, HIGH);
-          digitalWrite(IN2, LOW);
-          analogWrite(ENA, 100);
+          pinMode(D10, OUTPUT);
+          pinMode(D11, OUTPUT);
+          pinMode(A0, OUTPUT);
+          digitalWrite(D10, HIGH);
+          digitalWrite(D11, LOW);
+          analogWrite(A0, 100);
           delay(500);
-          digitalWrite(IN1, LOW);
-          digitalWrite(IN2, LOW);
-          analogWrite(ENA, 0);
+          digitalWrite(D10, LOW);
+          digitalWrite(D11, LOW);
+          analogWrite(A0, 0);
         }
         void loop() {}
       `,
@@ -235,17 +235,6 @@ describe('Interpreter — sensor reads', () => {
     echoPin: 'D6',
     position: { x: 0, y: 0 },
   }
-  const colorSensor: SensorConfig = {
-    id: 'cs1',
-    type: 'color',
-    pin: 'D8',
-    s0Pin: 'D9',
-    s1Pin: 'D10',
-    s2Pin: 'D11',
-    s3Pin: 'D12',
-    position: { x: 0, y: 0 },
-  }
-
   it('throws a clear error when reading an unconfigured pin', () => {
     const { interpreter } = build(`
       void setup() { int v = digitalRead(A0); }
@@ -280,64 +269,6 @@ describe('Interpreter — sensor reads', () => {
     for (let i = 0; i < 2; i++) interpreter.step() // one loop() iteration: 1 statement + iteration-complete
 
     expect(serialOutput).toEqual(['2000\n'])
-  })
-
-  it("pulseIn on a color sensor's OUT pin selects the channel via S2/S3 — real TCS230 truth table (LOW/LOW=red, HIGH/HIGH=green, LOW/HIGH=blue)", () => {
-    const { interpreter, serialOutput } = build(
-      `
-        void setup() {
-          pinMode(D11, OUTPUT);
-          pinMode(D12, OUTPUT);
-        }
-        void loop() {
-          digitalWrite(D11, LOW);
-          digitalWrite(D12, LOW);
-          Serial.println(pulseIn(D8, LOW)); // red channel
-
-          digitalWrite(D11, HIGH);
-          digitalWrite(D12, HIGH);
-          Serial.println(pulseIn(D8, LOW)); // green channel
-
-          digitalWrite(D11, LOW);
-          digitalWrite(D12, HIGH);
-          Serial.println(pulseIn(D8, LOW)); // blue channel
-        }
-      `,
-      {
-        sensors: [colorSensor],
-        getSensorReadings: () => ({ cs1: 'red' }),
-      },
-    )
-    // True color is 'red': only the red channel should come back strong (short pulse).
-    for (let i = 0; i < 30 && serialOutput.length < 3; i++) interpreter.step()
-
-    expect(serialOutput).toEqual(['50\n', '600\n', '600\n'])
-  })
-
-  it('white reflects every channel strong; black leaves every channel weak', () => {
-    const { interpreter, serialOutput } = build(
-      `
-        void setup() {}
-        void loop() {
-          Serial.println(pulseIn(D8, LOW));
-        }
-      `,
-      { sensors: [colorSensor], getSensorReadings: () => ({ cs1: 'white' }) },
-    )
-    for (let i = 0; i < 5 && serialOutput.length < 1; i++) interpreter.step()
-    expect(serialOutput).toEqual(['50\n']) // S2/S3 default LOW/LOW (red channel) — white is strong on every channel
-
-    const black = build(
-      `
-        void setup() {}
-        void loop() {
-          Serial.println(pulseIn(D8, LOW));
-        }
-      `,
-      { sensors: [colorSensor], getSensorReadings: () => ({ cs1: 'black' }) },
-    )
-    for (let i = 0; i < 5 && black.serialOutput.length < 1; i++) black.interpreter.step()
-    expect(black.serialOutput).toEqual(['600\n'])
   })
 
   it('supports the full real trig/echo sequence: pinMode, digitalWrite pulse, delayMicroseconds, then pulseIn', () => {

@@ -1,6 +1,5 @@
-import type { ColorZoneColor, MotorConfig, SensorConfig } from '../../types/domain'
-import type { ColorChannel, SensorReading } from '../../sim/engine/SensorSampling'
-import { colorChannelPulseUs } from '../../sim/engine/SensorSampling'
+import type { MotorConfig, SensorConfig } from '../../types/domain'
+import type { SensorReading } from '../../sim/engine/SensorSampling'
 import { MOTOR_SPEED_SCALE_PX_PER_SEC_PER_UNIT, SPEED_OF_SOUND_CM_PER_US } from '../../utils/constants'
 import { RuntimeError } from './errors'
 import type { ExecutionContext, RuntimeValue } from './ExecutionContext'
@@ -30,7 +29,6 @@ export class ArduinoRuntimeAPI {
   private readonly deps: ArduinoRuntimeDeps
   private readonly sensorByPin: Map<string, SensorConfig>
   private readonly ultrasonicByEchoPin: Map<string, SensorConfig>
-  private readonly colorByOutPin: Map<string, SensorConfig>
 
   constructor(deps: ArduinoRuntimeDeps) {
     this.deps = deps
@@ -39,7 +37,6 @@ export class ArduinoRuntimeAPI {
       deps.sensors.filter((sensor): sensor is SensorConfig & { echoPin: string } => sensor.echoPin !== undefined)
         .map((sensor) => [sensor.echoPin, sensor]),
     )
-    this.colorByOutPin = new Map(deps.sensors.filter((sensor) => sensor.type === 'color').map((sensor) => [sensor.pin, sensor]))
   }
 
   call(name: string, args: RuntimeValue[], context: ExecutionContext, line: number): RuntimeValue {
@@ -59,7 +56,7 @@ export class ArduinoRuntimeAPI {
       case 'delayMicroseconds':
         return this.delayMicroseconds(args, context, line)
       case 'pulseIn':
-        return this.pulseIn(args, context, line)
+        return this.pulseIn(args, line)
       case 'Serial.print':
         return this.serialPrint(args, false)
       case 'Serial.println':
@@ -134,21 +131,15 @@ export class ArduinoRuntimeAPI {
   }
 
   /**
-   * pulseIn() serves two real sensors here, resolved by which pin was passed:
-   *
-   * HC-SR04 (ultrasonic): trigger `pin` first (a plain digitalWrite HIGH/LOW pulse — no sensor
-   * lookup needed for that, it's just an output pin), then `pulseIn(echoPin, HIGH)` measures the
-   * round-trip time. The simulator already knows the true distance each tick (see
-   * SensorSampling.sampleUltrasonicCm), so this returns the equivalent pulse duration for that
-   * distance directly rather than timing an actual pulse — the formula a student's own code
-   * inverts is the same one real HC-SR04 datasheets give: distance = duration * 0.0343 / 2.
-   *
-   * TCS230/TCS3200 (color): set S2/S3 first (digitalWrite, same as any output pin) to select
-   * which photodiode filter is active, then `pulseIn(outPin, LOW)` reads that channel's
-   * frequency as a pulse duration — short means strong (that color is present), long means weak.
-   * See SensorSampling.colorChannelPulseUs for how the duration is synthesized from ground truth.
+   * pulseIn() serves HC-SR04 (ultrasonic) here: trigger `pin` first (a plain digitalWrite
+   * HIGH/LOW pulse — no sensor lookup needed for that, it's just an output pin), then
+   * `pulseIn(echoPin, HIGH)` measures the round-trip time. The simulator already knows the true
+   * distance each tick (see SensorSampling.sampleUltrasonicCm), so this returns the equivalent
+   * pulse duration for that distance directly rather than timing an actual pulse — the formula a
+   * student's own code inverts is the same one real HC-SR04 datasheets give:
+   * distance = duration * 0.0343 / 2.
    */
-  private pulseIn(args: RuntimeValue[], context: ExecutionContext, line: number): RuntimeValue {
+  private pulseIn(args: RuntimeValue[], line: number): RuntimeValue {
     const pin = asString(args[0])
 
     const ultrasonic = this.ultrasonicByEchoPin.get(pin)
@@ -158,29 +149,11 @@ export class ArduinoRuntimeAPI {
       return Math.round((distanceCm * 2) / SPEED_OF_SOUND_CM_PER_US)
     }
 
-    const colorSensor = this.colorByOutPin.get(pin)
-    if (colorSensor) {
-      const channel = this.selectedColorChannel(colorSensor, context)
-      if (!channel) return 0 // S2=HIGH,S3=LOW selects Clear (unfiltered) — not modeled.
-      const trueColor = this.deps.getSensorReadings()[colorSensor.id] as ColorZoneColor
-      return colorChannelPulseUs(trueColor, channel)
-    }
-
-    throw new RuntimeError(`pulseIn(${pin}): no ultrasonic echo pin or color OUT pin wired to ${pin}`, line)
-  }
-
-  /** Real TCS230 S2/S3 truth table: LOW/LOW=red, HIGH/HIGH=green, LOW/HIGH=blue, HIGH/LOW=clear. */
-  private selectedColorChannel(sensor: SensorConfig, context: ExecutionContext): ColorChannel | null {
-    const s2 = sensor.s2Pin ? context.getDigitalPinState(sensor.s2Pin) : 0
-    const s3 = sensor.s3Pin ? context.getDigitalPinState(sensor.s3Pin) : 0
-    if (s2 === 0 && s3 === 0) return 'red'
-    if (s2 === 1 && s3 === 1) return 'green'
-    if (s2 === 0 && s3 === 1) return 'blue'
-    return null
+    throw new RuntimeError(`pulseIn(${pin}): no ultrasonic echo pin wired to ${pin}`, line)
   }
 
   /**
-   * Reads each motor's real L298N control pins — IN1/IN2 direction (digitalWrite HIGH/LOW: one
+   * Reads each motor's L298N control pins — in1Pin/in2Pin direction (digitalWrite HIGH/LOW: one
    * HIGH one LOW drives, matching values stop/brake) and the enable pin's PWM magnitude
    * (analogWrite 0-255) — and combines them into a signed px/s speed, exactly what a real driver
    * board does with those three pins. Called once per interpreter pump, after student code runs,

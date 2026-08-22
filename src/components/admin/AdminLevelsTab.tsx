@@ -9,7 +9,6 @@ import styles from './AdminLevelsTab.module.css'
 const SENSOR_LABEL_KEYS: Record<SensorType, TranslationKey> = {
   ir: 'catalog.ir.label',
   ultrasonic: 'catalog.ultrasonic.label',
-  color: 'catalog.color.label',
 }
 const MOTOR_LABEL_KEYS: Record<MotorSide, TranslationKey> = {
   left: 'catalog.motor.left.label',

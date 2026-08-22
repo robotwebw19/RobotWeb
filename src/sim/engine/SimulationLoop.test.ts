@@ -22,7 +22,6 @@ function buildLoop(
     {
       track,
       obstacles: [],
-      colorZones: [],
       sensors: [],
       robotRadiusPx: 40,
       wheelBasePx: 60,

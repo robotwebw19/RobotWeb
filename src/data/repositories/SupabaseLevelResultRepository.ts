@@ -66,6 +66,11 @@ export class SupabaseLevelResultRepository implements ILevelResultRepository {
     if (error) throw error
   }
 
+  async resetForLevel(levelId: string): Promise<void> {
+    const { error } = await supabase.from('level_results').delete().eq('level_id', levelId)
+    if (error) throw error
+  }
+
   subscribeToChanges(onChange: () => void): () => void {
     // Debounced: a burst of near-simultaneous writes (e.g. a class finishing a level at once)
     // should trigger one refetch per subscriber, not one per row inserted.

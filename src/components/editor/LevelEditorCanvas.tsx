@@ -136,7 +136,7 @@ export function LevelEditorCanvas({ draft, onChange, tool, activeColor }: LevelE
       onMouseUp={handleMouseUp}
     >
       <Layer>
-        <Rect x={0} y={0} width={EDITOR_DISPLAY_WIDTH_PX} height={EDITOR_DISPLAY_HEIGHT_PX} fill="#f7f7f5" />
+        <Rect x={0} y={0} width={EDITOR_DISPLAY_WIDTH_PX} height={EDITOR_DISPLAY_HEIGHT_PX} fill="#f8f8f7" />
         <ColorZoneLayer colorZones={draft.colorZones} viewport={VIEWPORT} />
         <FinishZoneLayer finishZone={draft.finishZone} viewport={VIEWPORT} />
         <TrackLayer trackPath={draft.trackPath} viewport={VIEWPORT} />

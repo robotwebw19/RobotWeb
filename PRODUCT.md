@@ -16,7 +16,7 @@ Teach students to program a line-following robot using real Arduino-style code, 
 
 ## Positioning
 
-Unlike block-based robotics teaching tools (Scratch-style drag-and-drop), students write actual C/Arduino-subset syntax — `pinMode`, `digitalRead`, `setMotorSpeed`, `delay`, sensor reads, etc. — run through a real custom lexer/parser/interpreter against a physics-based simulation (differential-drive motion, IR/ultrasonic/color sensors, obstacles, color zones). The skills and code students write are meant to transfer directly to programming a real Arduino-based robot later.
+Unlike block-based robotics teaching tools (Scratch-style drag-and-drop), students write actual C/Arduino-subset syntax — `pinMode`, `digitalRead`, `setMotorSpeed`, `delay`, sensor reads, etc. — run through a real custom lexer/parser/interpreter against a physics-based simulation (differential-drive motion, IR/ultrasonic sensors, obstacles, color zones). The skills and code students write are meant to transfer directly to programming a real Arduino-based robot later.
 
 ## Operating Context
 
@@ -25,7 +25,7 @@ Classroom session, teacher-led, students on shared classroom computers/browsers.
 ## Capabilities and Constraints
 
 - Custom Arduino-subset interpreter (lexer, parser, runtime) executes student code statement-by-statement against a ticked physics simulation.
-- Sensors: IR (digital or analog), ultrasonic, color — each with a configurable mount position/pin. Motors: left/right, differential drive.
+- Sensors: IR (digital or analog), ultrasonic — each with a configurable mount position/pin. Motors: left/right, differential drive.
 - Sensor/motor "budget" economy (`SENSOR_BUDGET_CREDITS`): students pick and place equipment within a cost limit before coding, mirroring real component tradeoffs.
 - 5 built-in levels (straight line, curve, multi-way junction, gapped line, color-zone response), each with an admin-only reference solution and 1–3 star par times/off-track tolerances.
 - Pass/fail causes: reaching the finish zone (robot body overlap, not just center point), going off-track too long, colliding with an obstacle, or running out of time.

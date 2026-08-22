@@ -41,6 +41,19 @@ export function Navbar() {
                 <path d="M14 9l2 2" />
               </svg>
             </Link>
+            <Link
+              to="/admin/race-track"
+              className={styles.iconLink}
+              title={t('nav.adminRaceTrack')}
+              aria-label={t('nav.adminRaceTrack')}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="5" width="18" height="14" rx="2" />
+                <path d="M3 10h18" />
+                <path d="M8 5v14" />
+                <circle cx="14" cy="14.5" r="1.6" fill="currentColor" stroke="none" />
+              </svg>
+            </Link>
             <button className={styles.logoutButton} type="button" onClick={handleLogout}>
               {t('nav.logout')}
             </button>

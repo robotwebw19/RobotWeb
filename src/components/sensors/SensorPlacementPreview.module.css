@@ -3,5 +3,8 @@
   height: auto;
   border: 1px solid var(--border);
   border-radius: 5px;
-  background: var(--bg);
+  /* Matches the SimCanvas/LevelEditorCanvas floor (#f8f8f7) — a near-white backdrop so the
+     robot's shadow/light modeling reads clearly, deliberately breaking from the page's dark
+     panel-bg for this one "studio shot" surface. */
+  background: #f8f8f7;
 }

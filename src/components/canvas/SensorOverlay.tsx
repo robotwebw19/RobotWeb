@@ -17,7 +17,6 @@ interface SensorOverlayProps {
 const COLOR_BY_TYPE: Record<SensorConfig['type'], string> = {
   ir: '#e64980',
   ultrasonic: '#15aabf',
-  color: '#f08c00',
 }
 
 /** Whether a sensor is currently picking something up — drives the "detecting" glow. */
@@ -26,10 +25,7 @@ function isDetecting(sensor: SensorConfig, reading: SensorReading | undefined): 
   if (sensor.type === 'ir') {
     return reading === 1
   }
-  if (sensor.type === 'ultrasonic') {
-    return (reading as number) <= ULTRASONIC_MAX_RANGE_CM * 0.25
-  }
-  return reading !== 'white'
+  return reading <= ULTRASONIC_MAX_RANGE_CM * 0.25
 }
 
 export function SensorOverlay({ pose, sensors, sensorReadings = {}, viewport = defaultViewport }: SensorOverlayProps) {

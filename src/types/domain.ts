@@ -3,15 +3,14 @@ export interface Vector2 {
   y: number
 }
 
-export type SensorType = 'ir' | 'ultrasonic' | 'color'
+export type SensorType = 'ir' | 'ultrasonic'
 
 export interface SensorConfig {
   /** Stable id for this sensor instance within a robot (not the Arduino pin). */
   id: string
   type: SensorType
   /** Arduino pin this sensor is wired to, e.g. "A0", "D2". Must be unique per robot. For an
-   * ultrasonic sensor this is the Trig (output) pin (see `echoPin`); for a color sensor this is
-   * the OUT (frequency output) pin (see `s0Pin`-`s3Pin`). */
+   * ultrasonic sensor this is the Trig (output) pin (see `echoPin`). */
   pin: string
   /**
    * Offset from the robot's center, in world units, robot-local frame at heading 0:
@@ -22,14 +21,6 @@ export interface SensorConfig {
   /** Ultrasonic sensors only: the Echo (input) pin, wired alongside `pin` (Trig) — a real
    * HC-SR04 needs both, `pulseIn(echoPin, HIGH)` after triggering `pin`. */
   echoPin?: string
-  /** Color sensors only: a real TCS230/TCS3200's frequency-scaling select pins — wired for
-   * realism (typically set once in setup(), e.g. S0=HIGH/S1=LOW), not read by the simulator. */
-  s0Pin?: string
-  s1Pin?: string
-  /** Color sensors only: the filter-select pins — S2/S3 choose which color's photodiode `pin`
-   * (OUT) reports: LOW/LOW=red, HIGH/HIGH=green, LOW/HIGH=blue, HIGH/LOW=clear (unfiltered). */
-  s2Pin?: string
-  s3Pin?: string
   /** Ultrasonic sensors only: beam direction offset from robot heading, in degrees. */
   mountAngleDeg?: number
 }
@@ -40,9 +31,10 @@ export interface MotorConfig {
   /** Stable id for this motor instance within a robot (not the Arduino pin). */
   id: string
   side: MotorSide
-  /** Real L298N control pins for this motor, fixed 1:1 with `side`: IN1/IN2 pick direction
-   * (digitalWrite HIGH/LOW — one HIGH one LOW drives, matching values stop/brake), enablePin
-   * sets speed magnitude (analogWrite 0-255 PWM). */
+  /** L298N control pins for this motor, fixed 1:1 with `side`, drawn from the board's D2-D13/
+   * A0-A7 pins (see robot/motorCatalog.ts): in1Pin/in2Pin pick direction (digitalWrite HIGH/LOW —
+   * one HIGH one LOW drives, matching values stop/brake), enablePin sets speed magnitude
+   * (analogWrite 0-255 PWM). */
   in1Pin: string
   in2Pin: string
   enablePin: string
@@ -137,16 +129,7 @@ export interface Level {
 }
 
 export type RequiredEquipmentItem =
-  | {
-      kind: 'sensor'
-      type: SensorType
-      pin: string
-      echoPin?: string
-      s0Pin?: string
-      s1Pin?: string
-      s2Pin?: string
-      s3Pin?: string
-    }
+  | { kind: 'sensor'; type: SensorType; pin: string; echoPin?: string }
   | { kind: 'motor'; side: MotorSide; in1Pin: string; in2Pin: string; enablePin: string }
 
 export interface UserCode {

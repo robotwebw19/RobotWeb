@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { Group, Rect, Arrow } from 'react-konva'
+import type Konva from 'konva'
 import type { Pose } from '../../sim/engine/RobotPhysics'
 import { worldToStage, defaultViewport, type Viewport } from './gridUtils'
 import { ROBOT_RADIUS_PX, ROBOT_WHEEL_BASE_PX } from '../../utils/constants'
@@ -10,6 +11,8 @@ interface RobotSpriteProps {
   leftMotorSpeed?: number
   rightMotorSpeed?: number
   viewport?: Viewport
+  /** Drives the RobotPinoutPanel hover card — see CenterPanel.tsx. */
+  onHoverChange?: (hovering: boolean) => void
 }
 
 const TREAD_COUNT = 4
@@ -40,11 +43,29 @@ function Wheel({
       {treads.map((x, i) => (
         <Rect key={i} x={x} y={-thickness / 2} width={Math.max(thickness * 0.32, 1.5)} height={thickness} fill="#495057" />
       ))}
+      {/* Rim-light wash, same white/black-overlay trick as the body below — no new hue. */}
+      <Rect
+        x={-length / 2}
+        y={-thickness / 2}
+        width={length}
+        height={thickness}
+        cornerRadius={thickness / 3}
+        fillLinearGradientStartPoint={{ x: 0, y: -thickness / 2 }}
+        fillLinearGradientEndPoint={{ x: 0, y: thickness / 2 }}
+        fillLinearGradientColorStops={[0, 'rgba(255,255,255,0.25)', 0.5, 'rgba(255,255,255,0)', 1, 'rgba(0,0,0,0.3)']}
+        listening={false}
+      />
     </Group>
   )
 }
 
-export function RobotSprite({ pose, leftMotorSpeed = 0, rightMotorSpeed = 0, viewport = defaultViewport }: RobotSpriteProps) {
+export function RobotSprite({
+  pose,
+  leftMotorSpeed = 0,
+  rightMotorSpeed = 0,
+  viewport = defaultViewport,
+  onHoverChange,
+}: RobotSpriteProps) {
   const stagePos = worldToStage({ x: pose.x, y: pose.y }, viewport)
   const size = ROBOT_RADIUS_PX * 1.3 * viewport.scale
   const wheelSpan = ROBOT_WHEEL_BASE_PX * viewport.scale
@@ -61,11 +82,54 @@ export function RobotSprite({ pose, leftMotorSpeed = 0, rightMotorSpeed = 0, vie
   rollRef.current.left += leftMotorSpeed * dtSeconds
   rollRef.current.right += rightMotorSpeed * dtSeconds
 
+  function setCursor(e: Konva.KonvaEventObject<MouseEvent>, cursor: string) {
+    const container = e.target.getStage()?.container()
+    if (container) container.style.cursor = cursor
+  }
+
   return (
-    <Group x={stagePos.x} y={stagePos.y} rotation={pose.headingDeg}>
+    <Group
+      x={stagePos.x}
+      y={stagePos.y}
+      rotation={pose.headingDeg}
+      onMouseEnter={(e) => {
+        setCursor(e, 'pointer')
+        onHoverChange?.(true)
+      }}
+      onMouseLeave={(e) => {
+        setCursor(e, 'default')
+        onHoverChange?.(false)
+      }}
+    >
       <Wheel y={-wheelSpan / 2} length={wheelLength} thickness={wheelThickness} rollPx={rollRef.current.left} />
       <Wheel y={wheelSpan / 2} length={wheelLength} thickness={wheelThickness} rollPx={rollRef.current.right} />
-      <Rect x={-size / 2} y={-size / 2} width={size} height={size} fill="#4c6ef5" cornerRadius={6} />
+      {/* Ground contact shadow (Konva's native shadow, no offset so it stays put as the body rotates). */}
+      <Rect
+        x={-size / 2}
+        y={-size / 2}
+        width={size}
+        height={size}
+        cornerRadius={6}
+        fill="#4c6ef5"
+        shadowColor="#000000"
+        shadowBlur={size * 0.35}
+        shadowOpacity={0.5}
+        shadowOffsetX={0}
+        shadowOffsetY={0}
+      />
+      {/* Light-from-top-left wash over the same flat #4c6ef5 (DESIGN.md robot-body token) —
+          white/black overlay, not a second body color, for a lit/dimensional look. */}
+      <Rect
+        x={-size / 2}
+        y={-size / 2}
+        width={size}
+        height={size}
+        cornerRadius={6}
+        fillLinearGradientStartPoint={{ x: -size / 2, y: -size / 2 }}
+        fillLinearGradientEndPoint={{ x: size / 2, y: size / 2 }}
+        fillLinearGradientColorStops={[0, 'rgba(255,255,255,0.4)', 0.55, 'rgba(255,255,255,0)', 1, 'rgba(0,0,0,0.25)']}
+        listening={false}
+      />
       <Arrow
         points={[0, 0, size * 0.7, 0]}
         stroke="#ffd43b"
