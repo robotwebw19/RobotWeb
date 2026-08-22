@@ -139,8 +139,10 @@ export interface StudentStats {
   perLevel: StudentLevelStat[]
 }
 
-export async function getStudentStats(studentId: string, levels: Level[]): Promise<StudentStats> {
-  const bestByLevel = bestPassedPerLevel(await levelResultRepository.getForUser(studentId))
+/** Reduces one student's raw results into their per-level bests and totals — shared by
+ * `getStudentStats` (one student) and `getAllStudentStats` (every student at once). */
+function statsFromResults(results: LevelResult[], levels: Level[]): StudentStats {
+  const bestByLevel = bestPassedPerLevel(results)
 
   let totalStars = 0
   let levelsPassed = 0
@@ -154,4 +156,31 @@ export async function getStudentStats(studentId: string, levels: Level[]): Promi
   })
 
   return { totalStars, levelsPassed, perLevel }
+}
+
+export async function getStudentStats(studentId: string, levels: Level[]): Promise<StudentStats> {
+  return statsFromResults(await levelResultRepository.getForUser(studentId), levels)
+}
+
+/**
+ * Same computation as `getStudentStats`, for every student at once. Fetches each level's
+ * results once (O(levels) round trips) instead of once per student (O(students)) — matters
+ * once a class roster grows past a handful of names, since every realtime result change would
+ * otherwise re-fire one request per student.
+ */
+export async function getAllStudentStats(levels: Level[]): Promise<Map<string, StudentStats>> {
+  const resultsByLevel = await Promise.all(levels.map((level) => levelResultRepository.getForLevel(level.id)))
+
+  const resultsByStudent = new Map<string, LevelResult[]>()
+  for (const results of resultsByLevel) {
+    for (const result of results) {
+      const existing = resultsByStudent.get(result.studentId)
+      if (existing) existing.push(result)
+      else resultsByStudent.set(result.studentId, [result])
+    }
+  }
+
+  return new Map(
+    Array.from(resultsByStudent, ([studentId, results]) => [studentId, statsFromResults(results, levels)]),
+  )
 }

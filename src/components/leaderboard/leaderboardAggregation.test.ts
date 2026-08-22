@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { getGlobalLeaderboard, getLevelLeaderboard, getStudentStats } from './leaderboardAggregation'
+import { getAllStudentStats, getGlobalLeaderboard, getLevelLeaderboard, getStudentStats } from './leaderboardAggregation'
 import { userRepository, levelResultRepository } from '../../data'
 import type { Level, User } from '../../types/domain'
 
@@ -144,5 +144,26 @@ describe('getStudentStats', () => {
     expect(stats.perLevel[0].best?.stars).toBe(3)
     expect(stats.perLevel[0].best?.completionTimeMs).toBe(6000)
     expect(stats.totalStars).toBe(3)
+  })
+})
+
+describe('getAllStudentStats', () => {
+  it('matches getStudentStats per student while fetching each level only once', async () => {
+    const levels = [fixtureLevel('l1'), fixtureLevel('l2')]
+    await levelResultRepository.save({ studentId: '11111', levelId: 'l1', completionTimeMs: 4000, stars: 3, passed: true, submittedAt: 't1' })
+    await levelResultRepository.save({ studentId: '11111', levelId: 'l2', completionTimeMs: 5000, stars: 1, passed: true, submittedAt: 't2' })
+    await levelResultRepository.save({ studentId: '22222', levelId: 'l1', completionTimeMs: 6000, stars: 2, passed: true, submittedAt: 't3' })
+
+    const allStats = await getAllStudentStats(levels)
+    expect(allStats.get('11111')).toEqual(await getStudentStats('11111', levels))
+    expect(allStats.get('22222')).toEqual(await getStudentStats('22222', levels))
+  })
+
+  it('omits students with no results at all rather than an empty-stats entry', async () => {
+    const levels = [fixtureLevel('l1')]
+    await levelResultRepository.save({ studentId: '11111', levelId: 'l1', completionTimeMs: 4000, stars: 3, passed: true, submittedAt: 't1' })
+
+    const allStats = await getAllStudentStats(levels)
+    expect(allStats.has('99999')).toBe(false)
   })
 })

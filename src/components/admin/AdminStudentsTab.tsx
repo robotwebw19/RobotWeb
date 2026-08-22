@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { userRepository, levelRepository } from '../../data'
 import { useLiveLevelResults } from '../../hooks/useLiveLevelResults'
-import { getStudentStats, type StudentStats } from '../leaderboard/leaderboardAggregation'
+import { getAllStudentStats, type StudentStats } from '../leaderboard/leaderboardAggregation'
 import { FilterTabs } from '../common/FilterTabs'
 import { useTranslation } from '../../i18n/useTranslation'
 import type { TranslationKey } from '../../i18n/translations'
@@ -136,10 +136,7 @@ export function AdminStudentsTab() {
   }, [])
 
   useLiveLevelResults(
-    () =>
-      Promise.all(students.map((student) => getStudentStats(student.studentId, levels))).then((allStats) =>
-        Object.fromEntries(students.map((student, index) => [student.studentId, allStats[index]])),
-      ),
+    () => getAllStudentStats(levels).then((statsByStudent) => Object.fromEntries(statsByStudent)),
     setStatsByStudentId,
     students.length > 0 && levels.length > 0,
     [students, levels],
