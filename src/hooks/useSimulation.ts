@@ -25,6 +25,10 @@ function easeInOutCubic(t: number): number {
   return t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2
 }
 
+/** Below this, the robot reads as already sitting at the target — not worth animating. */
+const ALREADY_AT_TARGET_PX = 0.5
+const ALREADY_AT_TARGET_DEG = 0.5
+
 export interface UseSimulationParams {
   trackPath: Vector2[][]
   obstacles: Obstacle[]
@@ -97,6 +101,20 @@ export function useSimulation({
       const fromPose = useSimulationStore.getState().simState.pose
       const targetPose: Pose = { x: startX, y: startY, headingDeg: startHeadingDeg }
       const headingDeltaDeg = shortestHeadingDeltaDeg(fromPose.headingDeg, targetPose.headingDeg)
+
+      // Nothing to visibly drive back from (e.g. Run pressed on a level that's never moved, or
+      // right after a Reset) — skip the animation instead of stalling every Run press behind a
+      // needless 750ms wait when the robot is already sitting at the start point.
+      if (
+        Math.abs(fromPose.x - targetPose.x) < ALREADY_AT_TARGET_PX &&
+        Math.abs(fromPose.y - targetPose.y) < ALREADY_AT_TARGET_PX &&
+        Math.abs(headingDeltaDeg) < ALREADY_AT_TARGET_DEG
+      ) {
+        resetSimToStart()
+        resolve()
+        return
+      }
+
       const startTime = performance.now()
 
       function step(now: number) {
