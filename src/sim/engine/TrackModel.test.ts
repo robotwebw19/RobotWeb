@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { Vector2 } from '../../types/domain'
-import { distanceToSegment } from '../math/geometry'
+import { distanceToPolylines } from '../math/geometry'
 import { TrackModel } from './TrackModel'
 
 /** Deterministic PRNG (mulberry32) so the spatial-index cross-check below is reproducible. */
@@ -13,19 +12,6 @@ function mulberry32(seed: number): () => number {
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296
   }
-}
-
-/** Ground truth for distanceToNearestPoint: a plain O(segments) linear scan, independent of
- * TrackModel's spatial grid — what the grid's expanding-ring search must always match exactly. */
-function bruteForceDistance(point: Vector2, polylines: Vector2[][]): number {
-  let min = Infinity
-  for (const polyline of polylines) {
-    for (let i = 0; i < polyline.length - 1; i++) {
-      const d = distanceToSegment(point, polyline[i], polyline[i + 1])
-      if (d < min) min = d
-    }
-  }
-  return min
 }
 
 describe('TrackModel', () => {
@@ -90,7 +76,7 @@ describe('TrackModel', () => {
 
     for (let i = 0; i < 300; i++) {
       const point = { x: random() * 2400 - 200, y: random() * 2400 - 200 }
-      expect(track.distanceToNearestPoint(point)).toBeCloseTo(bruteForceDistance(point, polylines), 6)
+      expect(track.distanceToNearestPoint(point)).toBeCloseTo(distanceToPolylines(point, polylines), 6)
     }
   })
 
