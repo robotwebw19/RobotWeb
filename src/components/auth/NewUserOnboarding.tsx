@@ -159,6 +159,8 @@ export function NewUserOnboarding() {
               initialConfig={defaultRobotConfig}
               onSave={handleFinish}
               saveLabel={t('onboarding.startPlaying')}
+              hoverPanelPlacement="right"
+              compactPreview
             />
           </div>
         )}

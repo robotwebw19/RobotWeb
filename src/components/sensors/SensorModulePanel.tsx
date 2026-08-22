@@ -28,6 +28,11 @@ interface SensorModulePanelProps {
    * part spacing. */
   dotRadius: number
   parts: SensorModulePart[]
+  /** Where the panel floats. 'center' (default) suits the main app's Equipment tab, a narrow
+   * side column the panel doesn't overlap. Onboarding's Build-Robot step shows the catalog
+   * inside one centered card, where a dead-center panel would sit right on top of the very
+   * card the student is reading — 'right' floats it clear of that card instead. */
+  placement?: 'center' | 'right'
 }
 
 function buildLegend(parts: SensorModulePart[], t: TFunction) {
@@ -43,12 +48,22 @@ function buildLegend(parts: SensorModulePart[], t: TFunction) {
  * this panel, however high, can then paint above sibling columns (`.center`/`.right`) stacked in
  * front of `.left`. A portal escapes that ancestor's stacking context entirely, the same fix a
  * modal or toast library uses for exactly this "always on top of everything" requirement. */
-export function SensorModulePanel({ titleKey, image, imageAlt, imageWidth, imageHeight, dotRadius, parts }: SensorModulePanelProps) {
+export function SensorModulePanel({
+  titleKey,
+  image,
+  imageAlt,
+  imageWidth,
+  imageHeight,
+  dotRadius,
+  parts,
+  placement = 'center',
+}: SensorModulePanelProps) {
   const { t } = useTranslation()
   const legend = buildLegend(parts, t)
+  const placementClass = placement === 'right' ? styles.panelRight : styles.panelCenter
 
   return createPortal(
-    <div className={styles.panel}>
+    <div className={`${styles.panel} ${placementClass}`}>
       <p className={styles.title}>{t(titleKey)}</p>
       <div className={styles.boardWrap}>
         <img src={image} alt={imageAlt} className={styles.boardImage} />

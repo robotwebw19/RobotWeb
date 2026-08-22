@@ -17,7 +17,11 @@ const PARTS: SensorModulePart[] = [
   { x: 992, y: 955, labelKey: 'irModule.vccPin.label', roleKey: 'irModule.vccPin.role' },
 ]
 
-export function IrModulePanel() {
+interface IrModulePanelProps {
+  placement?: 'center' | 'right'
+}
+
+export function IrModulePanel({ placement }: IrModulePanelProps) {
   return (
     <SensorModulePanel
       titleKey="irModule.title"
@@ -27,6 +31,7 @@ export function IrModulePanel() {
       imageHeight={1080}
       dotRadius={17}
       parts={PARTS}
+      placement={placement}
     />
   )
 }

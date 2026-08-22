@@ -21,7 +21,11 @@ const PARTS: SensorModulePart[] = [
   { x: 432, y: 478, labelKey: 'motorModule.enb.label', roleKey: 'motorModule.enb.role' },
 ]
 
-export function MotorModulePanel() {
+interface MotorModulePanelProps {
+  placement?: 'center' | 'right'
+}
+
+export function MotorModulePanel({ placement }: MotorModulePanelProps) {
   return (
     <SensorModulePanel
       titleKey="motorModule.title"
@@ -31,6 +35,7 @@ export function MotorModulePanel() {
       imageHeight={538}
       dotRadius={10}
       parts={PARTS}
+      placement={placement}
     />
   )
 }

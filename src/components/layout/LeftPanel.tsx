@@ -40,6 +40,8 @@ export function LeftPanel() {
             initialConfig={user.robotConfig}
             onSave={updateRobotConfig}
             saveLabel={t('sensors.saveChanges')}
+            previewSize={100}
+            compactFooter
           />
         )}
       </div>

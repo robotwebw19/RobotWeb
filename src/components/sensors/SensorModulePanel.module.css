@@ -1,10 +1,5 @@
-/* Fixed dead-center of the viewport — always in the same predictable, fully-visible spot no
- * matter where the IR card sits in the catalog grid or how the page is scrolled. */
 .panel {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   width: 300px;
   max-width: calc(100vw - 32px);
   padding: 10px 12px;
@@ -14,6 +9,23 @@
   box-shadow: var(--depth-raised);
   pointer-events: none;
   z-index: 20;
+}
+
+/* Dead-center of the viewport — always in the same predictable, fully-visible spot no matter
+ * where the IR card sits in the catalog grid or how the page is scrolled. */
+.panelCenter {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Clear of the viewport's right edge, vertically centered — for onboarding's Build-Robot step,
+ * where the catalog sits inside one centered card and a dead-center panel would land right on
+ * top of it instead of beside it. */
+.panelRight {
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
 }
 
 .title {

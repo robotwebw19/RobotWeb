@@ -5,6 +5,13 @@
   padding: 16px;
 }
 
+/* Main app's Equipment tab only (see SensorConfigurator's compactFooter prop) — every extra
+ * pixel of vertical rhythm here competes with previewSize for the same limited 280px-column
+ * height, so this tightens it below the default 16px. */
+.configuratorTight {
+  gap: 8px;
+}
+
 .layout {
   position: relative;
   display: flex;
@@ -28,6 +35,33 @@
   flex-direction: column;
   gap: 12px;
   align-items: center;
+}
+
+/* Onboarding's Build-Robot step only (see SensorConfigurator's compactPreview prop): the catalog
+ * and the warning list stack as two grid rows in the left column, and the preview spans both
+ * rows — so it shrinks/grows to exactly match "4 buttons + 2 warning lines" instead of the fixed
+ * square it renders as everywhere else. Grid (not flex) because spanning a sibling's height
+ * across two stacked rows is what grid row-spanning is for; flex has no equivalent for this. */
+.layoutCompact {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 200px;
+  grid-template-rows: auto auto;
+  gap: 16px 20px;
+}
+
+.layoutCompact .catalog {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.layoutCompact .errorsInLayout {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.layoutCompact .side {
+  grid-column: 2;
+  grid-row: 1 / span 2;
 }
 
 .saveButton {
@@ -63,7 +97,11 @@
   cursor: not-allowed;
 }
 
+/* min-height reserves room for the two independent checks (sensors, both motors) at once —
+ * always mounted (see SensorConfigurator.tsx) so the card never grows/shrinks as a student adds
+ * equipment and one check clears while the other hasn't yet. */
 .errors {
+  min-height: 44px;
   color: var(--danger);
   font-size: 13px;
   margin: 0;

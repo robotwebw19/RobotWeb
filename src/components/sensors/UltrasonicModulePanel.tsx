@@ -12,7 +12,11 @@ const PARTS: SensorModulePart[] = [
   { x: 340, y: 230, labelKey: 'ultrasonicModule.gndPin.label', roleKey: 'ultrasonicModule.gndPin.role' },
 ]
 
-export function UltrasonicModulePanel() {
+interface UltrasonicModulePanelProps {
+  placement?: 'center' | 'right'
+}
+
+export function UltrasonicModulePanel({ placement }: UltrasonicModulePanelProps) {
   return (
     <SensorModulePanel
       titleKey="ultrasonicModule.title"
@@ -22,6 +26,7 @@ export function UltrasonicModulePanel() {
       imageHeight={341}
       dotRadius={10}
       parts={PARTS}
+      placement={placement}
     />
   )
 }

@@ -6,6 +6,16 @@ import styles from './SensorPlacementPreview.module.css'
 interface SensorPlacementPreviewProps {
   sensors: SensorConfig[]
   motors: MotorConfig[]
+  /** Renders at 100% of the parent box (still square, letterboxed via preserveAspectRatio)
+   * instead of the fixed SIZE×SIZE square — for SensorConfigurator's compactPreview layout,
+   * where the parent's height is set by CSS grid row-spanning rather than this component's own
+   * intrinsic size. */
+  fillContainer?: boolean
+  /** Rendered width/height in px, square. Defaults to 200 (SIZE). The drawing itself always
+   * uses a fixed 200x200 viewBox — this only scales the SVG's own box via preserveAspectRatio,
+   * same mechanism as an <img>'s width/height, so the robot drawing stays crisp at any size.
+   * Ignored when fillContainer is set. */
+  size?: number
 }
 
 const COLOR_BY_TYPE: Record<SensorType, string> = {
@@ -65,13 +75,14 @@ function Wheel({ cx, cy }: { cx: number; cy: number }) {
   )
 }
 
-export function SensorPlacementPreview({ sensors, motors }: SensorPlacementPreviewProps) {
+export function SensorPlacementPreview({ sensors, motors, fillContainer, size = SIZE }: SensorPlacementPreviewProps) {
   const { t } = useTranslation()
   return (
     <svg
-      width={SIZE}
-      height={SIZE}
+      width={fillContainer ? '100%' : size}
+      height={fillContainer ? '100%' : size}
       viewBox={`0 0 ${SIZE} ${SIZE}`}
+      preserveAspectRatio="xMidYMid meet"
       className={styles.preview}
       role="img"
       aria-label={t('sensors.placementPreview')}
