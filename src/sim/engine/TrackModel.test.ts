@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { distanceToPolylines } from '../math/geometry'
+import type { Vector2 } from '../../types/domain'
 import { TrackModel } from './TrackModel'
 
 /** Deterministic PRNG (mulberry32) so the spatial-index cross-check below is reproducible. */
