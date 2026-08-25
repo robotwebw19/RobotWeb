@@ -12,6 +12,9 @@ export const translations = {
   'error.reload': { en: 'Reload page', th: 'โหลดหน้าใหม่' },
   'error.backHome': { en: '← Back to home', th: '← กลับหน้าหลัก' },
 
+  // Desktop-only gate
+  'desktopOnly.title': { en: 'Please use a computer and widen the window', th: 'กรุณาใช้งานผ่านคอมพิวเตอร์และขยายหน้าจอ' },
+
   // Navbar
   'nav.brand': { en: 'URRWNM Line Tracking Robot', th: 'URRWNM Line Tracking Robot' },
   'nav.leaderboard': { en: 'Leaderboard', th: 'กระดานผู้นำ' },
